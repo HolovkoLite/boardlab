@@ -535,7 +535,7 @@ const PATTERNS = [['none', 'Nessuno'], ['lines', 'Righe'], ['grid', 'Quadretti']
 const PEN_SIZES = [1.2, 2, 3, 4.5, 6.5, 9.5];
 const HL_SIZES = [8, 12, 17, 24, 32, 44];
 const ER_SIZES = [6, 10, 16, 24, 36, 52];
-const APP_VERSION = '0.8.2';
+const APP_VERSION = '0.8.3';
 const ZMIN = 0.1, ZMAX = 6;
 const ER_DECAY_MS = 600; // tempo con cui la gomma ingrandita torna piccola
 const SORT_LABEL = { created: 'Data di creazione', modified: 'Data di modifica', name: 'Nome' };
@@ -3524,7 +3524,8 @@ function isScribble(p) {
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity, len = 0;
   for (let i = 0; i < n; i++) { const x = p[3 * i], y = p[3 * i + 1]; x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); if (i) len += Math.hypot(x - p[3 * i - 3], y - p[3 * i - 2]); }
   const ext = Math.max(x1 - x0, y1 - y0);
-  if (ext < 12 / cam.z || len < 3 * ext) return false;
+  if (ext < 12 / cam.z) return false;
+  if (len < 3 * ext) return !!longScribble(p, len);
   const axis = (x1 - x0) >= (y1 - y0) ? 0 : 1, th = ext * 0.25;
   let dir = 0, ref = p[axis], rev = 0;
   for (let i = 1; i < n; i++) {
@@ -3533,17 +3534,49 @@ function isScribble(p) {
     else if (dir === 1) { if (v > ref) ref = v; else if (ref - v > th) { rev++; dir = -1; ref = v; } }
     else { if (v < ref) ref = v; else if (v - ref > th) { rev++; dir = 1; ref = v; } }
   }
-  return rev >= 3;
+  if (rev >= 3) return true;
+  return !!longScribble(p, len);
+}
+/* Scarabocchio lungo, per parole lunghe e frasi: uno zig-zag fitto che avanza lungo la scritta.
+   Si riconosce dalle tante inversioni nel verso trasversale, vicine tra loro rispetto all'altezza
+   (nella scrittura corsiva, come "mmm", le gobbe sono molto più larghe). */
+function longScribble(p, len) {
+  const n = p.length / 3; if (n < 30) return null;
+  let mx = 0, my = 0; for (let i = 0; i < n; i++) { mx += p[3 * i]; my += p[3 * i + 1]; } mx /= n; my /= n;
+  let sxx = 0, syy = 0, sxy = 0; for (let i = 0; i < n; i++) { const dx = p[3 * i] - mx, dy = p[3 * i + 1] - my; sxx += dx * dx; syy += dy * dy; sxy += dx * dy; }
+  const th = 0.5 * Math.atan2(2 * sxy, sxx - syy), cs = Math.cos(th), sn = Math.sin(th);
+  const U = new Float32Array(n), V = new Float32Array(n); let u0 = Infinity, u1 = -Infinity, v0 = Infinity, v1 = -Infinity;
+  for (let i = 0; i < n; i++) { const dx = p[3 * i] - mx, dy = p[3 * i + 1] - my; U[i] = dx * cs + dy * sn; V[i] = -dx * sn + dy * cs; u0 = Math.min(u0, U[i]); u1 = Math.max(u1, U[i]); v0 = Math.min(v0, V[i]); v1 = Math.max(v1, V[i]); }
+  const major = u1 - u0, minor = v1 - v0;
+  if (minor < 10 / cam.z || major < 1.5 * minor || len < 2.5 * major) return null;
+  const t = 0.4 * minor, revU = []; let dir = 0, ref = V[0], refU = U[0];
+  for (let i = 1; i < n; i++) {
+    const v = V[i];
+    if (dir === 0) { if (v - ref > t) { dir = 1; ref = v; refU = U[i]; } else if (ref - v > t) { dir = -1; ref = v; refU = U[i]; } }
+    else if (dir === 1) { if (v > ref) { ref = v; refU = U[i]; } else if (ref - v > t) { revU.push(refU); dir = -1; ref = v; refU = U[i]; } }
+    else { if (v < ref) { ref = v; refU = U[i]; } else if (v - ref > t) { revU.push(refU); dir = 1; ref = v; refU = U[i]; } }
+  }
+  if (revU.length < 6) return null;
+  let pitch = 0; for (let i = 1; i < revU.length; i++) pitch += Math.abs(revU[i] - revU[i - 1]); pitch /= revU.length - 1;
+  return pitch <= 0.45 * minor ? { th, minor, major } : null;
 }
 function scribbleHits(s) {
   const g = geom(s), sp3 = s.p, sn = sp3.length / 3, hits = new Set(), repl = new Map();
+  /* Area dello scarabocchio (per le lettere scritte con la tastiera): il rettangolo che lo contiene, inclinato come lo scarabocchio */
+  let mx = 0, my = 0; for (let j = 0; j < sn; j++) { mx += sp3[3 * j]; my += sp3[3 * j + 1]; } mx /= sn; my /= sn;
+  let sxx = 0, syy = 0, sxy = 0; for (let j = 0; j < sn; j++) { const dx = sp3[3 * j] - mx, dy = sp3[3 * j + 1] - my; sxx += dx * dx; syy += dy * dy; sxy += dx * dy; }
+  const sth = 0.5 * Math.atan2(2 * sxy, sxx - syy), scs = Math.cos(sth), ssn = Math.sin(sth);
+  let a0 = Infinity, a1 = -Infinity, b0 = Infinity, b1 = -Infinity;
+  for (let j = 0; j < sn; j++) { const dx = sp3[3 * j] - mx, dy = sp3[3 * j + 1] - my, u = dx * scs + dy * ssn, v = -dx * ssn + dy * scs; a0 = Math.min(a0, u); a1 = Math.max(a1, u); b0 = Math.min(b0, v); b1 = Math.max(b1, v); }
+  const pad = s.w / 2 + 1 / cam.z;
+  const inScribble = (x, y) => { const dx = x - mx, dy = y - my, u = dx * scs + dy * ssn, v = -dx * ssn + dy * scs; return u >= a0 - pad && u <= a1 + pad && v >= b0 - pad && v <= b1 + pad; };
   for (const it of ed.items) {
     const gi = geom(it);
     if (gi.x1 < g.x0 || gi.x0 > g.x1 || gi.y1 < g.y0 || gi.y0 > g.y1) continue;
     if (it.t === 'page' || it.t === 'image') continue;
     if (it.t === 'table') {
-      const pts = []; for (let j = 0; j < sn; j++) pts.push(toLocal(it, sp3[3 * j], sp3[3 * j + 1]));
-      const nt = eraseCellLetters(it, nearLocal(pts, s.w / 2 + 1 / cam.z));
+      const tf = localToWorld(it);
+      const nt = eraseCellLetters(it, bx => { const [x, y] = tf((bx.x0 + bx.x1) / 2, (bx.y0 + bx.y1) / 2); return inScribble(x, y); });
       if (nt) repl.set(it, [nt]);
       continue;
     }
@@ -3555,8 +3588,9 @@ function scribbleHits(s) {
       continue;
     }
     if (it.t === 'text') {
-      const pts = []; for (let j = 0; j < sn; j++) pts.push({ x: sp3[3 * j], y: sp3[3 * j + 1] });
-      const parts = eraseTextLetters(it, pts, s.w / 2 + 1 / cam.z);
+      const r0 = it.r || 0, cs = Math.cos(r0), snn = Math.sin(r0), hit = new Set();
+      for (const bx of textCharBoxes(it)) { const lx = (bx.x0 + bx.x1) / 2, ly = (bx.y0 + bx.y1) / 2; if (inScribble(it.x + lx * cs - ly * snn, it.y + lx * snn + ly * cs)) hit.add(bx.key); }
+      const parts = textRuns(it, hit);
       if (parts) repl.set(it, parts);
       continue;
     }
