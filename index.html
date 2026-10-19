@@ -264,6 +264,14 @@ input { font: inherit; color: inherit; }
 .exp-seg .seg-b { min-width: 0; padding: 11px 6px; font-size: 14.5px; }
 .exp-note { margin: 10px 0 4px; color: #4C5157; font-size: 14px; line-height: 1.5; }
 .exp-note.dim { color: var(--muted); font-size: 13px; }
+.expo .exp-l { font-size: 14px; color: var(--blue); margin: 16px 0 4px; }
+.expo .exp-l:first-child { margin-top: 0; }
+.exp-sel { position: relative; }
+.exp-sel select { width: 100%; appearance: none; -webkit-appearance: none; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: none; font: inherit; font-size: 17px; color: var(--ink); padding: 10px 34px 10px 2px; outline: 0; }
+.exp-sel .ic { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: var(--muted); pointer-events: none; }
+.exp-rows { margin-top: 6px; }
+.exp-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; padding: 13px 2px; font-size: 16px; text-align: left; }
+.exp-out { margin: 8px 2px 0; font-size: 13px; color: var(--muted); }
 .exp-prev { display: block; max-width: 100%; max-height: 42vh; margin: 0 auto 6px; border: 1px solid var(--line); border-radius: 4px; }
 .exp-file { display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--pane); border-radius: 8px; font-size: 15px; }
 .sk-grid { display: grid; grid-template-columns: repeat(6, 44px); justify-content: center; gap: 4px; margin-bottom: 4px; }
@@ -294,7 +302,6 @@ input { font: inherit; color: inherit; }
   #drawer { position: absolute; left: 0; top: 0; bottom: 0; box-shadow: var(--shadow); }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
-.exp-dl { display: block; margin: 4px 0 0; font-size: 14px; }
 #updBar { position: fixed; left: 50%; top: 12px; transform: translateX(-50%); z-index: 90; background: #2F3337; color: #fff; border-radius: 8px; padding: 10px 12px 10px 18px; display: flex; align-items: center; gap: 16px; font-size: 14.5px; box-shadow: var(--shadow); max-width: calc(100% - 32px); box-sizing: border-box; }
 #updBar button { color: #82C4FF; font-weight: 500; padding: 6px 8px; }
 </style>
@@ -537,7 +544,7 @@ const PATTERNS = [['none', 'Nessuno'], ['lines', 'Righe'], ['grid', 'Quadretti']
 const PEN_SIZES = [1.2, 2, 3, 4.5, 6.5, 9.5];
 const HL_SIZES = [8, 12, 17, 24, 32, 44];
 const ER_SIZES = [6, 10, 16, 24, 36, 52];
-const APP_VERSION = '0.9.1';
+const APP_VERSION = '0.9.2';
 const ZMIN = 0.1, ZMAX = 6;
 const ER_DECAY_MS = 600; // tempo con cui la gomma ingrandita torna piccola
 const SORT_LABEL = { created: 'Data di creazione', modified: 'Data di modifica', name: 'Nome' };
@@ -4172,51 +4179,64 @@ async function downloadBlob(blob, name) {
   a.href = url; a.download = name; document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
+/* Finestra di esportazione come in Nebo: formato, sfondo, nome del file; poi subito il menu Condividi di Android */
 function exportDialog() {
   commitText();
-  const st = { fmt: 'png', what: sel ? 'sel' : 'all', pat: true };
+  const S = meta.settings.exp || (meta.settings.exp = { fmt: 'pdf', col: true, pat: true });
+  const st = { fmt: S.fmt || 'pdf', selOnly: !!sel, col: S.col !== false, pat: S.pat !== false, name: ed.b.name };
+  const hasPages = ed.items.some(i => i.t === 'page'), white = /^#?f{6}$/i.test(ed.bg.color || '');
+  const ext = () => ({ png: '.png', pdf: '.pdf', boardlab: '.boardlab' })[st.fmt];
+  const fname = () => fileSafe(st.name.trim() || ed.b.name) + ext();
+  const row = (k, label) => `<button class="exp-row" data-t="${k}"><span>${label}</span><span class="tg ${st[k] ? 'on' : ''}"></span></button>`;
   const body = h('div', 'expo');
   const render = () => {
-    const seg = (key, opts) => `<div class="seg exp-seg">${opts.map(([v, l]) => `<button class="seg-b ${st[key] === v ? 'on' : ''}" data-k="${key}" data-v="${v}">${l}</button>`).join('')}</div>`;
-    body.innerHTML = `<div class="lbl">Formato</div>${seg('fmt', [['png', 'Immagine PNG'], ['pdf', 'PDF'], ['boardlab', 'BoardLab']])}
-      <p class="exp-note">${st.fmt === 'boardlab' ? 'Il file .boardlab conserva tutto modificabile: potrai riaprirlo in BoardLab dalla libreria.' : st.fmt === 'pdf' ? (ed.items.some(i => i.t === 'page') && st.what !== 'sel' ? 'Un PDF con le stesse pagine dell\'originale e le tue annotazioni sopra.' : 'Un PDF di una pagina con il contenuto della lavagna, da stampare o condividere.') : 'Un\'immagine ad alta risoluzione, da condividere o inserire in un documento.'}</p>
-      ${sel ? `<div class="lbl">Cosa esportare</div>${seg('what', [['all', 'Tutta la lavagna'], ['sel', 'Solo la selezione']])}` : ''}
-      ${st.fmt !== 'boardlab' && !(st.fmt === 'pdf' && st.what !== 'sel' && ed.items.some(i => i.t === 'page')) && ed.bg.pattern !== 'none' ? `<div class="lbl">Sfondo</div>${seg('pat', [[true, 'Con ' + ({ lines: 'le righe', grid: 'i quadretti', dots: 'i puntini', none: 'il motivo' })[ed.bg.pattern]], [false, 'Solo il colore']])}` : ''}`;
+    const pagesPdf = st.fmt === 'pdf' && hasPages && !(sel && st.selOnly), bgOpts = st.fmt !== 'boardlab' && !pagesPdf;
+    body.innerHTML = `<div class="exp-l">Formato</div>
+      <div class="exp-sel"><select id="expFmt">${[['png', 'PNG'], ['pdf', 'PDF'], ['boardlab', 'BoardLab']].map(([v, l]) => `<option value="${v}"${st.fmt === v ? ' selected' : ''}>${l}</option>`).join('')}</select>${ic('chevD')}</div>
+      ${st.fmt === 'boardlab' ? '<p class="exp-note dim">Conserva tutto modificabile: si riapre in BoardLab.</p>' : pagesPdf ? '<p class="exp-note dim">Le pagine del PDF originale con le tue annotazioni.</p>' : ''}
+      <div class="exp-rows">${sel ? row('selOnly', 'Solo la selezione') : ''}${bgOpts && !white ? row('col', 'Colore sfondo') : ''}${bgOpts && ed.bg.pattern !== 'none' ? row('pat', 'Motivo di sfondo') : ''}</div>
+      <div class="exp-l">Nome file</div>
+      <input class="dlg-in" id="expName" autocomplete="off" spellcheck="false">
+      <p class="exp-out">Esportato come "<span></span>"</p>`;
+    const inp = $('#expName', body); inp.value = st.name;
+    inp.addEventListener('input', () => { st.name = inp.value; $('.exp-out span', body).textContent = fname(); });
+    $('.exp-out span', body).textContent = fname();
+    $('#expFmt', body).addEventListener('change', e => { st.fmt = e.target.value; render(); });
   };
-  body.addEventListener('click', e => {
-    const b = e.target.closest('[data-k]'); if (!b) return;
-    const k = b.dataset.k; st[k] = k === 'pat' ? b.dataset.v === 'true' : b.dataset.v; render();
-  });
+  body.addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (b) { st[b.dataset.t] = !st[b.dataset.t]; render(); } });
   render();
-  dialog({ title: 'Esporta', body, ok: 'ESPORTA' }).then(ok => { if (ok) doExport(st); });
+  dialog({ title: `Esporta "${ed.b.name}"`, body, ok: 'ESPORTA' }).then(ok => {
+    if (!ok) return;
+    S.fmt = st.fmt; S.col = st.col; S.pat = st.pat; saveMeta();
+    doExport({ fmt: st.fmt, what: sel && st.selOnly ? 'sel' : 'all', col: st.col || white, pat: st.pat, name: st.name.trim() || ed.b.name });
+  });
 }
 async function doExport(st) {
   const items = st.what === 'sel' && sel ? selItemsList() : ed.items;
-  const base = fileSafe(ed.b.name);
+  const base = fileSafe(st.name || ed.b.name), bg = st.col === false ? { ...ed.bg, color: '#FFFFFF' } : ed.bg;
   if (st.fmt === 'boardlab') {
     const images = {};
     for (const it of items) if (it.img && !images[it.img]) { const bl = await DB.get('img:' + it.img); if (bl) images[it.img] = await blobToDataURL(bl); }
     const data = { format: 'boardlab', version: 1, app: 'BoardLab ' + APP_VERSION, name: ed.b.name, exported: new Date().toISOString(), bg: ed.bg, items: serializeItems(items), images };
     const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-    exportReady(blob, base + '.boardlab', null, `${items.length} elementi · ${Math.max(1, Math.round(blob.size / 1024))} KB`);
+    deliverFile(blob, base + '.boardlab');
     return;
   }
   if (!items.length) { toast('Non c\'è niente da esportare'); return; }
   const withPages = st.fmt === 'pdf' && st.what !== 'sel' && items.some(i => i.t === 'page');
   toast('Preparo l\'esportazione…');
   await Promise.all(items.filter(i => i.img).map(i => loadImage(i.img)));
-  const { canvas } = renderScene(withPages ? items.filter(i => { const p = items.find(x => x.t === 'page'); const g = geom(i); return g.y0 < p.y + p.h / 2 && g.y1 > p.y - p.h / 2; }) : items, st.fmt === 'pdf' ? 1 : 2, ed.bg, st.pat);
   if (st.fmt === 'png') {
-    const blob = await canvasBlob(canvas, 'image/png');
-    exportReady(blob, base + '.png', URL.createObjectURL(blob), `${canvas.width} × ${canvas.height} pixel`);
+    const { canvas } = renderScene(items, 2, bg, st.pat);
+    const blob = await canvasBlob(canvas, 'image/png'); canvas.width = canvas.height = 1;
+    deliverFile(blob, base + '.png');
     return;
   }
   toast('Preparo il PDF…');
   let jsPDF;
   try { jsPDF = await loadJsPDF(); } catch (_) { toast('Non riesco a caricare il generatore di PDF. Chiudi e riapri BoardLab.'); return; }
-  const blob = withPages ? await pagesPdf(jsPDF, items) : await vectorPdf(jsPDF, items, ed.bg, st.pat);
-  const np = items.filter(i => i.t === 'page').length;
-  exportReady(blob, base + '.pdf', canvas.toDataURL('image/jpeg', 0.8), `${withPages ? `PDF di ${np} ${np === 1 ? 'pagina' : 'pagine'}, come l'originale` : 'PDF vettoriale di una pagina'} · ${Math.max(1, Math.round(blob.size / 1024))} KB`);
+  const blob = withPages ? await pagesPdf(jsPDF, items) : await vectorPdf(jsPDF, items, bg, st.pat);
+  deliverFile(blob, base + '.pdf');
 }
 /* PDF vettoriale: tratti come linee e forme, testo come testo vero. Leggero e nitido a qualsiasi ingrandimento. */
 function mixRgb(a, b, t) { const A = hex2rgb(a), B = hex2rgb(b); return A.map((v, i) => Math.round(v + (B[i] - v) * t)); }
@@ -4352,32 +4372,27 @@ async function pagesPdf(jsPDF, items) {
   }
   return pdf.output('blob');
 }
-/* Il file da passare al menu Condividi di Android, se Chrome lo accetta (PDF e PNG sì; il .boardlab di solito no) */
+/* Il file da passare al menu Condividi di Android, se lo accetta (PDF e PNG sì; il .boardlab di solito no) */
 function shareFile(blob, name) {
   try {
+    if (window.top !== window) return null; // dentro un'altra pagina (prove) il menu Condividi non è disponibile
     const type = /\.pdf$/i.test(name) ? 'application/pdf' : /\.png$/i.test(name) ? 'image/png' : (blob.type || 'application/octet-stream');
     const f = new File([blob], name, { type });
     return navigator.canShare && navigator.share && navigator.canShare({ files: [f] }) ? f : null;
   } catch (_) { return null; }
 }
-function exportReady(blob, name, previewUrl, info) {
-  const body = h('div', 'expo');
-  body.innerHTML = `${previewUrl ? `<img class="exp-prev" src="${previewUrl}" alt="Anteprima">` : `<div class="exp-file">${ic('export')}<span>${esc(name)}</span></div>`}
-    <p class="exp-note"><b>${esc(name)}</b><br>${esc(info)}</p>
-    ${dlCap && /\.boardlab$/i.test(name) ? '<p class="exp-note dim">Durante le prove il file viene salvato come .boardlab.json. BoardLab lo riapre senza problemi; nella versione installata il nome sarà .boardlab.</p>' : ''}`;
-  const file = shareFile(blob, name), canSh = !!file;
-  if (canSh) {
-    const alt = h('button', 'link exp-dl', 'Salva invece nella cartella Download');
-    alt.onclick = () => { downloadBlob(blob, name); const c = body.closest('.dlg'); if (c) c.querySelector('.dlg-b .tbtn').click(); };
-    body.append(alt);
+/* Consegna del file esportato: menu Condividi di Android (come Nebo), altrimenti salvataggio nella cartella Download */
+async function deliverFile(blob, name) {
+  const f = shareFile(blob, name);
+  if (!f) { downloadBlob(blob, name); return; }
+  const share = async () => { try { await navigator.share({ files: [f], title: name }); return true; } catch (e) { return e && e.name === 'AbortError' ? true : e && e.name === 'NotAllowedError' ? null : false; } };
+  let r = await share();
+  if (r === null) { // il file ha richiesto qualche secondo e Android vuole un nuovo tocco prima di aprire il menu
+    const ok = await dialog({ title: 'Il file è pronto', text: name, ok: 'CONDIVIDI' });
+    if (!ok) return;
+    r = await share();
   }
-  dialog({ title: 'Esportazione pronta', body, ok: canSh ? 'CONDIVIDI' : 'SCARICA' }).then(async ok => {
-    if (ok) {
-      if (canSh) { try { await navigator.share({ files: [file], title: name }); } catch (e) { if (!e || e.name !== 'AbortError') downloadBlob(blob, name); } }
-      else downloadBlob(blob, name);
-    }
-    if (previewUrl && previewUrl.startsWith('blob:')) setTimeout(() => URL.revokeObjectURL(previewUrl), 60000);
-  });
+  if (r !== true) downloadBlob(blob, name);
 }
 async function importFile(file) {
   let data;
