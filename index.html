@@ -535,7 +535,7 @@ const PATTERNS = [['none', 'Nessuno'], ['lines', 'Righe'], ['grid', 'Quadretti']
 const PEN_SIZES = [1.2, 2, 3, 4.5, 6.5, 9.5];
 const HL_SIZES = [8, 12, 17, 24, 32, 44];
 const ER_SIZES = [6, 10, 16, 24, 36, 52];
-const APP_VERSION = '0.7.0';
+const APP_VERSION = '0.7.2';
 const ZMIN = 0.1, ZMAX = 6;
 const ER_DECAY_MS = 600; // tempo con cui la gomma ingrandita torna piccola
 const SORT_LABEL = { created: 'Data di creazione', modified: 'Data di modifica', name: 'Nome' };
@@ -762,7 +762,7 @@ function renderBody() {
       <dt>Tabelle e modelli</dt><dd>Dal + in alto. Per scrivere in una cella usa lo strumento tastiera e tocca la cella. Righe, colonne e intestazione si cambiano selezionando la tabella → Tabella. Con la tabella selezionata, trascina una linea interna per allargare una colonna o alzare una riga. La gomma cancella anche le lettere nelle celle.</dd>
       <dt>Selezionare con il dito</dt><dd>Tocca una tabella, una forma o un'immagine per selezionarla. Trascinala con il dito per spostarla; usa angoli, lati e il pallino blu per ridimensionarla o ruotarla. Trascinando altrove il foglio scorre.</dd>
       <dt>Righello e goniometro</dt><dd>Dal + in alto. Spostali con il dito, ruotali con il pallino blu, chiudili con la ×. Con la penna, partendo vicino al bordo del righello o alla base del goniometro tracci una linea dritta; partendo dal centro del goniometro tracci un angolo, con i gradi mostrati mentre disegni. La lancetta rossa misura gli angoli.</dd>
-      <dt>PDF e immagini</dt><dd>Dal pulsante blu + della libreria scegli Apri PDF: le pagine compaiono una sotto l'altra e ci scrivi sopra. In basso vedi a che pagina sei: toccalo per andare a una pagina o aggiungere una pagina bianca in fondo (anche da + in alto). Le immagini si inseriscono dal + in alto e si spostano con il lazo.</dd>
+      <dt>PDF e immagini</dt><dd>Dal pulsante blu + della libreria scegli Apri PDF: le pagine compaiono una sotto l'altra e ci scrivi sopra. Si scrive solo sui fogli: i tratti si fermano al bordo della pagina. In basso vedi a che pagina sei: toccalo per andare a una pagina o aggiungere una pagina bianca in fondo (anche da + in alto). Le immagini si inseriscono dal + in alto e si spostano con il lazo.</dd>
       <dt>Puntatore laser</dt><dd>Indica con la penna: la scia rossa svanisce da sola e non lascia segni.</dd>
       <dt>I miei modelli</dt><dd>Seleziona qualcosa con il lazo e tocca Modello: gli dai un nome e lo ritrovi in + → Modelli, pronto da inserire in qualsiasi lavagna. Con ⋮ sul modello lo rinomini o lo elimini.</dd>
       <dt>Cercare</dt><dd>Con la lente della libreria cerchi nei nomi delle lavagne, nei testi scritti con la tastiera e nelle tabelle (non nella scrittura a mano). Tocca un risultato per aprire la lavagna proprio lì. Dentro una lavagna: ⋮ → Cerca nella lavagna, con le frecce per passare da un risultato all'altro.</dd>
@@ -1502,10 +1502,8 @@ function tableMenu(anchor) {
     else if (a === 'header') { n = { ...t, header: !t.header }; meta.tool.table.header = n.header; saveMeta(); }
     else if (b.dataset.hc) n = { ...t, hc: b.dataset.hc };
     if (!n) return;
-    // la tabella cresce o si riduce mantenendo fermo l'angolo in alto a sinistra
-    const g0 = geom(t), W1 = sum(n.cols), H1 = geom(n).H, dw = (W1 - g0.W) / 2, dh = (H1 - g0.H) / 2, r = t.r || 0;
-    n.x = t.x + dw * Math.cos(r) - dh * Math.sin(r); n.y = t.y + dw * Math.sin(r) + dh * Math.cos(r);
-    replaceItem(t, n); render();
+    // la tabella cresce o si riduce mantenendo fermo l'angolo in alto a sinistra (nuovo oggetto: la geometria si ricalcola)
+    replaceItem(t, keepTop(t, n)); render();
   });
 }
 /* Stile delle forme: spessore, riempimento, linea */
@@ -1590,7 +1588,8 @@ function loadScript(src) { return new Promise((res, rej) => { const s = document
 
 /* Inserimento di un'immagine dalla galleria o dalla fotocamera */
 async function prepareImageBlob(file) {
-  const el = await decodeBlob(file), W = el.width, H = el.height, s = Math.min(1, 2400 / Math.max(W, H));
+  let el; try { el = await decodeBlob(file); } catch (_) { el = await blobToImg(file); }
+  const W = el.width, H = el.height, s = Math.min(1, 2400 / Math.max(W, H));
   if (s === 1 && file.size < 1.5e6) { try { el.close && el.close(); } catch (_) {} return { blob: file, w: W, h: H }; }
   const c = h('canvas'); c.width = Math.round(W * s); c.height = Math.round(H * s);
   const x = c.getContext('2d'); if (file.type !== 'image/png') { x.fillStyle = '#FFFFFF'; x.fillRect(0, 0, c.width, c.height); }
@@ -1601,13 +1600,18 @@ async function prepareImageBlob(file) {
 async function insertImageFile(file) {
   if (!ed) return;
   toast('Inserisco l\'immagine…');
+  // prima si copia il file in memoria: se è solo nel cloud (Google Foto, Drive) e manca la rete, lo diciamo chiaramente
+  let data;
+  try { const buf = await file.arrayBuffer(); if (!buf.byteLength) throw new Error('vuoto'); data = new Blob([buf], { type: file.type || 'image/jpeg' }); }
+  catch (_) { toast('Non riesco a leggere questa immagine: forse è salvata solo nel cloud e senza rete non si scarica'); return; }
+  file = data;
   try {
     const { blob, w, h: hh } = await prepareImageBlob(file);
     const id = await storeImage(blob); await loadImage(id);
     const s = Math.min(1, (SW * 0.6 / cam.z) / w, (SH * 0.6 / cam.z) / hh);
     placeItems([{ id: uid(), t: 'image', img: id, x: 0, y: 0, w: w * s, h: hh * s, r: 0 }]);
     toast('Immagine inserita');
-  } catch (_) { toast('Non riesco ad aprire questa immagine'); }
+  } catch (_) { toast('Non riesco ad aprire questa immagine: il formato potrebbe non essere supportato'); }
 }
 
 /* Apertura di un PDF: ogni pagina diventa uno sfondo bloccato, una sotto l'altra */
@@ -1662,6 +1666,42 @@ let pgCache = { items: null, pages: [] };
 function pageList() {
   if (pgCache.items !== ed.items) pgCache = { items: ed.items, pages: ed.items.filter(i => i.t === 'page').sort((a, b) => a.y - b.y) };
   return pgCache.pages;
+}
+/* Nei PDF si scrive solo sulle pagine: i tratti vengono tagliati al bordo del foglio,
+   testo e forme nuove partono solo da una pagina */
+const onPage = (w, pages = pageList()) => pages.some(p => Math.abs(w.x - p.x) <= p.w / 2 && Math.abs(w.y - p.y) <= p.h / 2);
+function pageClipPath() {
+  const pages = pageList(); if (!pages.length) return null;
+  if (pgCache.clip) return pgCache.clip;
+  const P = new Path2D(); for (const p of pages) P.rect(p.x - p.w / 2, p.y - p.h / 2, p.w, p.h);
+  return (pgCache.clip = P);
+}
+/* Divide un tratto nei pezzi che stanno sulle pagine; il punto di uscita viene portato esattamente sul bordo */
+function clipInkToPages(it) {
+  const pages = pageList(); if (!pages.length) return [it];
+  const p = it.p, n = p.length / 3, pageOf = (x, y) => pages.find(q => Math.abs(x - q.x) <= q.w / 2 && Math.abs(y - q.y) <= q.h / 2) || null;
+  const edge = (q, ax, ay, bx, by) => { // punto del segmento a(dentro q) → b(fuori) sul bordo di q
+    let t = 1; const x0 = q.x - q.w / 2, x1 = q.x + q.w / 2, y0 = q.y - q.h / 2, y1 = q.y + q.h / 2, dx = bx - ax, dy = by - ay;
+    if (dx > 0 && bx > x1) t = Math.min(t, (x1 - ax) / dx); if (dx < 0 && bx < x0) t = Math.min(t, (x0 - ax) / dx);
+    if (dy > 0 && by > y1) t = Math.min(t, (y1 - ay) / dy); if (dy < 0 && by < y0) t = Math.min(t, (y0 - ay) / dy);
+    return [ax + dx * t, ay + dy * t];
+  };
+  const out = []; let run = null, runPage = null, all = true;
+  const flush = () => { if (run && run.length >= 3 && (run.length >= 6 || n === 1)) out.push({ ...it, id: out.length ? uid() : it.id, p: Float32Array.from(run) }); run = null; runPage = null; };
+  for (let i = 0; i < n; i++) {
+    const x = p[3 * i], y = p[3 * i + 1], pr = p[3 * i + 2], q = runPage && pageOf(x, y) === runPage ? runPage : pageOf(x, y);
+    if (q && q === runPage) { run.push(x, y, pr); continue; }
+    if (i > 0 || !q) all = false;
+    if (run) { const [ex, ey] = edge(runPage, run[run.length - 3], run[run.length - 2], x, y); run.push(ex, ey, pr); flush(); }
+    if (q) {
+      run = []; runPage = q;
+      if (i > 0) { const [ex, ey] = edge(q, x, y, p[3 * i - 3], p[3 * i - 2]); run.push(ex, ey, pr); }
+      run.push(x, y, pr);
+    }
+  }
+  if (all) return [it];
+  flush();
+  return out;
 }
 function currentPageIndex(pages) {
   const cy = (SH / 2 - cam.oy) / cam.z; let best = 0, bd = Infinity;
@@ -1810,8 +1850,10 @@ function drawLive() {
   if (find) drawFindHits(c);
   if (drawing && drawing.kind === 'ink') {
     const pts = drawing.snap ? snapPts(drawing) : drawing.item.k === 'straight' ? straighten(drawing.pts) : drawing.pts;
-    const it = { ...drawing.item, p: pts };
+    const it = { ...drawing.item, p: pts }, clipP = pageClipPath();
+    if (clipP) { c.save(); c.clip(clipP); }
     drawItem(c, it, buildGeom(it));
+    if (clipP) c.restore();
   }
   if (drawing && drawing.kind === 'shape') {
     drawConnTargets(c, drawing);
@@ -2465,6 +2507,7 @@ function textTap(w) {
   let hit = null;
   for (let i = ed.items.length - 1; i >= 0; i--) { const it = ed.items[i]; if (it.t === 'text' && textHit(it, w.x, w.y, 6 / cam.z)) { hit = it; break; } }
   if (!hit) for (let i = ed.items.length - 1; i >= 0; i--) { const it = ed.items[i]; if (it.t === 'table') { const cell = cellAt(it, w.x, w.y); if (cell) { startCellEdit(it, cell.ri, cell.ci); return; } } }
+  if (!hit && pageList().length && !onPage(w)) { toast('In un PDF si scrive solo sulle pagine'); return; }
   startText(w, hit);
 }
 function startCellEdit(t, ri, ci) {
@@ -2890,6 +2933,7 @@ function beginTool(e) {
   } else if (T.tool === 'shape') {
     hidePasteBar();
     if (sel) { const hnd = selHit(s); if (hnd) { startSelDrag(hnd, w, e.pointerId); return; } clearSel(); }
+    if (pageList().length && !onPage(w)) { const t = topItemAt(w); if (t) tapSelect(w); else toast('In un PDF si disegna solo sulle pagine'); return; }
     drawing = { pid: e.pointerId, kind: 'shape', a: w, b: w, as: s, bs: s };
   } else if (T.tool === 'laser') {
     drawing = { pid: e.pointerId, kind: 'laser' };
@@ -2913,8 +2957,9 @@ function finishTool(e) {
   if (d.snap) {
     const sp2 = snapPts(d);
     if (Math.hypot(sp2[3] - sp2[0], sp2[4] - sp2[1]) * cam.z < 3) { drawLive(); return; }
-    const it = { ...d.item, p: finalizePts(sp2, clamp(1.5 / cam.z, 0.25, 3)) }, before = ed.items.slice();
-    ed.items.push(it); pushHist(before); lastPen = null; renderInk(); drawLive(); return;
+    const it = { ...d.item, p: finalizePts(sp2, clamp(1.5 / cam.z, 0.25, 3)) }, before = ed.items.slice(), parts = clipInkToPages(it);
+    if (!parts.length) { drawLive(); return; }
+    ed.items.push(...parts); pushHist(before); lastPen = null; renderInk(); drawLive(); return;
   }
   if (d.item.t === 'hl' && d.item.k === 'straight') pts = straighten(pts);
   const it = { ...d.item, p: finalizePts(pts, clamp(1.5 / cam.z, 0.25, 3)) };
@@ -2933,8 +2978,10 @@ function finishTool(e) {
       ed.items = out; pushHist(start); renderInk(); drawLive(); return;
     }
   }
-  ed.items.push(it); pushHist(before);
-  if (it.t === 'pen') lastPen = { it, t: performance.now() };
+  const parts = clipInkToPages(it);
+  if (!parts.length) { drawLive(); return; }
+  ed.items.push(...parts); pushHist(before);
+  if (it.t === 'pen' && parts.length === 1) lastPen = { it: parts[0], t: performance.now() };
   renderInk(); drawLive();
 }
 
@@ -3671,9 +3718,9 @@ async function importFile(file) {
   toast('Lavagna aperta in ' + f.name);
   openBoard(b.id).then(() => { if (items.some(i => i.t === 'page')) fitWidth(); else if (items.length) fitContent(); });
 }
-$('#fileIn').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) importFile(f); });
-$('#pdfIn').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) openPdfFile(f); });
-for (const id of ['imgIn', 'camIn']) $('#' + id).addEventListener('change', e => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) insertImageFile(f); });
+/* Il campo si svuota solo dopo aver letto il file (su Android il file scelto potrebbe non essere più leggibile dopo) */
+const onPick = (id, fn) => $('#' + id).addEventListener('change', async e => { const f = e.target.files && e.target.files[0]; try { if (f) await fn(f); } finally { e.target.value = ''; } });
+onPick('fileIn', importFile); onPick('pdfIn', openPdfFile); onPick('imgIn', insertImageFile); onPick('camIn', insertImageFile);
 
 /* ================= Eventi globali ================= */
 const ACT = {
