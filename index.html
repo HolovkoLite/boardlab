@@ -391,6 +391,8 @@ const I = {
   help: '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 114.2 1.8c-.9.7-1.8 1.2-1.8 2.6"/><circle cx="12" cy="17" r="1" class="f"/>',
   chevD: '<path d="M6 9l6 6 6-6"/>',
   chevU: '<path d="M6 15l6-6 6 6"/>',
+  bucket: '<path d="M10.5 4.5l7.5 7.5-5.8 5.8a1.6 1.6 0 01-2.3 0L4.7 12.6a1.6 1.6 0 010-2.3z"/><path d="M6.5 3.5l3 3M4.8 11.2h11.4"/><path class="tip" d="M19.8 14.3s1.9 2.3 1.9 3.5a1.9 1.9 0 01-3.8 0c0-1.2 1.9-3.5 1.9-3.5z"/>',
+  cross8: '<path d="M12 3.5v17M3.5 12h17M6 6l12 12M18 6L6 18"/>',
   pages: '<rect x="6" y="3.5" width="12" height="16" rx="1.5"/><path d="M9 8h6M9 11.5h6M9 15h4"/>',
   pageAdd: '<path d="M14 3.5H7.5A1.5 1.5 0 006 5v14a1.5 1.5 0 001.5 1.5h9A1.5 1.5 0 0018 19V7.5z"/><path d="M12 10v6M9 13h6"/>',
   chevR: '<path d="M9 6l6 6-6 6"/>',
@@ -535,7 +537,7 @@ const PATTERNS = [['none', 'Nessuno'], ['lines', 'Righe'], ['grid', 'Quadretti']
 const PEN_SIZES = [1.2, 2, 3, 4.5, 6.5, 9.5];
 const HL_SIZES = [8, 12, 17, 24, 32, 44];
 const ER_SIZES = [6, 10, 16, 24, 36, 52];
-const APP_VERSION = '0.8.3';
+const APP_VERSION = '0.9.0';
 const ZMIN = 0.1, ZMAX = 6;
 const ER_DECAY_MS = 600; // tempo con cui la gomma ingrandita torna piccola
 const SORT_LABEL = { created: 'Data di creazione', modified: 'Data di modifica', name: 'Nome' };
@@ -557,7 +559,7 @@ function seedMeta() {
     v: 1, collections: [c1, c2], folders, boards: [board], palette: DEFAULT_PALETTE.slice(),
     settings: { dbl: true, scribble: true, xErase: true, erBoost: true, erMax: 3, shapeRec: true, shapeHold: 'normal', shapeGrid: false, sort: 'created', view: 'list' },
     ui: { folder: folders[0].id, drawer: true, zoomLock: false },
-    tool: { tool: 'pen', prev: 'pen', pen: { k: 'marker', s: 3, c: '#000000' }, hl: { k: 'free', s: 2, c: '#FFD83B' }, er: { k: 'stroke', s: 2 }, text: { s: 2, c: '#000000', b: false, i: false }, laser: { c: '#F0163A', f: 1 }, shape: { k: 'rect', s: 2, fill: 'none', ls: 'solid', c: '#000000' }, table: { header: true } }
+    tool: { tool: 'pen', prev: 'pen', pen: { k: 'marker', s: 3, c: '#000000' }, hl: { k: 'free', s: 2, c: '#FFD83B' }, er: { k: 'stroke', s: 2 }, text: { s: 2, c: '#000000', b: false, i: false }, laser: { c: '#F0163A', f: 1 }, shape: { k: 'rect', s: 2, fill: 'none', ls: 'solid', c: '#000000' }, fill: { c: '#FFD83B', mode: 'solid' }, table: { header: true } }
   };
 }
 let metaT;
@@ -753,6 +755,7 @@ function renderBody() {
       <dt>Opzioni di uno strumento</dt><dd>Tocca una volta per sceglierlo, una seconda volta per aprire tipo e spessore.</dd>
       <dt>Gomma veloce</dt><dd>Doppio clic sul pulsante della penna. Un altro doppio clic torna allo strumento di prima.</dd>
       <dt>Riconoscimento delle forme</dt><dd>Disegna con la penna e, alla fine, tieni ferma la punta: il tratto diventa linea, freccia, cerchio, ellisse, rettangolo, quadrato, rombo, triangolo, poligono, arco o spezzata (anche un rettangolo a tre lati), con l'inclinazione con cui l'hai tracciato. Se non somiglia a una forma diventa una linea. Una V disegnata in fondo a una linea la trasforma in freccia. Un Annulla riporta il tratto a mano. Si attiva e si regola in Impostazioni → Interazioni, dove puoi anche far allineare le forme alla griglia (utile per le mappe concettuali; linee e frecce restano libere).</dd>
+      <dt>Secchiello</dt><dd>Scegli il secchiello e tocca con la penna dentro un'area chiusa (un cerchio fatto a mano, una forma, una cella, una regione di una cartina): si colora sotto i tratti. Piccoli buchi nel contorno vengono ignorati; su un'area aperta o sullo spazio bianco non succede niente. Toccando un riempimento ne cambi il colore. Il secondo tocco sullo strumento sceglie Pieno o Chiaro. Se l'area esce dallo schermo, rimpicciolisci.</dd>
       <dt>Gomma precisa</dt><dd>Cancella solo il pezzo su cui passa, anche su forme, linee, frecce ed evidenziatore dritto. Una forma cancellata in parte diventa tratti; il suo riempimento resta.</dd>
       <dt>Scarabocchio e X</dt><dd>Uno zig-zag veloce o una X sopra una scritta la cancellano.</dd>
       <dt>Colori</dt><dd>Tocca di nuovo il colore attivo, o tienilo premuto, per modificarlo o eliminarlo. Il + aggiunge un colore.</dd>
@@ -1146,7 +1149,7 @@ function hitItem(it, w, tol) {
   for (let i = 1; i < n; i++) if (segDist(w.x, w.y, p[3 * i - 3], p[3 * i - 2], p[3 * i], p[3 * i + 1]) <= lim) return true;
   return false;
 }
-function topItemAt(w, noInk) { const tol = 8 / cam.z; for (let i = ed.items.length - 1; i >= 0; i--) { const it = ed.items[i]; if (noInk && (it.t === 'pen' || it.t === 'hl')) continue; if (hitItem(it, w, tol)) return it; } return null; }
+function topItemAt(w, noInk) { const tol = 8 / cam.z; for (const L of [3, 2, 1, 0]) for (let i = ed.items.length - 1; i >= 0; i--) { const it = ed.items[i]; if (layerOf(it) !== L || (noInk && (it.t === 'pen' || it.t === 'hl'))) continue; if (hitItem(it, w, tol)) return it; } return null; }
 function pointInPoly(x, y, poly) {
   let inside = false;
   for (let i = 0, j = poly.length - 2; i < poly.length; j = i, i += 2) {
@@ -1218,6 +1221,7 @@ function shapeLocal(it) {
       pts.push(0, ah / 2 - k); q(0, ah / 2 - k, 0, ah / 2, aw / 2, ah / 2, pts);
       poly(pts, false); break;
     }
+    case 'blob': { for (const q of it.rings || []) { const pts = []; for (let i = 0; i + 1 < q.length; i += 2) pts.push(q[i] * w, q[i + 1] * h); poly(pts, true); } break; }
     case 'poly': { const q = it.pts || [], pts = []; for (let i = 0; i + 1 < q.length; i += 2) pts.push(q[i] * w, q[i + 1] * h); poly(pts, !!it.closed); break; }
     case 'arc': { const pts = [], n = 48; for (let i = 0; i <= n; i++) { const t = it.a0 + (it.a1 - it.a0) * i / n; pts.push(w / 2 * Math.cos(t), h / 2 * Math.sin(t)); } poly(pts, false); break; }
     default: {
@@ -1251,6 +1255,7 @@ function nearShape(it, x, y, tol) {
   return false;
 }
 function shapeHit(it, x, y, tol) {
+  if (it.k === 'blob') { let n = 0; for (const p of geom(it).wp) if (pointInPoly(x, y, p.pts)) n++; return n % 2 === 1; } // riempimento: i buchi non contano
   if (nearShape(it, x, y, tol)) return true;
   if (isOpenShape(it)) return false;
   const g = geom(it); return g.wp.some(p => p.closed && pointInPoly(x, y, p.pts));
@@ -1259,11 +1264,16 @@ function drawShape(c, it, g) {
   const S = g.S;
   c.save(); c.translate(it.x, it.y); if (it.r) c.rotate(it.r);
   c.lineJoin = 'round'; c.lineCap = 'round'; c.lineWidth = it.sw; c.strokeStyle = it.c; c.fillStyle = it.c;
+  if (it.k === 'blob') { // riempimento del secchiello: tutti i contorni insieme, con i buchi
+    const path = new Path2D();
+    for (const p of S.polys) { path.moveTo(p.pts[0], p.pts[1]); for (let i = 2; i < p.pts.length; i += 2) path.lineTo(p.pts[i], p.pts[i + 1]); path.closePath(); }
+    c.globalAlpha = FILL_ALPHA[it.fill] || 1; c.fillStyle = it.fc || it.c; c.fill(path, 'evenodd'); c.globalAlpha = 1; c.restore(); return;
+  }
   for (const p of S.polys) {
     const path = new Path2D(); path.moveTo(p.pts[0], p.pts[1]);
     for (let i = 2; i < p.pts.length; i += 2) path.lineTo(p.pts[i], p.pts[i + 1]);
     if (p.closed) path.closePath();
-    if (p.closed && FILL_ALPHA[it.fill]) { c.globalAlpha = FILL_ALPHA[it.fill]; c.fill(path); c.globalAlpha = 1; }
+    if (p.closed && FILL_ALPHA[it.fill]) { c.globalAlpha = FILL_ALPHA[it.fill]; c.fillStyle = it.fc || it.c; c.fill(path); c.fillStyle = it.c; c.globalAlpha = 1; }
     if (it.noStroke) continue;
     setDash(c, lineStyle(it), it.sw);
     c.stroke(path); c.setLineDash([]);
@@ -1430,7 +1440,8 @@ const TEMPLATES = [
   ['timeline', 'Linea del tempo', 'timeline'],
   ['tchart', 'Schema a T', 'tchart'],
   ['venn', 'Diagramma di Venn', 'venn'],
-  ['venn3', 'Diagramma di Venn a 3', 'venn3']
+  ['venn3', 'Diagramma di Venn a 3', 'venn3'],
+  ['cross8', 'Croce a 8 raggi', 'cross8']
 ];
 function insertTemplate(k) {
   commitText();
@@ -1449,6 +1460,10 @@ function insertTemplate(k) {
   }
   else if (k === 'venn3') {
     for (const [c, x, y] of [['#1E88F5', -115, -70], ['#F0163A', 115, -70], ['#22D45E', 0, 130]]) items.push(mkShape('circle', x, y, 330, 330, { c, fill: 'light', ls: 'solid', sw: 3.5 }));
+  }
+  else if (k === 'cross8') { // + e × sovrapposti: quattro linee della stessa lunghezza per il centro
+    const L = 420, d = L / Math.SQRT2, o = { sw: 3.5, fill: 'none', ls: 'solid' };
+    items.push(mkShape('line', 0, 0, L, 0, o), mkShape('line', 0, 0, 0, L, o), mkShape('line', 0, 0, d, d, o), mkShape('line', 0, 0, d, -d, o));
   }
   if (items.length) placeItems(items);
 }
@@ -1521,7 +1536,7 @@ function shapeStyleHTML(o, withKinds) {
     <div class="seg">${[['solid', 'Continua'], ['dash', 'Tratteggiata'], ['dot', 'A puntini']].map(([d, l]) => `<button class="seg-b ${(o.ls || (o.dash ? 'dash' : 'solid')) === d ? 'on' : ''}" data-d="${d}"><span class="linesw ls-${d}"></span><span>${l}</span></button>`).join('')}</div>`;
 }
 function applyShapeStyle(o) {
-  const shapes = selItemsList().filter(x => x.t === 'shape' || x.t === 'conn');
+  const shapes = selItemsList().filter(x => (x.t === 'shape' && x.k !== 'blob') || x.t === 'conn');
   if (!shapes.length) return;
   const before = ed.items.slice(), ids = new Set(shapes.map(x => x.id));
   ed.items = ed.items.map(x => ids.has(x.id) ? { ...x, sw: SHAPE_SIZES[o.s], fill: isOpenShape(x) ? 'none' : o.fill, ls: o.ls || (o.dash ? 'dash' : 'solid'), dash: undefined } : x);
@@ -1591,7 +1606,7 @@ function drawImageItem(c, it) {
   c.restore();
 }
 /* Livelli: pagine PDF, immagini, evidenziatore (sopra le immagini, sotto la scrittura), tutto il resto */
-const layerOf = it => it.t === 'page' ? 0 : it.t === 'image' ? 1 : it.t === 'hl' ? 2 : 3;
+const layerOf = it => it.t === 'page' ? 0 : it.t === 'image' || (it.t === 'shape' && it.k === 'blob') ? 1 : it.t === 'hl' ? 2 : 3;
 function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.append(s); }); }
 
 /* Inserimento di un'immagine dalla galleria o dalla fotocamera */
@@ -1914,7 +1929,7 @@ function findItem(id) {
   return null;
 }
 function withConnScope(items, fn) { const prev = connScope; connScope = new Map(items.map(i => [i.id, i])); try { return fn(); } finally { connScope = prev; } }
-const isConnTarget = it => (it.t === 'shape' && !isOpenShape(it)) || it.t === 'table' || it.t === 'image' || it.t === 'text';
+const isConnTarget = it => (it.t === 'shape' && it.k !== 'blob' && !isOpenShape(it)) || it.t === 'table' || it.t === 'image' || it.t === 'text';
 function connTargetAt(w) {
   const tol = 6 / cam.z;
   for (let i = ed.items.length - 1; i >= 0; i--) { const it = ed.items[i]; if (isConnTarget(it) && hitItem(it, w, tol)) return it; }
@@ -2618,6 +2633,162 @@ function drawRecog(c, d) {
   for (const it of r.items) drawItem(c, it, buildGeom(it));
 }
 
+/* ================= Secchiello ================= */
+/* Tocco con la penna:
+   - su un riempimento già fatto ne cambia il colore;
+   - dentro un'area chiusa (tratti a penna, forme, tabelle, pagine PDF, immagini) crea una macchia di colore che la riempie,
+     sotto i tratti; piccoli buchi nel contorno vengono ignorati;
+   - su un'area aperta (che arriva al bordo dello schermo) non riempie niente.
+   La macchia è una forma 'blob' senza contorno: si seleziona, si sposta, si ricolora e si cancella come le altre forme. */
+const FILL_GAP = 5; // px sullo schermo: i buchi del contorno fino a circa il doppio vengono chiusi
+function fillAt(w) {
+  commitText(); clearSel();
+  const T = meta.tool.fill, col = T.c, mode = T.mode || 'solid';
+  for (let i = ed.items.length - 1; i >= 0; i--) {
+    const it = ed.items[i];
+    if (it.t === 'shape' && it.k === 'blob' && shapeHit(it, w.x, w.y, 0)) { replaceItem(it, { ...it, c: col, fc: col, fill: mode }); return; }
+  }
+  let shp = null;
+  for (let i = ed.items.length - 1; i >= 0 && !shp; i--) {
+    const it = ed.items[i];
+    if (it.t === 'shape' && it.k !== 'blob' && !isOpenShape(it) && geom(it).wp.some(p => p.closed && pointInPoly(w.x, w.y, p.pts))) shp = it;
+  }
+  const reg = floodRegion(w);
+  const fillShape = () => replaceItem(shp, { ...shp, fill: mode, fc: col });
+  if (reg.rings) {
+    if (shp) { // l'area trovata è proprio l'interno della forma: si riempie la forma, più precisa
+      const g = geom(shp), d = Math.hypot(g.x1 - g.x0, g.y1 - g.y0), b = reg.box;
+      if (reg.rings.length === 1 && Math.abs(b.x0 - g.x0) + Math.abs(b.x1 - g.x1) + Math.abs(b.y0 - g.y0) + Math.abs(b.y1 - g.y1) < 0.1 * d + 4 * (shp.sw / 2 + 4)) { fillShape(); return; }
+    }
+    const it = blobItem(reg.rings, col, mode);
+    const before = ed.items.slice(); ed.items = ed.items.concat([it]); pushHist(before); renderInk();
+    return;
+  }
+  if (shp) { fillShape(); return; }
+  toast(reg.onLine ? 'Tocca dentro l\'area da colorare' : 'L\'area non è chiusa: se esce dallo schermo, rimpicciolisci e riprova');
+}
+function blobItem(rings, col, mode) {
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for (const r of rings) for (let i = 0; i < r.length; i += 2) { x0 = Math.min(x0, r[i]); x1 = Math.max(x1, r[i]); y0 = Math.min(y0, r[i + 1]); y1 = Math.max(y1, r[i + 1]); }
+  const w = Math.max(1, x1 - x0), h = Math.max(1, y1 - y0), cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+  const nr = rings.map(r => { const o = []; for (let i = 0; i < r.length; i += 2) o.push(+((r[i] - cx) / w).toFixed(5), +((r[i + 1] - cy) / h).toFixed(5)); return o; });
+  return { id: uid(), t: 'shape', k: 'blob', x: cx, y: cy, w, h, r: 0, c: col, fc: col, sw: 1, fill: mode, ls: 'solid', noStroke: true, rings: nr };
+}
+/* Dilatazione di una maschera di un raggio R (quadrato), in due passate */
+function dilate(M, W, H, R) {
+  const T = new Uint8Array(W * H), O = new Uint8Array(W * H);
+  for (let y = 0; y < H; y++) {
+    let cnt = 0; const row = y * W;
+    for (let x = 0; x < Math.min(R, W); x++) cnt += M[row + x];
+    for (let x = 0; x < W; x++) { if (x + R < W) cnt += M[row + x + R]; if (x - R - 1 >= 0) cnt -= M[row + x - R - 1]; T[row + x] = cnt > 0 ? 1 : 0; }
+  }
+  for (let x = 0; x < W; x++) {
+    let cnt = 0;
+    for (let y = 0; y < Math.min(R, H); y++) cnt += T[y * W + x];
+    for (let y = 0; y < H; y++) { if (y + R < H) cnt += T[(y + R) * W + x]; if (y - R - 1 >= 0) cnt -= T[(y - R - 1) * W + x]; O[y * W + x] = cnt > 0 ? 1 : 0; }
+  }
+  return O;
+}
+function floodRegion(w) {
+  const W = Math.max(1, Math.round(SW)), H = Math.max(1, Math.round(SH));
+  const sx = Math.round(w.x * cam.z + cam.ox), sy = Math.round(w.y * cam.z + cam.oy);
+  if (sx < 1 || sy < 1 || sx >= W - 1 || sy >= H - 1) return { open: true };
+  // quello che si vede, senza griglia dello sfondo, evidenziatore e riempimenti già fatti
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const x = cv.getContext('2d', { willReadFrequently: true });
+  x.fillStyle = ed.bg.color; x.fillRect(0, 0, W, H);
+  x.setTransform(cam.z, 0, 0, cam.z, cam.ox, cam.oy);
+  const vx0 = -cam.ox / cam.z, vy0 = -cam.oy / cam.z, vx1 = vx0 + W / cam.z, vy1 = vy0 + H / cam.z;
+  for (const L of [0, 1, 2, 3]) for (const it of ed.items) {
+    if (layerOf(it) !== L || it.t === 'hl' || (it.t === 'shape' && it.k === 'blob')) continue;
+    const g = geom(it); if (g.x1 < vx0 || g.x0 > vx1 || g.y1 < vy0 || g.y0 > vy1) continue;
+    drawItem(x, it, g);
+  }
+  const D = x.getImageData(0, 0, W, H).data; cv.width = cv.height = 1;
+  // seme: se il tocco è proprio su una linea, si cerca il punto libero più vicino
+  let seed = sy * W + sx;
+  const colAt = i => [D[4 * i], D[4 * i + 1], D[4 * i + 2]];
+  const diff = (i, c) => Math.abs(D[4 * i] - c[0]) + Math.abs(D[4 * i + 1] - c[1]) + Math.abs(D[4 * i + 2] - c[2]);
+  const bg = colAt(seed), bgc = hex2rgb(ed.bg.color);
+  let c0 = bg;
+  if (diff(seed, bgc) > 90) { // il tocco cade su qualcosa di colorato: va bene se è un'area ampia di quel colore (es. una regione di una cartina)
+    let same = 0, tot = 0; for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) { tot++; if (diff((sy + dy) * W + sx + dx, bg) < 60) same++; }
+    if (same < tot * 0.8) {
+      let best = -1;
+      for (let r = 1; r <= 8 && best < 0; r++) for (let dy = -r; dy <= r && best < 0; dy++) for (let dx = -r; dx <= r; dx++) {
+        const X = sx + dx, Y = sy + dy; if (X < 0 || Y < 0 || X >= W || Y >= H) continue;
+        if (diff(Y * W + X, bgc) < 60) { best = Y * W + X; break; }
+      }
+      if (best < 0) return { onLine: true };
+      seed = best; c0 = colAt(seed);
+    }
+  }
+  const N = W * H, B = new Uint8Array(N);
+  for (let i = 0; i < N; i++) B[i] = diff(i, c0) > 90 ? 1 : 0;
+  const BD = dilate(B, W, H, FILL_GAP);
+  if (BD[seed]) { // il punto è molto vicino a una linea: si accetta senza chiusura dei buchi
+    if (B[seed]) return { onLine: true };
+  }
+  const blocked = BD[seed] ? B : BD;
+  const R = new Uint8Array(N), st = new Int32Array(N); let sp = 0, open = false, count = 0;
+  R[seed] = 1; st[sp++] = seed;
+  while (sp) {
+    const i = st[--sp]; count++;
+    const X = i % W, Y = (i / W) | 0;
+    if (X === 0 || Y === 0 || X === W - 1 || Y === H - 1) { open = true; break; }
+    for (const j of [i - 1, i + 1, i - W, i + W]) if (!R[j] && !blocked[j]) { R[j] = 1; st[sp++] = j; }
+  }
+  if (open) return { open: true };
+  if (count < 20) return { onLine: true };
+  const M = blocked === BD ? dilate(R, W, H, FILL_GAP + 1) : dilate(R, W, H, 1);
+  const rings = traceRings(M, W, H);
+  if (!rings.length) return { open: true };
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for (const r of rings) for (let i = 0; i < r.length; i += 2) { x0 = Math.min(x0, r[i]); x1 = Math.max(x1, r[i]); y0 = Math.min(y0, r[i + 1]); y1 = Math.max(y1, r[i + 1]); }
+  return { rings, box: { x0, x1, y0, y1 } };
+}
+/* Contorni della maschera (bordi tra pixel), semplificati e in coordinate della lavagna; i buchi minuscoli (dentro le lettere) si ignorano */
+function traceRings(M, W, H) {
+  const V = (x, y) => y * (W + 1) + x, next = new Map();
+  const add = (a, b) => { const l = next.get(a); if (l) l.push(b); else next.set(a, [b]); };
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    if (!M[y * W + x]) continue;
+    if (y === 0 || !M[(y - 1) * W + x]) add(V(x, y), V(x + 1, y));
+    if (x === W - 1 || !M[y * W + x + 1]) add(V(x + 1, y), V(x + 1, y + 1));
+    if (y === H - 1 || !M[(y + 1) * W + x]) add(V(x + 1, y + 1), V(x, y + 1));
+    if (x === 0 || !M[y * W + x - 1]) add(V(x, y + 1), V(x, y));
+  }
+  const loops = [];
+  for (const [start] of next) {
+    while (next.has(start)) {
+      const pts = []; let v = start, guard = 0;
+      do {
+        const l = next.get(v); if (!l) break;
+        const nv = l.pop(); if (!l.length) next.delete(v);
+        pts.push({ x: v % (W + 1), y: (v / (W + 1)) | 0 }); v = nv;
+      } while (v !== start && ++guard < 4e6);
+      if (pts.length >= 4) loops.push(pts);
+    }
+  }
+  const area = p => { let a = 0; for (let i = 0; i < p.length; i++) { const q = p[(i + 1) % p.length]; a += p[i].x * q.y - q.x * p[i].y; } return a / 2; };
+  let maxA = 0; for (const l of loops) maxA = Math.max(maxA, Math.abs(area(l)));
+  const out = [];
+  for (const l of loops) {
+    if (Math.abs(area(l)) < Math.max(80, maxA * 0.004)) continue;
+    const s = rdp(l.concat([l[0]]), 0.8); s.pop();
+    const r = []; for (const p of s) r.push((p.x - cam.ox) / cam.z, (p.y - cam.oy) / cam.z);
+    if (r.length >= 6) out.push(r);
+  }
+  return out;
+}
+function fillPopover(anchor) {
+  const T = meta.tool.fill, box = h('div', 'pop ptool');
+  const render = () => { box.innerHTML = `<div class="pop-h">Secchiello</div><div class="seg">${[['solid', 'Pieno'], ['light', 'Chiaro']].map(([k, l]) => `<button class="seg-b ${(T.mode || 'solid') === k ? 'on' : ''}" data-m="${k}"><span class="fillsw fs-${k}"></span><span>${l}</span></button>`).join('')}</div>`; };
+  render();
+  box.addEventListener('click', e => { const b = e.target.closest('[data-m]'); if (!b) return; T.mode = b.dataset.m; saveMeta(); render(); });
+  popover(anchor, box, 'center');
+}
+
 /* ================= Righello e goniometro ================= */
 /* Stanno appoggiati sulla lavagna (coordinate della lavagna, quindi seguono zoom e scorrimento). Non vengono salvati né esportati.
    Righello: 20 cm, la penna che parte vicino a un bordo traccia una linea dritta lungo il bordo.
@@ -3079,7 +3250,7 @@ function tapSelect(w, finger) {
 }
 function showSelBar() {
   if (!sel) { if (!pasteAt) selBar.hidden = true; return; }
-  selBar.innerHTML = `<button data-sa="cut">Taglia</button><button data-sa="copy">Copia</button>${clip && clip.length ? '<button data-sa="paste">Incolla</button>' : ''}<button data-sa="dup">Duplica</button><button data-sa="color">Colore</button>${selItemsList().some(x => x.t === 'shape' || x.t === 'conn') ? '<button data-sa="style">Stile</button>' : ''}${selItemsList().filter(x => x.t === 'table').length === 1 ? '<button data-sa="table">Tabella</button>' : ''}<button data-sa="tpl">Modello</button><button data-sa="del" class="danger">Elimina</button>`;
+  selBar.innerHTML = `<button data-sa="cut">Taglia</button><button data-sa="copy">Copia</button>${clip && clip.length ? '<button data-sa="paste">Incolla</button>' : ''}<button data-sa="dup">Duplica</button><button data-sa="color">Colore</button>${selItemsList().some(x => (x.t === 'shape' && x.k !== 'blob') || x.t === 'conn') ? '<button data-sa="style">Stile</button>' : ''}${selItemsList().filter(x => x.t === 'table').length === 1 ? '<button data-sa="table">Tabella</button>' : ''}<button data-sa="tpl">Modello</button><button data-sa="del" class="danger">Elimina</button>`;
   selBar.hidden = false; positionSelBar();
 }
 function showPasteBar(w) { pasteAt = w; selBar.innerHTML = '<button data-sa="paste">Incolla</button>'; selBar.hidden = false; positionSelBar(); }
@@ -3125,7 +3296,7 @@ function pasteClip(at) {
 function recolorSel(col) {
   if (!sel) return;
   const before = ed.items.slice();
-  ed.items = ed.items.map(it => sel.ids.has(it.id) ? { ...it, c: col } : it);
+  ed.items = ed.items.map(it => sel.ids.has(it.id) ? { ...it, c: col, ...(it.fc ? { fc: col } : {}) } : it);
   pushHist(before); renderInk();
 }
 function selColorPop(anchor) {
@@ -3228,6 +3399,7 @@ stage.addEventListener('pointermove', e => {
   if (k === 'sel') { updSelDrag(toWorld(sp(e))); drawLive(); return; }
   if (k === 'guide') { guideDragMove(drawing, toWorld(sp(e))); drawLive(); return; }
   if (k === 'shape') { drawing.b = toWorld(sp(e)); drawing.bs = sp(e); drawLive(); return; }
+  if (k === 'fill') return;
   for (const ce of list) {
     const s = sp(ce);
     if (Math.hypot(s.x - drawing.lastS.x, s.y - drawing.lastS.y) < 0.6) continue;
@@ -3323,6 +3495,8 @@ function beginTool(e) {
     if (sel) { const hnd = selHit(s); if (hnd) { startSelDrag(hnd, w, e.pointerId); return; } clearSel(); }
     if (pageList().length && !onPage(w)) { const t = topItemAt(w); if (t) tapSelect(w); else toast('In un PDF si disegna solo sulle pagine'); return; }
     drawing = { pid: e.pointerId, kind: 'shape', a: w, b: w, as: s, bs: s };
+  } else if (T.tool === 'fill') {
+    hidePasteBar(); drawing = { pid: e.pointerId, kind: 'fill', w };
   } else if (T.tool === 'laser') {
     drawing = { pid: e.pointerId, kind: 'laser' };
     laser.pts.push({ x: w.x, y: w.y, t: performance.now(), brk: true });
@@ -3333,6 +3507,7 @@ function finishTool(e) {
   const d = drawing; drawing = null;
   if (d.kind === 'er') { if (d.changed) pushHist(d.before); drawLive(); return; }
   if (d.kind === 'laser') return;
+  if (d.kind === 'fill') { fillAt(d.w); return; }
   if (d.kind === 'guide') { drawLive(); return; }
   if (d.kind === 'lasso') { finishLasso(d, e); return; }
   if (d.kind === 'sel') { endSelDrag(); return; }
@@ -3705,18 +3880,20 @@ function buildToolbar() {
     <button class="tb" data-tool="er" aria-label="Gomma">${ic('eraser')}</button>
     <button class="tb" data-tool="lasso" aria-label="Lazo">${ic('lasso')}</button>
     <button class="tb" data-tool="shape" aria-label="Forme">${ic('shapes')}</button>
+    <button class="tb" data-tool="fill" aria-label="Secchiello">${ic('bucket')}</button>
     <button class="tb" data-tool="laser" aria-label="Puntatore laser">${ic('laser')}</button>
     <span class="tsep"></span><div class="sws" id="sws"></div>
     <button class="sw add" id="swAdd" aria-label="Aggiungi colore">${ic('plus')}</button>`;
   t.addEventListener('click', onToolbarClick);
 }
-function curColor() { const T = meta.tool; return T.tool === 'hl' ? T.hl.c : T.tool === 'text' ? T.text.c : T.tool === 'laser' ? T.laser.c : T.tool === 'shape' ? T.shape.c : T.pen.c; }
+function curColor() { const T = meta.tool; return T.tool === 'fill' ? T.fill.c : T.tool === 'hl' ? T.hl.c : T.tool === 'text' ? T.text.c : T.tool === 'laser' ? T.laser.c : T.tool === 'shape' ? T.shape.c : T.pen.c; }
 function updToolbar() {
   const T = meta.tool;
   $$('.tb').forEach(b => b.classList.toggle('on', b.dataset.tool === T.tool));
   $('.tb[data-tool="pen"]').style.setProperty('--tc', T.pen.c);
   $('.tb[data-tool="hl"]').style.setProperty('--tc', T.hl.c);
-  const cur = curColor().toUpperCase(), show = T.tool === 'pen' || T.tool === 'hl' || T.tool === 'text' || T.tool === 'laser' || T.tool === 'shape';
+  $('.tb[data-tool="fill"]').style.setProperty('--tc', T.fill.c);
+  const cur = curColor().toUpperCase(), show = T.tool === 'pen' || T.tool === 'hl' || T.tool === 'text' || T.tool === 'laser' || T.tool === 'shape' || T.tool === 'fill';
   let marked = false;
   $('#sws').innerHTML = meta.palette.map((c, i) => {
     const on = show && !marked && c.toUpperCase() === cur; if (on) marked = true;
@@ -3739,6 +3916,7 @@ function applyColor(c) {
   else if (T.tool === 'shape') { T.shape.c = c; if (sel) recolorSel(c); }
   else if (T.tool === 'hl') T.hl.c = c;
   else if (T.tool === 'laser') T.laser.c = c;
+  else if (T.tool === 'fill') T.fill.c = c;
   else { T.pen.c = c; if (T.tool !== 'pen') setTool('pen'); }
   updToolbar(); saveMeta();
 }
@@ -3747,7 +3925,7 @@ function onToolbarClick(e) {
   const T = meta.tool;
   if (b.dataset.tool) {
     const t = b.dataset.tool;
-    if (T.tool === t) { if (t === 'pen' || t === 'hl' || t === 'er' || t === 'text' || t === 'laser') toolPopover(t, b); else if (t === 'shape') shapePopover(b, false); }
+    if (T.tool === t) { if (t === 'pen' || t === 'hl' || t === 'er' || t === 'text' || t === 'laser') toolPopover(t, b); else if (t === 'shape') shapePopover(b, false); else if (t === 'fill') fillPopover(b); }
     else setTool(t);
     return;
   }
@@ -3770,8 +3948,8 @@ function editSwatch(i, anchor, isNew) {
     onChange(hex) {
       const T = meta.tool, prev = meta.palette[idx].toUpperCase();
       meta.palette[idx] = hex;
-      if (isNew) { if (T.tool === 'hl') T.hl.c = hex; else if (T.tool === 'text') T.text.c = hex; else if (T.tool === 'laser') T.laser.c = hex; else if (T.tool === 'shape') T.shape.c = hex; else T.pen.c = hex; }
-      else { for (const k of ['pen', 'hl', 'text', 'laser', 'shape']) if (T[k].c.toUpperCase() === prev) T[k].c = hex; }
+      if (isNew) { if (T.tool === 'hl') T.hl.c = hex; else if (T.tool === 'text') T.text.c = hex; else if (T.tool === 'laser') T.laser.c = hex; else if (T.tool === 'shape') T.shape.c = hex; else if (T.tool === 'fill') T.fill.c = hex; else T.pen.c = hex; }
+      else { for (const k of ['pen', 'hl', 'text', 'laser', 'shape', 'fill']) if (T[k] && T[k].c.toUpperCase() === prev) T[k].c = hex; }
       updToolbar(); saveMeta();
     },
     onDelete: () => { if (meta.palette.length <= 1) { toast('La tavolozza deve avere almeno un colore'); return false; } meta.palette.splice(idx, 1); updToolbar(); saveMeta(); return true; },
@@ -4068,11 +4246,17 @@ function pdfDrawItems(pdf, items, X, Y, k, imgs) {
       continue;
     }
     if (it.t === 'shape') {
-      const g = geom(it), col = hex2rgb(it.c), nPolys = g.S.polys.length;
+      const g = geom(it), col = hex2rgb(it.c), fcol = hex2rgb(it.fc || it.c), nPolys = g.S.polys.length;
+      if (it.k === 'blob') {
+        pdf.setFillColor(...fcol); if (FILL_ALPHA[it.fill] !== 1) pdf.setGState(new pdf.GState({ opacity: FILL_ALPHA[it.fill] || 1 }));
+        for (const p of g.wp) { const q = p.pts; pdf.moveTo(X(q[0]), Y(q[1])); for (let i = 2; i < q.length; i += 2) pdf.lineTo(X(q[i]), Y(q[i + 1])); pdf.close(); }
+        pdf.fillEvenOdd(); pdf.setGState(gsFull);
+        continue;
+      }
       pdf.setDrawColor(...col); pdf.setFillColor(...col); pdf.setLineWidth(it.sw * k); pdf.setLineCap('round'); pdf.setLineJoin('round');
       g.wp.forEach((p, i) => {
-        if (i >= nPolys) { pdfPoly(p.pts, true, 'F'); return; }
-        if (p.closed && FILL_ALPHA[it.fill]) { pdf.setGState(new pdf.GState({ opacity: FILL_ALPHA[it.fill] })); pdfPoly(p.pts, true, 'F'); pdf.setGState(gsFull); }
+        if (i >= nPolys) { pdf.setFillColor(...col); pdfPoly(p.pts, true, 'F'); return; }
+        if (p.closed && FILL_ALPHA[it.fill]) { pdf.setFillColor(...fcol); pdf.setGState(new pdf.GState({ opacity: FILL_ALPHA[it.fill] })); pdfPoly(p.pts, true, 'F'); pdf.setGState(gsFull); pdf.setFillColor(...col); }
         if (it.noStroke) return;
         const ls = lineStyle(it);
         if (ls === 'dash') pdf.setLineDashPattern([it.sw * 3 * k, it.sw * 2.4 * k], 0);
