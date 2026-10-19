@@ -535,7 +535,7 @@ const PATTERNS = [['none', 'Nessuno'], ['lines', 'Righe'], ['grid', 'Quadretti']
 const PEN_SIZES = [1.2, 2, 3, 4.5, 6.5, 9.5];
 const HL_SIZES = [8, 12, 17, 24, 32, 44];
 const ER_SIZES = [6, 10, 16, 24, 36, 52];
-const APP_VERSION = '0.7.3';
+const APP_VERSION = '0.8.0';
 const ZMIN = 0.1, ZMAX = 6;
 const ER_DECAY_MS = 600; // tempo con cui la gomma ingrandita torna piccola
 const SORT_LABEL = { created: 'Data di creazione', modified: 'Data di modifica', name: 'Nome' };
@@ -555,7 +555,7 @@ function seedMeta() {
   const board = { id: uid(), folder: folders[0].id, name: '1A - prova BoardLab', created: now, modified: now, deleted: 0, bg: '#FFFFFF' };
   return {
     v: 1, collections: [c1, c2], folders, boards: [board], palette: DEFAULT_PALETTE.slice(),
-    settings: { dbl: true, scribble: true, xErase: true, erBoost: true, erMax: 3, sort: 'created', view: 'list' },
+    settings: { dbl: true, scribble: true, xErase: true, erBoost: true, erMax: 3, shapeRec: true, shapeHold: 'normal', sort: 'created', view: 'list' },
     ui: { folder: folders[0].id, drawer: true, zoomLock: false },
     tool: { tool: 'pen', prev: 'pen', pen: { k: 'marker', s: 3, c: '#000000' }, hl: { k: 'free', s: 2, c: '#FFD83B' }, er: { k: 'stroke', s: 2 }, text: { s: 2, c: '#000000', b: false, i: false }, laser: { c: '#F0163A', f: 1 }, shape: { k: 'rect', s: 2, fill: 'none', ls: 'solid', c: '#000000' }, table: { header: true } }
   };
@@ -739,7 +739,7 @@ function renderBody() {
     const tg = (k, t, d) => `<button class="trow" data-act="toggle-setting" data-k="${k}"><span><b>${t}</b><small>${d}</small></span><span class="tg ${meta.settings[k] ? 'on' : ''}"></span></button>`;
     const pages = {
       penna: `<div class="setp">${tg('dbl', 'Doppio clic sul pulsante della penna', 'Passa dalla penna o dall\'evidenziatore alla gomma, e viceversa.')}<p>Il clic singolo sul pulsante non ha nessun effetto.</p></div>`,
-      interazioni: `<div class="setp">${tg('scribble', 'Cancella con lo scarabocchio', 'Uno zig-zag veloce con la penna sopra una scritta la cancella.')}${tg('xErase', 'Cancella con una X', 'Una X disegnata con la penna sopra una scritta la cancella. Su uno spazio vuoto la X resta disegnata.')}${tg('erBoost', 'Gomma che si allarga con la velocità', 'Se strofini la gomma velocemente, la sua area si ingrandisce.')}${meta.settings.erBoost ? `<div class="trow col"><span><b>Ingrandimento massimo della gomma</b><small>Quanto può diventare grande la gomma quando la muovi velocemente.</small></span><div class="seg nums">${[2,3,4,5,6,7].map(n => `<button class="seg-b ${meta.settings.erMax === n ? 'on' : ''}" data-act="set-ermax" data-v="${n}">${n}×</button>`).join('')}</div></div>` : ''}</div>`,
+      interazioni: `<div class="setp">${tg('scribble', 'Cancella con lo scarabocchio', 'Uno zig-zag veloce con la penna sopra una scritta la cancella.')}${tg('xErase', 'Cancella con una X', 'Una X disegnata con la penna sopra una scritta la cancella. Su uno spazio vuoto la X resta disegnata.')}${tg('erBoost', 'Gomma che si allarga con la velocità', 'Se strofini la gomma velocemente, la sua area si ingrandisce.')}${meta.settings.erBoost ? `<div class="trow col"><span><b>Ingrandimento massimo della gomma</b><small>Quanto può diventare grande la gomma quando la muovi velocemente.</small></span><div class="seg nums">${[2,3,4,5,6,7].map(n => `<button class="seg-b ${meta.settings.erMax === n ? 'on' : ''}" data-act="set-ermax" data-v="${n}">${n}×</button>`).join('')}</div></div>` : ''}${tg('shapeRec', 'Riconoscimento delle forme', 'Disegna con la penna e tieni ferma la punta: il tratto diventa una forma precisa, con la sua inclinazione. Se non somiglia a una forma diventa una linea.')}${meta.settings.shapeRec ? `<div class="trow col"><span><b>Durata della pausa</b><small>Quanto a lungo tenere ferma la punta prima che il tratto diventi una forma.</small></span><div class="seg nums">${[['short', 'Breve'], ['normal', 'Normale'], ['long', 'Lunga']].map(([k, l]) => `<button class="seg-b ${meta.settings.shapeHold === k ? 'on' : ''}" data-act="set-hold" data-v="${k}">${l}</button>`).join('')}</div></div>` : ''}</div>`,
       cloud: `<div class="setp"><div class="card"><p>La sincronizzazione automatica con Google Drive, attivabile e disattivabile, arriverà nella seconda versione di BoardLab.</p></div></div>`,
       info: `<div class="setp"><div class="card"><p><b>BoardLab ${APP_VERSION}</b> · prima versione completa</p></div><p>Raccolte, cartelle colorate, cestino, foglio infinito, penna, evidenziatore, gomme, scarabocchio e X, tavolozza, zoom, doppio clic della penna, testo da tastiera, lazo, forme, connettori, tabelle, modelli e modelli personali, righello e goniometro, immagini e PDF da annotare, puntatore laser, ricerca nel testo, esportazione e file .boardlab.</p><p>In arrivo: sincronizzazione con Google Drive.</p></div>`
     };
@@ -752,6 +752,7 @@ function renderBody() {
       <dt>Torna al contenuto</dt><dd>Il mirino in basso a sinistra riporta al centro di quello che hai scritto.</dd>
       <dt>Opzioni di uno strumento</dt><dd>Tocca una volta per sceglierlo, una seconda volta per aprire tipo e spessore.</dd>
       <dt>Gomma veloce</dt><dd>Doppio clic sul pulsante della penna. Un altro doppio clic torna allo strumento di prima.</dd>
+      <dt>Riconoscimento delle forme</dt><dd>Disegna con la penna e, alla fine, tieni ferma la punta: il tratto diventa linea, freccia, cerchio, ellisse, rettangolo, quadrato, rombo, triangolo, poligono, arco o spezzata (anche un rettangolo a tre lati), con l'inclinazione con cui l'hai tracciato. Se non somiglia a una forma diventa una linea. Una V disegnata in fondo a una linea la trasforma in freccia. Un Annulla riporta il tratto a mano. Si attiva e si regola in Impostazioni → Interazioni.</dd>
       <dt>Gomma precisa</dt><dd>Cancella solo il pezzo su cui passa, anche su forme, linee, frecce ed evidenziatore dritto. Una forma cancellata in parte diventa tratti; il suo riempimento resta.</dd>
       <dt>Scarabocchio e X</dt><dd>Uno zig-zag veloce o una X sopra una scritta la cancellano.</dd>
       <dt>Colori</dt><dd>Tocca di nuovo il colore attivo, o tienilo premuto, per modificarlo o eliminarlo. Il + aggiunge un colore.</dd>
@@ -1217,6 +1218,8 @@ function shapeLocal(it) {
       pts.push(0, ah / 2 - k); q(0, ah / 2 - k, 0, ah / 2, aw / 2, ah / 2, pts);
       poly(pts, false); break;
     }
+    case 'poly': { const q = it.pts || [], pts = []; for (let i = 0; i + 1 < q.length; i += 2) pts.push(q[i] * w, q[i + 1] * h); poly(pts, !!it.closed); break; }
+    case 'arc': { const pts = [], n = 48; for (let i = 0; i <= n; i++) { const t = it.a0 + (it.a1 - it.a0) * i / n; pts.push(w / 2 * Math.cos(t), h / 2 * Math.sin(t)); } poly(pts, false); break; }
     default: {
       const L = Math.hypot(w, h) || 1, ux = w / L, uy = h / L, s = Math.max(12, it.sw * 3.6), wd = s * 0.55;
       const a = it.k === 'darrow' ? s * 0.7 : 0, b = it.k !== 'line' ? s * 0.7 : 0;
@@ -1249,7 +1252,7 @@ function nearShape(it, x, y, tol) {
 }
 function shapeHit(it, x, y, tol) {
   if (nearShape(it, x, y, tol)) return true;
-  if (LINE_KINDS.has(it.k) || it.k === 'brace') return false;
+  if (isOpenShape(it)) return false;
   const g = geom(it); return g.wp.some(p => p.closed && pointInPoly(x, y, p.pts));
 }
 function drawShape(c, it, g) {
@@ -1521,7 +1524,7 @@ function applyShapeStyle(o) {
   const shapes = selItemsList().filter(x => x.t === 'shape' || x.t === 'conn');
   if (!shapes.length) return;
   const before = ed.items.slice(), ids = new Set(shapes.map(x => x.id));
-  ed.items = ed.items.map(x => ids.has(x.id) ? { ...x, sw: SHAPE_SIZES[o.s], fill: LINE_KINDS.has(x.k) || x.k === 'brace' ? 'none' : o.fill, ls: o.ls || (o.dash ? 'dash' : 'solid'), dash: undefined } : x);
+  ed.items = ed.items.map(x => ids.has(x.id) ? { ...x, sw: SHAPE_SIZES[o.s], fill: isOpenShape(x) ? 'none' : o.fill, ls: o.ls || (o.dash ? 'dash' : 'solid'), dash: undefined } : x);
   pushHist(before); renderInk(); drawLive();
 }
 function shapePopover(anchor, styleOnly) {
@@ -1853,7 +1856,8 @@ function drawLive() {
   if (guides.ruler) drawRuler(c, guides.ruler);
   if (guides.prot) drawProt(c, guides.prot);
   if (find) drawFindHits(c);
-  if (drawing && drawing.kind === 'ink') {
+  if (drawing && drawing.kind === 'ink' && drawing.recog) drawRecog(c, drawing);
+  else if (drawing && drawing.kind === 'ink') {
     const pts = drawing.snap ? snapPts(drawing) : drawing.item.k === 'straight' ? straighten(drawing.pts) : drawing.pts;
     const it = { ...drawing.item, p: pts }, clipP = pageClipPath();
     if (clipP) { c.save(); c.clip(clipP); }
@@ -1910,7 +1914,7 @@ function findItem(id) {
   return null;
 }
 function withConnScope(items, fn) { const prev = connScope; connScope = new Map(items.map(i => [i.id, i])); try { return fn(); } finally { connScope = prev; } }
-const isConnTarget = it => (it.t === 'shape' && !LINE_KINDS.has(it.k)) || it.t === 'table' || it.t === 'image' || it.t === 'text';
+const isConnTarget = it => (it.t === 'shape' && !isOpenShape(it)) || it.t === 'table' || it.t === 'image' || it.t === 'text';
 function connTargetAt(w) {
   const tol = 6 / cam.z;
   for (let i = ed.items.length - 1; i >= 0; i--) { const it = ed.items[i]; if (isConnTarget(it) && hitItem(it, w, tol)) return it; }
@@ -2235,6 +2239,268 @@ function drawFindHits(c) {
     c.fillStyle = cur ? 'rgba(255,152,0,0.20)' : 'rgba(255,214,0,0.20)'; c.fill();
     c.lineWidth = (cur ? 2.5 : 1.2) / cam.z; c.strokeStyle = cur ? '#FB8C00' : 'rgba(220,170,0,0.85)'; c.stroke();
   });
+}
+
+/* ================= Riconoscimento delle forme ================= */
+/* Con la penna: disegni e tieni ferma la punta. Se il tratto somiglia a una forma diventa quella forma (con l'inclinazione
+   con cui l'hai tracciata), altrimenti una linea dal punto di partenza a quello di arrivo. Solo calcoli geometrici, nessuna rete. */
+const HOLD_MS = { short: 400, normal: 650, long: 1000 };
+const isOpenShape = it => LINE_KINDS.has(it.k) || it.k === 'brace' || it.k === 'arc' || (it.k === 'poly' && !it.closed);
+function holdArm(d) {
+  clearTimeout(d.holdT);
+  if (!meta.settings.shapeRec || d.kind !== 'ink' || d.item.t !== 'pen' || d.snap) return;
+  d.holdT = setTimeout(() => { if (drawing === d && !d.recog) { const r = recognizeStroke(d.pts, d.item); if (r) { d.recog = r; drawLive(); } } }, HOLD_MS[meta.settings.shapeHold] || 650);
+}
+function holdMove(d, s) {
+  const hs = d.holdS, dd = hs ? Math.hypot(s.x - hs.x, s.y - hs.y) : Infinity;
+  if (d.recog) { if (dd > 10) { d.recog = null; d.holdS = s; holdArm(d); } }
+  else if (dd > 4) { d.holdS = s; holdArm(d); }
+}
+/* --- geometria di supporto --- */
+const pDist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+const angNorm = a => { while (a <= -Math.PI) a += 2 * Math.PI; while (a > Math.PI) a -= 2 * Math.PI; return a; };
+/* Inclinazione ridotta tra -45° e 45°: se il lato di riferimento finisce in verticale, larghezza e altezza si scambiano */
+function frame(th, w, h) { const q = quarterNorm(th), k = Math.round(angNorm(th - q) / (Math.PI / 2)); return Math.abs(k) % 2 ? { r: q, w: h, h: w } : { r: q, w, h }; }
+const quarterNorm = a => { a = angNorm(a); while (a > Math.PI / 4) a -= Math.PI / 2; while (a <= -Math.PI / 4) a += Math.PI / 2; return a; };
+function pathLen(P) { let L = 0; for (let i = 1; i < P.length; i++) L += pDist(P[i - 1], P[i]); return L; }
+function resample(P, n) {
+  const L = pathLen(P); if (L <= 0) return P.slice();
+  const step = L / (n - 1), out = [P[0]]; let acc = 0;
+  for (let i = 1; i < P.length; i++) {
+    let a = P[i - 1]; const b = P[i]; let d = pDist(a, b);
+    while (acc + d >= step && d > 0) { const t = (step - acc) / d; a = { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t }; out.push(a); d = pDist(a, b); acc = 0; }
+    acc += d;
+  }
+  if (out.length < n) out.push(P[P.length - 1]);
+  return out;
+}
+function rdp(P, eps) {
+  const keep = new Uint8Array(P.length); keep[0] = keep[P.length - 1] = 1;
+  const st = [[0, P.length - 1]];
+  while (st.length) {
+    const [i, j] = st.pop(); let md = -1, mi = -1;
+    for (let k = i + 1; k < j; k++) { const d = segDist(P[k].x, P[k].y, P[i].x, P[i].y, P[j].x, P[j].y); if (d > md) { md = d; mi = k; } }
+    if (md > eps) { keep[mi] = 1; st.push([i, mi], [mi, j]); }
+  }
+  const out = []; for (let k = 0; k < P.length; k++) if (keep[k]) out.push(P[k]);
+  return out;
+}
+const turnAt = (a, b, c) => Math.abs(angNorm(Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(b.y - a.y, b.x - a.x)));
+/* Toglie i vertici dove il tratto quasi non gira e quelli che chiudono segmenti cortissimi */
+function simplifyVerts(V, closed, minTurn, minLen) {
+  V = V.slice(); let changed = true;
+  while (changed && V.length > (closed ? 3 : 2)) {
+    changed = false;
+    const n = V.length;
+    for (let i = closed ? 0 : 1; i < (closed ? n : n - 1); i++) {
+      const a = V[(i - 1 + n) % n], b = V[i], c = V[(i + 1) % n];
+      if (turnAt(a, b, c) < minTurn || pDist(a, b) < minLen || pDist(b, c) < minLen) { V.splice(i, 1); changed = true; break; }
+    }
+  }
+  return V;
+}
+/* Raddrizza: i lati quasi perpendicolari o paralleli al lato più lungo diventano esattamente tali; i vertici sono le intersezioni dei lati */
+function squareVerts(V, closed) {
+  const n = V.length, m = closed ? n : n - 1, segs = [];
+  for (let i = 0; i < m; i++) { const a = V[i], b = V[(i + 1) % n]; segs.push({ ang: Math.atan2(b.y - a.y, b.x - a.x), len: pDist(a, b), mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 }); }
+  let base = segs[0]; for (const s of segs) if (s.len > base.len) base = s;
+  const B = base.ang; let allSnapped = true;
+  for (const s of segs) {
+    const rel = angNorm(s.ang - B), q = Math.round(rel / (Math.PI / 2)) * (Math.PI / 2);
+    if (Math.abs(angNorm(rel - q)) < 14 * Math.PI / 180) s.ang = B + q; else allSnapped = false;
+    s.dx = Math.cos(s.ang); s.dy = Math.sin(s.ang);
+  }
+  const inter = (s1, s2, fb) => {
+    const den = s1.dx * s2.dy - s1.dy * s2.dx; if (Math.abs(den) < 1e-6) return { x: fb.x, y: fb.y };
+    const t = ((s2.mx - s1.mx) * s2.dy - (s2.my - s1.my) * s2.dx) / den; return { x: s1.mx + s1.dx * t, y: s1.my + s1.dy * t };
+  };
+  const proj = (p, s) => { const t = (p.x - s.mx) * s.dx + (p.y - s.my) * s.dy; return { x: s.mx + s.dx * t, y: s.my + s.dy * t }; };
+  const out = [];
+  if (closed) for (let i = 0; i < m; i++) out.push(inter(segs[(i - 1 + m) % m], segs[i], V[i]));
+  else { out.push(proj(V[0], segs[0])); for (let i = 1; i < m; i++) out.push(inter(segs[i - 1], segs[i], V[i])); out.push(proj(V[n - 1], segs[m - 1])); }
+  return { pts: out, base: B, allSnapped };
+}
+/* --- costruzione degli elementi (colore e spessore della penna) --- */
+const recShape = (k, x, y, w, h, r, pen, o = {}) => ({ id: uid(), t: 'shape', k, x, y, w, h, r, c: pen.c, sw: pen.w, fill: 'none', ls: 'solid', ...o });
+function recLine(k, p, q, pen) {
+  const A = connTargetAt(p), B = connTargetAt(q);
+  if ((A || B) && A !== B) return { id: uid(), t: 'conn', k, a: A ? { id: A.id, x: p.x, y: p.y } : { x: p.x, y: p.y }, b: B ? { id: B.id, x: q.x, y: q.y } : { x: q.x, y: q.y }, c: pen.c, sw: pen.w, ls: 'solid' };
+  return recShape(k, (p.x + q.x) / 2, (p.y + q.y) / 2, q.x - p.x, q.y - p.y, 0, pen);
+}
+function recPoly(vs, closed, ang, pen) {
+  const th = quarterNorm(ang), cs = Math.cos(-th), sn = Math.sin(-th);
+  const L = vs.map(p => ({ x: p.x * cs - p.y * sn, y: p.x * sn + p.y * cs }));
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for (const p of L) { x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); }
+  const w = Math.max(1, x1 - x0), h = Math.max(1, y1 - y0), lcx = (x0 + x1) / 2, lcy = (y0 + y1) / 2;
+  const c2 = Math.cos(th), s2 = Math.sin(th), cx = lcx * c2 - lcy * s2, cy = lcx * s2 + lcy * c2;
+  const pts = []; for (const p of L) pts.push(+((p.x - lcx) / w).toFixed(5), +((p.y - lcy) / h).toFixed(5));
+  return recShape('poly', cx, cy, w, h, th, pen, { pts, closed: !!closed });
+}
+/* Rettangolo, quadrato o rombo da quattro vertici (se lo sono), altrimenti null */
+function recQuad(Q, sq, pen) {
+  if (sq.allSnapped) {
+    const P = sq.pts, a = pDist(P[0], P[1]), b = pDist(P[1], P[2]), c = pDist(P[2], P[3]), d = pDist(P[3], P[0]);
+    const f = frame(Math.atan2(P[1].y - P[0].y, P[1].x - P[0].x), (a + c) / 2, (b + d) / 2);
+    const cx = (P[0].x + P[1].x + P[2].x + P[3].x) / 4, cy = (P[0].y + P[1].y + P[2].y + P[3].y) / 4;
+    if (Math.abs(f.w - f.h) < 0.08 * Math.max(f.w, f.h)) { const s = (f.w + f.h) / 2; return recShape('square', cx, cy, s, s, f.r, pen); }
+    return recShape('rect', cx, cy, f.w, f.h, f.r, pen);
+  }
+  const d1x = Q[2].x - Q[0].x, d1y = Q[2].y - Q[0].y, d2x = Q[3].x - Q[1].x, d2y = Q[3].y - Q[1].y;
+  const L1 = Math.hypot(d1x, d1y), L2 = Math.hypot(d2x, d2y), cosA = Math.abs(d1x * d2x + d1y * d2y) / (L1 * L2 || 1);
+  const m1 = { x: (Q[0].x + Q[2].x) / 2, y: (Q[0].y + Q[2].y) / 2 }, m2 = { x: (Q[1].x + Q[3].x) / 2, y: (Q[1].y + Q[3].y) / 2 };
+  if (cosA < Math.sin(15 * Math.PI / 180) && pDist(m1, m2) < 0.15 * Math.max(L1, L2)) {
+    const f = frame(Math.atan2(d1y, d1x), L1, L2);
+    return recShape('diamond', (m1.x + m2.x) / 2, (m1.y + m2.y) / 2, f.w, f.h, f.r, pen);
+  }
+  return null;
+}
+function fitEllipse(R) {
+  const n = R.length; let mx = 0, my = 0; for (const p of R) { mx += p.x; my += p.y; } mx /= n; my /= n;
+  let sxx = 0, syy = 0, sxy = 0; for (const p of R) { const dx = p.x - mx, dy = p.y - my; sxx += dx * dx; syy += dy * dy; sxy += dx * dy; }
+  const th = 0.5 * Math.atan2(2 * sxy, sxx - syy), cs = Math.cos(th), sn = Math.sin(th);
+  let u0 = Infinity, u1 = -Infinity, v0 = Infinity, v1 = -Infinity;
+  const UV = R.map(p => { const dx = p.x - mx, dy = p.y - my, u = dx * cs + dy * sn, v = -dx * sn + dy * cs; u0 = Math.min(u0, u); u1 = Math.max(u1, u); v0 = Math.min(v0, v); v1 = Math.max(v1, v); return [u, v]; });
+  const a = (u1 - u0) / 2, b = (v1 - v0) / 2, cu = (u0 + u1) / 2, cv = (v0 + v1) / 2; if (a < 1 || b < 1) return null;
+  let err = 0; for (const [u, v] of UV) err += Math.abs(Math.hypot((u - cu) / a, (v - cv) / b) - 1); err /= n;
+  return { cx: mx + cu * cs - cv * sn, cy: my + cu * sn + cv * cs, a, b, th, err };
+}
+function fitCircle(R) { // metodo di Kåsa
+  let sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0, sxz = 0, syz = 0, sz = 0; const n = R.length;
+  for (const p of R) { const z = p.x * p.x + p.y * p.y; sx += p.x; sy += p.y; sxx += p.x * p.x; syy += p.y * p.y; sxy += p.x * p.y; sxz += p.x * z; syz += p.y * z; sz += z; }
+  const M = [[sxx, sxy, sx], [sxy, syy, sy], [sx, sy, n]], rhs = [-sxz, -syz, -sz];
+  const det = m => m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) + m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+  const D = det(M); if (Math.abs(D) < 1e-9) return null;
+  const col = (k) => det(M.map((row, i) => row.map((v, j) => j === k ? rhs[i] : v)));
+  const A = col(0) / D, B = col(1) / D, C = col(2) / D, cx = -A / 2, cy = -B / 2, r2 = cx * cx + cy * cy - C; if (r2 <= 0) return null;
+  const r = Math.sqrt(r2); let err = 0; for (const p of R) err += Math.abs(Math.hypot(p.x - cx, p.y - cy) - r); err /= n * r;
+  return { cx, cy, r, err };
+}
+/* Punta di freccia disegnata nello stesso tratto: segmenti corti che tornano indietro di 12°–75° vicino a un estremo del segmento principale */
+function arrowHeadAt(V, m, atEnd) {
+  const tail = V[m], tip = V[m + 1], len = pDist(tail, tip), o = atEnd ? tip : tail, other = atEnd ? tail : tip;
+  const back = { x: (other.x - o.x) / len, y: (other.y - o.y) / len };
+  const rest = atEnd ? V.slice(m + 2) : V.slice(0, m);
+  if (!rest.length) return false;
+  let barbs = 0;
+  for (const v of rest) {
+    const d = pDist(v, o); if (d < 0.15 * len) continue;
+    if (d > 0.5 * len) return false;
+    const ang = Math.acos(clamp(((v.x - o.x) * back.x + (v.y - o.y) * back.y) / d, -1, 1)) * 180 / Math.PI;
+    if (ang < 12 || ang > 75) return false;
+    barbs++;
+  }
+  return barbs > 0;
+}
+/* I lati di una spezzata o di un poligono devono essere davvero dritti (non una curva spezzettata) */
+function straightSides(R, V, closed) {
+  const n = V.length, m = closed ? n : n - 1;
+  for (const p of R) {
+    let best = Infinity, bl = 1;
+    for (let i = 0; i < m; i++) { const a = V[i], b = V[(i + 1) % n], d = segDist(p.x, p.y, a.x, a.y, b.x, b.y); if (d < best) { best = d; bl = pDist(a, b); } }
+    if (best > Math.max(3 / cam.z, 0.045 * bl)) return false;
+  }
+  return true;
+}
+/* Una "V" disegnata vicino all'estremo di una linea la trasforma in freccia (o in doppia freccia) */
+function vHeadUpgrade(V, pen) {
+  if (V.length !== 3) return null;
+  const apex = V[1], l1 = pDist(V[0], apex), l2 = pDist(V[2], apex); if (!l1 || !l2 || l1 / l2 > 2.5 || l2 / l1 > 2.5) return null;
+  const u1 = { x: (V[0].x - apex.x) / l1, y: (V[0].y - apex.y) / l1 }, u2 = { x: (V[2].x - apex.x) / l2, y: (V[2].y - apex.y) / l2 };
+  const open = Math.acos(clamp(u1.x * u2.x + u1.y * u2.y, -1, 1)) * 180 / Math.PI; if (open < 20 || open > 120) return null;
+  let bx = u1.x + u2.x, by = u1.y + u2.y; const bl = Math.hypot(bx, by) || 1; bx /= bl; by /= bl;
+  const tol = Math.max(18 / cam.z, 0.6 * Math.max(l1, l2));
+  let best = null;
+  for (const it of ed.items) {
+    if (!((it.t === 'shape' && LINE_KINDS.has(it.k)) || it.t === 'conn')) continue;
+    const [p, q] = lineEnds(it);
+    for (const [e, other, atB] of [[q, p, true], [p, q, false]]) {
+      const d = pDist(apex, e); if (d > tol) continue;
+      const L = pDist(e, other) || 1, dot = ((other.x - e.x) * bx + (other.y - e.y) * by) / L;
+      if (dot < Math.cos(45 * Math.PI / 180)) continue;
+      if (!best || d < best.d) best = { d, it, atB };
+    }
+  }
+  if (!best) return null;
+  const it = best.it, k0 = it.k, atB = best.atB;
+  const k = atB ? (k0 === 'line' ? 'arrow' : k0) : (k0 === 'line' ? 'arrow' : 'darrow');
+  const flip = !atB && k0 === 'line';
+  let ni;
+  if (it.t === 'conn') ni = flip ? { ...it, k, a: it.b, b: it.a } : { ...it, k };
+  else { const [p, q] = lineEnds(it), A = flip ? q : p, B = flip ? p : q; ni = { ...it, k, x: (A.x + B.x) / 2, y: (A.y + B.y) / 2, w: B.x - A.x, h: B.y - A.y, r: 0 }; }
+  return { upgrade: { old: it, item: ni } };
+}
+/* Il riconoscimento vero e proprio. Restituisce { items } oppure { upgrade } oppure null */
+function recognizeStroke(raw, pen) {
+  let P = []; for (let i = 0; i < raw.length; i += 3) P.push({ x: raw[i], y: raw[i + 1] });
+  if (P.length < 2) return null;
+  const last = P[P.length - 1]; while (P.length > 2 && pDist(P[P.length - 2], last) < 2.5 / cam.z) P.splice(P.length - 2, 1); // la punta ferma
+  if (pathLen(P) * cam.z < 55) return null; // troppo corto: è scrittura
+  const R = resample(P, 96), L = pathLen(R), S = R[0], E = R[R.length - 1];
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity; for (const p of R) { x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); }
+  const diag = Math.hypot(x1 - x0, y1 - y0) || 1;
+  const closed = pDist(S, E) < Math.max(0.2 * diag, 12 / cam.z) && L > 1.6 * diag;
+  if (closed) {
+    let far = 0, fd = -1; R.forEach((p, i) => { const d = pDist(p, S); if (d > fd) { fd = d; far = i; } });
+    const eps = Math.max(3 / cam.z, 0.06 * diag);
+    let V = rdp(R.slice(0, far + 1), eps).concat(rdp(R.slice(far), eps).slice(1));
+    V.pop(); // l'ultimo coincide (quasi) con il primo
+    V = simplifyVerts(V, true, 25 * Math.PI / 180, 0.06 * L);
+    const k = V.length;
+    if (k >= 5 || k < 3) {
+      const el = fitEllipse(R);
+      if (el && el.err < 0.07) {
+        if (el.a / el.b > 0.88 && el.a / el.b < 1.14) { const d = el.a + el.b; return { items: [recShape('circle', el.cx, el.cy, d, d, 0, pen)] }; }
+        const f = frame(el.th, 2 * el.a, 2 * el.b);
+        return { items: [recShape('ellipse', el.cx, el.cy, f.w, f.h, f.r, pen)] };
+      }
+      if (k < 3 || k > 8) return null; // chiusa ma non riconoscibile: resta il tratto
+    }
+    if (!straightSides(R, V, true)) return null;
+    const sq = squareVerts(V, true);
+    if (k === 4) { const q4 = recQuad(V, sq, pen); if (q4) return { items: [q4] }; }
+    return { items: [recPoly(sq.pts, true, sq.base, pen)] };
+  }
+  // aperta
+  const eps = Math.max(3 / cam.z, 0.05 * diag);
+  let V = simplifyVerts(rdp(R, eps), false, 20 * Math.PI / 180, 0.05 * L);
+  if (V.length === 2) return { items: [recLine('line', V[0], V[1], pen)] };
+  let maxTurn = 0; for (let i = 1; i < V.length - 1; i++) maxTurn = Math.max(maxTurn, turnAt(V[i - 1], V[i], V[i + 1]));
+  const ci = fitCircle(R);
+  if (ci && ci.err < 0.05 && maxTurn < 75 * Math.PI / 180) {
+    let sweep = 0, prev = Math.atan2(R[0].y - ci.cy, R[0].x - ci.cx); const a0 = prev;
+    for (let i = 1; i < R.length; i++) { const a = Math.atan2(R[i].y - ci.cy, R[i].x - ci.cx); sweep += angNorm(a - prev); prev = a; }
+    if (Math.abs(sweep) > 40 * Math.PI / 180 && Math.abs(sweep) < 330 * Math.PI / 180) return { items: [recShape('arc', ci.cx, ci.cy, 2 * ci.r, 2 * ci.r, 0, pen, { a0, a1: a0 + sweep })] };
+  }
+  if (maxTurn > 35 * Math.PI / 180) {
+    // freccia nello stesso tratto
+    let m = 0; for (let i = 1; i < V.length - 1; i++) if (pDist(V[i], V[i + 1]) > pDist(V[m], V[m + 1])) m = i;
+    if (pDist(V[m], V[m + 1]) >= 0.45 * L) {
+      const he = arrowHeadAt(V, m, true), hs = arrowHeadAt(V, m, false);
+      if (he || hs) return { items: [he && hs ? recLine('darrow', V[m], V[m + 1], pen) : he ? recLine('arrow', V[m], V[m + 1], pen) : recLine('arrow', V[m + 1], V[m], pen)] };
+    }
+    if (straightSides(R, V, false)) {
+      const up = vHeadUpgrade(V, pen); if (up) return up;
+      const sq = squareVerts(V, false);
+      return { items: [recPoly(sq.pts, false, sq.base, pen)] };
+    }
+  }
+  return { items: [recLine('line', S, E, pen)] }; // nessuna forma: una linea
+}
+/* Al rilascio: prima il tratto a mano, poi la forma, così un Annulla riporta il tratto com'era */
+function commitRecog(d) {
+  const hand = { ...d.item, p: finalizePts(d.pts, clamp(1.5 / cam.z, 0.25, 3)) };
+  let before = ed.items.slice(); ed.items.push(hand); pushHist(before);
+  before = ed.items.slice();
+  const r = d.recog, rest = ed.items.filter(x => x !== hand);
+  if (r.upgrade) ed.items = rest.map(x => x === r.upgrade.old ? r.upgrade.item : x);
+  else ed.items = rest.concat(r.items);
+  pushHist(before); lastPen = null; renderInk(); drawLive();
+}
+function drawRecog(c, d) {
+  const r = d.recog;
+  if (r.upgrade) { drawItem(c, r.upgrade.item, buildGeom(r.upgrade.item)); return; }
+  for (const it of r.items) drawItem(c, it, buildGeom(it));
 }
 
 /* ================= Righello e goniometro ================= */
@@ -2853,6 +3119,7 @@ stage.addEventListener('pointermove', e => {
     drawing.lastS = s; const w = toWorld(s);
     drawing.pts.push(w.x, w.y, pressure(ce));
   }
+  holdMove(drawing, sp(e));
   drawLive();
 });
 function pointerEnd(e) {
@@ -2922,6 +3189,7 @@ function beginTool(e) {
   if (T.tool === 'pen' || T.tool === 'hl') {
     const isHl = T.tool === 'hl', cfg = isHl ? T.hl : T.pen;
     drawing = { pid: e.pointerId, kind: 'ink', item: { id: uid(), t: isHl ? 'hl' : 'pen', k: cfg.k, c: cfg.c, w: (isHl ? HL_SIZES : PEN_SIZES)[cfg.s] }, pts: [w.x, w.y, pressure(e)], lastS: s, snap: (guides.ruler || guides.prot) ? guideSnap(w) : null };
+    drawing.holdS = s; holdArm(drawing);
     drawLive();
   } else if (T.tool === 'er') {
     drawing = { pid: e.pointerId, kind: 'er', before: ed.items.slice(), last: w, changed: false, f: 1, vs: 0, lastT: e.timeStamp, lastS: s };
@@ -2958,6 +3226,8 @@ function finishTool(e) {
     if (!it) { tapSelect(toWorld(sp(e))); return; }
     const before = ed.items.slice(); ed.items.push(it); pushHist(before); renderInk(); setSelection([it]); return;
   }
+  clearTimeout(d.holdT);
+  if (d.recog) { commitRecog(d); return; }
   let pts = d.pts;
   if (d.snap) {
     const sp2 = snapPts(d);
@@ -3025,7 +3295,7 @@ function shapeToInk(it) {
     const head = i >= nP;
     out.push({ id: uid(), t: 'pen', k: 'marker', c: sh.c, w: sh.sw, p: head ? Float32Array.from(pts) : densify(Float32Array.from(pts), 2), ...(head ? { fillPath: true } : ls !== 'solid' ? { ls } : {}) });
   });
-  if (it.t === 'shape' && !LINE_KINDS.has(it.k) && FILL_ALPHA[it.fill]) out.unshift({ ...it, noStroke: true });
+  if (it.t === 'shape' && !isOpenShape(it) && FILL_ALPHA[it.fill]) out.unshift({ ...it, noStroke: true });
   return out;
 }
 /* Gomma precisa su un tratto: restano i pezzi non toccati (null se il tratto non è toccato) */
@@ -3810,6 +4080,7 @@ const ACT = {
   },
   'set-page': t => { settingsPage = t.dataset.v; libMode = 'settings'; renderLibrary(); },
   'set-ermax': t => { meta.settings.erMax = +t.dataset.v; saveMeta(); renderBody(); },
+  'set-hold': t => { meta.settings.shapeHold = t.dataset.v; saveMeta(); renderBody(); },
   'toggle-setting': t => { const k = t.dataset.k; meta.settings[k] = !meta.settings[k]; saveMeta(); renderBody(); },
   'open-board': t => searching && searchQ.trim() ? openHit(t.dataset.id, 0) : openBoard(t.dataset.id),
   'open-hit': t => openHit(t.dataset.id, +t.dataset.n || 0),
