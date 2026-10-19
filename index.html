@@ -535,7 +535,7 @@ const PATTERNS = [['none', 'Nessuno'], ['lines', 'Righe'], ['grid', 'Quadretti']
 const PEN_SIZES = [1.2, 2, 3, 4.5, 6.5, 9.5];
 const HL_SIZES = [8, 12, 17, 24, 32, 44];
 const ER_SIZES = [6, 10, 16, 24, 36, 52];
-const APP_VERSION = '0.8.0';
+const APP_VERSION = '0.8.1';
 const ZMIN = 0.1, ZMAX = 6;
 const ER_DECAY_MS = 600; // tempo con cui la gomma ingrandita torna piccola
 const SORT_LABEL = { created: 'Data di creazione', modified: 'Data di modifica', name: 'Nome' };
@@ -2430,61 +2430,164 @@ function vHeadUpgrade(V, pen) {
   else { const [p, q] = lineEnds(it), A = flip ? q : p, B = flip ? p : q; ni = { ...it, k, x: (A.x + B.x) / 2, y: (A.y + B.y) / 2, w: B.x - A.x, h: B.y - A.y, r: 0 }; }
   return { upgrade: { old: it, item: ni } };
 }
+/* Lati dritti del tratto: tratti in cui la direzione resta costante. Gli angoli arrotondati, gli uncini all'inizio e alla fine
+   e le piccole sbavature restano fuori, così anche un quadrato disegnato in fretta viene riconosciuto. */
+function lineRuns(R, closed, L) {
+  // direzione locale su una finestra di circa il 4% del tratto (almeno 8 px), su punti leggermente lisciati
+  const n = R.length, sp = L / Math.max(1, n - 1), k = Math.max(3, Math.round(Math.max(0.04 * L, 8 / cam.z) / sp / 2)), th = [];
+  const Sm = R.map((p, i) => { let x = 0, y = 0, c = 0; for (let j = Math.max(0, i - 2); j <= Math.min(n - 1, i + 2); j++) { x += R[j].x; y += R[j].y; c++; } return { x: x / c, y: y / c }; });
+  for (let i = 0; i < n; i++) { const a = Sm[Math.max(0, i - k)], b = Sm[Math.min(n - 1, i + k)]; th.push(Math.atan2(b.y - a.y, b.x - a.x)); }
+  // ai bordi di ogni pezzo restano punti di passaggio (angolo, uncino): si tolgono quelli che deviano dalla direzione media
+  const trimRun = (a, b) => {
+    let cx = 0, cy = 0; for (let i = a; i <= b; i++) { cx += Math.cos(th[i]); cy += Math.sin(th[i]); }
+    const m = Math.atan2(cy, cx), lim = 12 * Math.PI / 180;
+    while (a < b && Math.abs(angNorm(th[a] - m)) > lim) a++;
+    while (b > a && Math.abs(angNorm(th[b] - m)) > lim) b--;
+    return [a, b];
+  };
+  const tol = 13 * Math.PI / 180, raw = [];
+  let s = 0, cx = Math.cos(th[0]), cy = Math.sin(th[0]);
+  for (let i = 1; i <= n; i++) {
+    if (i < n && Math.abs(angNorm(th[i] - Math.atan2(cy, cx))) < tol) { cx += Math.cos(th[i]); cy += Math.sin(th[i]); continue; }
+    if (i - 1 >= s) raw.push(trimRun(s, i - 1)); if (i < n) { s = i; cx = Math.cos(th[i]); cy = Math.sin(th[i]); }
+  }
+  const fit = (a, b) => { // retta dei punti a..b (componenti principali), orientata nel verso del tratto
+    const pts = R.slice(a, b + 1), m = pts.length; let mx = 0, my = 0; for (const p of pts) { mx += p.x; my += p.y; } mx /= m; my /= m;
+    let sxx = 0, syy = 0, sxy = 0; for (const p of pts) { const dx = p.x - mx, dy = p.y - my; sxx += dx * dx; syy += dy * dy; sxy += dx * dy; }
+    let ang = 0.5 * Math.atan2(2 * sxy, sxx - syy); let dx = Math.cos(ang), dy = Math.sin(ang);
+    if ((pts[m - 1].x - pts[0].x) * dx + (pts[m - 1].y - pts[0].y) * dy < 0) { ang = angNorm(ang + Math.PI); dx = -dx; dy = -dy; }
+    let t0 = Infinity, t1 = -Infinity, dev = 0;
+    for (const p of pts) { const t = (p.x - mx) * dx + (p.y - my) * dy, d = Math.abs(-(p.x - mx) * dy + (p.y - my) * dx); t0 = Math.min(t0, t); t1 = Math.max(t1, t); dev = Math.max(dev, d); }
+    let len = 0; for (let i = a + 1; i <= b; i++) len += pDist(R[i - 1], R[i]);
+    // curvatura: direzione della prima metà contro quella della seconda (su un arco differiscono, su un lato no)
+    const h = (a + b) >> 1, q1 = R[a], q2 = R[h], q3 = R[b];
+    const bend = b - a >= 6 ? Math.abs(angNorm(Math.atan2(q3.y - q2.y, q3.x - q2.x) - Math.atan2(q2.y - q1.y, q2.x - q1.x))) : 0;
+    return { a, b, ang, bend, dx, dy, mx, my, len, span: t1 - t0, dev, P0: { x: mx + dx * t0, y: my + dy * t0 }, P1: { x: mx + dx * t1, y: my + dy * t1 } };
+  };
+  const ok = f => f.len >= 0.08 * L && f.dev <= Math.max(2.5 / cam.z, 0.045 * f.span) && f.bend < 9 * Math.PI / 180;
+  // pezzi vicini quasi paralleli sono lo stesso lato spezzato da un tremolio: si uniscono prima di scartare i pezzi corti
+  let runs = raw.filter(([a, b]) => b - a >= 2).map(([a, b]) => fit(a, b));
+  for (let i = 1; i < runs.length; i++) {
+    if (Math.abs(angNorm(runs[i].ang - runs[i - 1].ang)) < 20 * Math.PI / 180 && runs[i].a - runs[i - 1].b <= 2 * k + 2) {
+      const f = fit(runs[i - 1].a, runs[i].b); if (f.dev <= Math.max(2.5 / cam.z, 0.045 * f.span) && f.bend < 9 * Math.PI / 180) { runs.splice(i - 1, 2, f); i--; }
+    }
+  }
+  runs = runs.filter(ok);
+  for (let i = 1; i < runs.length; i++) {
+    if (Math.abs(angNorm(runs[i].ang - runs[i - 1].ang)) < 20 * Math.PI / 180) { const f = fit(runs[i - 1].a, runs[i].b); if (ok(f)) { runs.splice(i - 1, 2, f); i--; } }
+  }
+  if (closed && runs.length > 2 && Math.abs(angNorm(runs[0].ang - runs[runs.length - 1].ang)) < 20 * Math.PI / 180) {
+    // il tratto è finito sul primo lato (o lo ha ripassato): primo e ultimo pezzo sono lo stesso lato
+    const A = runs.pop(), B = runs[0], w = A.len + B.len;
+    const mx = (A.mx * A.len + B.mx * B.len) / w, my = (A.my * A.len + B.my * B.len) / w, ang = Math.atan2(A.dy * A.len + B.dy * B.len, A.dx * A.len + B.dx * B.len);
+    runs[0] = { ...B, mx, my, ang, dx: Math.cos(ang), dy: Math.sin(ang), len: w, P0: A.P0 };
+  }
+  // un lato perso (troppo tremolante o spezzato): se il poligono non segue il tratto, si cerca il lato nel buco più grande
+  const outlineErr = rs => {
+    if (rs.length < 2) return Infinity;
+    const V = vertsFromRuns(rs, closed, false).pts, m = V.length; let e = 0;
+    for (const p of R) { let d = Infinity; for (let i = 0; i < (closed ? m : m - 1); i++) { const a = V[i], b = V[(i + 1) % m]; d = Math.min(d, segDist(p.x, p.y, a.x, a.y, b.x, b.y)); } e += d; }
+    return e / n;
+  };
+  if (runs.length >= 2 && runs.length < 8) {
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity; for (const p of R) { x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); }
+    const dg = Math.hypot(x1 - x0, y1 - y0) || 1;
+    if (outlineErr(runs) > 0.035 * dg) {
+      let gi = -1, gl = 0;
+      for (let i = 1; i < runs.length; i++) { const g = runs[i].a - runs[i - 1].b; if (g > gl) { gl = g; gi = i; } }
+      let a0 = gi > 0 ? runs[gi - 1].b : 0, b0 = gi > 0 ? runs[gi].a : 0, at = gi;
+      if (closed) { // il buco può stare a cavallo tra la fine e l'inizio del tratto: si usa il pezzo più lungo dei due
+        const head = runs[0].a, tail = n - 1 - runs[runs.length - 1].b;
+        if (head + tail > gl) { gl = head + tail; if (head >= tail) { a0 = 0; b0 = head; at = 0; } else { a0 = runs[runs.length - 1].b; b0 = n - 1; at = runs.length; } }
+      }
+      if (gl > 0.12 * n && b0 - a0 > 6) {
+        const a = Math.round(a0 + (b0 - a0) * 0.25), b = Math.round(a0 + (b0 - a0) * 0.75);
+        const f = fit(a, b);
+        if (f.dev <= Math.max(2.5 / cam.z, 0.06 * f.span) && f.bend < 12 * Math.PI / 180) {
+          const cand = runs.slice(0, at).concat([f], runs.slice(at));
+          if (outlineErr(cand) < outlineErr(runs) * 0.6) runs = cand;
+        }
+      }
+    }
+  }
+  const frac = runs.reduce((s, f) => s + f.len, 0) / L;
+  return { runs, frac };
+}
+/* Vertici da una serie di lati: intersezioni dei lati consecutivi (raddrizzati se quasi perpendicolari o paralleli al più lungo) */
+function vertsFromRuns(runs, closed, snap) {
+  const segs = runs.map(r => ({ ...r }));
+  let allSnapped = true, base = segs[0]; for (const s of segs) if (s.len > base.len) base = s;
+  const B = base.ang;
+  if (snap) for (const s of segs) {
+    const rel = angNorm(s.ang - B), q = Math.round(rel / (Math.PI / 2)) * (Math.PI / 2);
+    if (Math.abs(angNorm(rel - q)) < 15 * Math.PI / 180) { s.ang = B + q; s.dx = Math.cos(s.ang); s.dy = Math.sin(s.ang); } else allSnapped = false;
+  }
+  const inter = (s1, s2) => {
+    const den = s1.dx * s2.dy - s1.dy * s2.dx;
+    if (Math.abs(den) < 1e-6) return { x: (s1.P1.x + s2.P0.x) / 2, y: (s1.P1.y + s2.P0.y) / 2 };
+    const t = ((s2.mx - s1.mx) * s2.dy - (s2.my - s1.my) * s2.dx) / den; return { x: s1.mx + s1.dx * t, y: s1.my + s1.dy * t };
+  };
+  const proj = (p, s) => { const t = (p.x - s.mx) * s.dx + (p.y - s.my) * s.dy; return { x: s.mx + s.dx * t, y: s.my + s.dy * t }; };
+  const m = segs.length, out = [];
+  if (closed) for (let i = 0; i < m; i++) out.push(inter(segs[(i - 1 + m) % m], segs[i]));
+  else { out.push(proj(segs[0].P0, segs[0])); for (let i = 1; i < m; i++) out.push(inter(segs[i - 1], segs[i])); out.push(proj(segs[m - 1].P1, segs[m - 1])); }
+  return { pts: out, base: B, allSnapped };
+}
 /* Il riconoscimento vero e proprio. Restituisce { items } oppure { upgrade } oppure null */
 function recognizeStroke(raw, pen) {
   let P = []; for (let i = 0; i < raw.length; i += 3) P.push({ x: raw[i], y: raw[i + 1] });
   if (P.length < 2) return null;
   const last = P[P.length - 1]; while (P.length > 2 && pDist(P[P.length - 2], last) < 2.5 / cam.z) P.splice(P.length - 2, 1); // la punta ferma
   if (pathLen(P) * cam.z < 55) return null; // troppo corto: è scrittura
-  const R = resample(P, 96), L = pathLen(R), S = R[0], E = R[R.length - 1];
+  const L0 = pathLen(P), R = resample(P, Math.round(clamp(L0 / Math.max(1.5 / cam.z, L0 / 128), 24, 128))), L = pathLen(R), S = R[0], E = R[R.length - 1];
   let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity; for (const p of R) { x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); }
-  const diag = Math.hypot(x1 - x0, y1 - y0) || 1;
-  const closed = pDist(S, E) < Math.max(0.2 * diag, 12 / cam.z) && L > 1.6 * diag;
+  const diag = Math.hypot(x1 - x0, y1 - y0) || 1, n = R.length;
+  // chiusa: la fine torna vicino all'inizio, oppure lo ripassa
+  let near = pDist(S, E);
+  for (let i = Math.floor(n * 0.8); i < n; i++) near = Math.min(near, pDist(R[i], S));
+  for (let i = 0; i < Math.ceil(n * 0.2); i++) near = Math.min(near, pDist(R[i], E));
+  const closed = near < Math.max(0.2 * diag, 12 / cam.z) && L > 1.8 * diag;
+  const { runs, frac } = lineRuns(R, closed, L);
   if (closed) {
-    let far = 0, fd = -1; R.forEach((p, i) => { const d = pDist(p, S); if (d > fd) { fd = d; far = i; } });
-    const eps = Math.max(3 / cam.z, 0.06 * diag);
-    let V = rdp(R.slice(0, far + 1), eps).concat(rdp(R.slice(far), eps).slice(1));
-    V.pop(); // l'ultimo coincide (quasi) con il primo
-    V = simplifyVerts(V, true, 25 * Math.PI / 180, 0.06 * L);
-    const k = V.length;
-    if (k >= 5 || k < 3) {
-      const el = fitEllipse(R);
-      if (el && el.err < 0.07) {
-        if (el.a / el.b > 0.88 && el.a / el.b < 1.14) { const d = el.a + el.b; return { items: [recShape('circle', el.cx, el.cy, d, d, 0, pen)] }; }
-        const f = frame(el.th, 2 * el.a, 2 * el.b);
-        return { items: [recShape('ellipse', el.cx, el.cy, f.w, f.h, f.r, pen)] };
-      }
-      if (k < 3 || k > 8) return null; // chiusa ma non riconoscibile: resta il tratto
+    const k = runs.length, el = fitEllipse(R);
+    const ellipseItem = () => {
+      if (el.a / el.b > 0.85 && el.a / el.b < 1.18) { const d = el.a + el.b; return { items: [recShape('circle', el.cx, el.cy, d, d, 0, pen)] }; }
+      const f = frame(el.th, 2 * el.a, 2 * el.b);
+      return { items: [recShape('ellipse', el.cx, el.cy, f.w, f.h, f.r, pen)] };
+    };
+    if (el && el.err < 0.04 && frac < 0.7) return ellipseItem();
+    if (k >= 3 && k <= 8 && frac >= 0.5) {
+      const sq = vertsFromRuns(runs, true, true);
+      if (k === 4) { const q4 = recQuad(vertsFromRuns(runs, true, false).pts, sq, pen); if (q4) return { items: [q4] }; }
+      return { items: [recPoly(sq.pts, true, sq.base, pen)] };
     }
-    if (!straightSides(R, V, true)) return null;
-    const sq = squareVerts(V, true);
-    if (k === 4) { const q4 = recQuad(V, sq, pen); if (q4) return { items: [q4] }; }
-    return { items: [recPoly(sq.pts, true, sq.base, pen)] };
+    if (el && el.err < 0.1) return ellipseItem();
+    if (k >= 3 && k <= 8 && frac >= 0.35) { const sq = vertsFromRuns(runs, true, true); return { items: [recPoly(sq.pts, true, sq.base, pen)] }; }
+    return null; // chiusa ma non riconoscibile: resta il tratto
   }
-  // aperta
+  // aperta: prima la freccia disegnata in un solo tratto
   const eps = Math.max(3 / cam.z, 0.05 * diag);
-  let V = simplifyVerts(rdp(R, eps), false, 20 * Math.PI / 180, 0.05 * L);
-  if (V.length === 2) return { items: [recLine('line', V[0], V[1], pen)] };
-  let maxTurn = 0; for (let i = 1; i < V.length - 1; i++) maxTurn = Math.max(maxTurn, turnAt(V[i - 1], V[i], V[i + 1]));
-  const ci = fitCircle(R);
-  if (ci && ci.err < 0.05 && maxTurn < 75 * Math.PI / 180) {
-    let sweep = 0, prev = Math.atan2(R[0].y - ci.cy, R[0].x - ci.cx); const a0 = prev;
-    for (let i = 1; i < R.length; i++) { const a = Math.atan2(R[i].y - ci.cy, R[i].x - ci.cx); sweep += angNorm(a - prev); prev = a; }
-    if (Math.abs(sweep) > 40 * Math.PI / 180 && Math.abs(sweep) < 330 * Math.PI / 180) return { items: [recShape('arc', ci.cx, ci.cy, 2 * ci.r, 2 * ci.r, 0, pen, { a0, a1: a0 + sweep })] };
-  }
-  if (maxTurn > 35 * Math.PI / 180) {
-    // freccia nello stesso tratto
+  const V = simplifyVerts(rdp(R, eps), false, 20 * Math.PI / 180, 0.05 * L);
+  if (V.length >= 3) {
     let m = 0; for (let i = 1; i < V.length - 1; i++) if (pDist(V[i], V[i + 1]) > pDist(V[m], V[m + 1])) m = i;
     if (pDist(V[m], V[m + 1]) >= 0.45 * L) {
       const he = arrowHeadAt(V, m, true), hs = arrowHeadAt(V, m, false);
       if (he || hs) return { items: [he && hs ? recLine('darrow', V[m], V[m + 1], pen) : he ? recLine('arrow', V[m], V[m + 1], pen) : recLine('arrow', V[m + 1], V[m], pen)] };
     }
-    if (straightSides(R, V, false)) {
-      const up = vHeadUpgrade(V, pen); if (up) return up;
-      const sq = squareVerts(V, false);
-      return { items: [recPoly(sq.pts, false, sq.base, pen)] };
-    }
   }
+  if (runs.length === 1 && frac >= 0.6) { const r0 = runs[0]; return { items: [recLine('line', r0.P0, r0.P1, pen)] }; }
+  if (runs.length >= 2 && runs.length <= 8 && frac >= 0.68) {
+    const sq = vertsFromRuns(runs, false, true);
+    if (sq.pts.length === 3) { const up = vHeadUpgrade(vertsFromRuns(runs, false, false).pts, pen); if (up) return up; }
+    return { items: [recPoly(sq.pts, false, sq.base, pen)] };
+  }
+  const ci = fitCircle(R);
+  if (ci && ci.err < 0.06) {
+    let sweep = 0, prev = Math.atan2(R[0].y - ci.cy, R[0].x - ci.cx); const a0 = prev;
+    for (let i = 1; i < R.length; i++) { const a = Math.atan2(R[i].y - ci.cy, R[i].x - ci.cx); sweep += angNorm(a - prev); prev = a; }
+    if (Math.abs(sweep) > 40 * Math.PI / 180 && Math.abs(sweep) < 330 * Math.PI / 180) return { items: [recShape('arc', ci.cx, ci.cy, 2 * ci.r, 2 * ci.r, 0, pen, { a0, a1: a0 + sweep })] };
+  }
+  if (runs.length === 1) { const r0 = runs[0]; return { items: [recLine('line', r0.P0, r0.P1, pen)] }; }
   return { items: [recLine('line', S, E, pen)] }; // nessuna forma: una linea
 }
 /* Al rilascio: prima il tratto a mano, poi la forma, così un Annulla riporta il tratto com'era */
