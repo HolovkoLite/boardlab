@@ -535,7 +535,7 @@ const PATTERNS = [['none', 'Nessuno'], ['lines', 'Righe'], ['grid', 'Quadretti']
 const PEN_SIZES = [1.2, 2, 3, 4.5, 6.5, 9.5];
 const HL_SIZES = [8, 12, 17, 24, 32, 44];
 const ER_SIZES = [6, 10, 16, 24, 36, 52];
-const APP_VERSION = '0.7.2';
+const APP_VERSION = '0.7.3';
 const ZMIN = 0.1, ZMAX = 6;
 const ER_DECAY_MS = 600; // tempo con cui la gomma ingrandita torna piccola
 const SORT_LABEL = { created: 'Data di creazione', modified: 'Data di modifica', name: 'Nome' };
@@ -752,6 +752,7 @@ function renderBody() {
       <dt>Torna al contenuto</dt><dd>Il mirino in basso a sinistra riporta al centro di quello che hai scritto.</dd>
       <dt>Opzioni di uno strumento</dt><dd>Tocca una volta per sceglierlo, una seconda volta per aprire tipo e spessore.</dd>
       <dt>Gomma veloce</dt><dd>Doppio clic sul pulsante della penna. Un altro doppio clic torna allo strumento di prima.</dd>
+      <dt>Gomma precisa</dt><dd>Cancella solo il pezzo su cui passa, anche su forme, linee, frecce ed evidenziatore dritto. Una forma cancellata in parte diventa tratti; il suo riempimento resta.</dd>
       <dt>Scarabocchio e X</dt><dd>Uno zig-zag veloce o una X sopra una scritta la cancellano.</dd>
       <dt>Colori</dt><dd>Tocca di nuovo il colore attivo, o tienilo premuto, per modificarlo o eliminarlo. Il + aggiunge un colore.</dd>
       <dt>Testo</dt><dd>Con lo strumento tastiera tocca un punto e scrivi. Tocca un testo esistente per modificarlo. Il secondo tocco sullo strumento apre dimensione, grassetto e corsivo.</dd>
@@ -1086,10 +1087,12 @@ function drawItem(c, it, g) {
   if (g.type === 'stroke') {
     c.lineJoin = 'round'; c.lineCap = it.t === 'hl' ? 'butt' : 'round'; c.lineWidth = it.w; c.strokeStyle = it.c;
     if (it.t === 'hl') c.globalAlpha = 0.38;
-    c.stroke(g.path); c.globalAlpha = 1;
+    if (it.ls && it.ls !== 'solid') setDash(c, it.ls, it.w);
+    if (it.fillPath) { c.fillStyle = it.c; c.fill(g.path); }
+    c.stroke(g.path); c.setLineDash([]); c.globalAlpha = 1;
   } else { c.fillStyle = it.c; c.fill(g.path, 'nonzero'); c.fill(g.caps); }
 }
-function drawItems(c, items) { for (const L of [0, 1, 2]) for (const it of items) if (layerOf(it) === L) drawItem(c, it); }
+function drawItems(c, items) { for (const L of [0, 1, 2, 3]) for (const it of items) if (layerOf(it) === L) drawItem(c, it); }
 function straighten(pts) {
   const n = pts.length / 3; if (n < 2) return pts;
   const x0 = pts[0], y0 = pts[1]; let x1 = pts[3 * n - 3], y1 = pts[3 * n - 2];
@@ -1258,6 +1261,7 @@ function drawShape(c, it, g) {
     for (let i = 2; i < p.pts.length; i += 2) path.lineTo(p.pts[i], p.pts[i + 1]);
     if (p.closed) path.closePath();
     if (p.closed && FILL_ALPHA[it.fill]) { c.globalAlpha = FILL_ALPHA[it.fill]; c.fill(path); c.globalAlpha = 1; }
+    if (it.noStroke) continue;
     setDash(c, lineStyle(it), it.sw);
     c.stroke(path); c.setLineDash([]);
   }
@@ -1583,7 +1587,8 @@ function drawImageItem(c, it) {
   else if (it.t === 'image') { c.fillStyle = '#E4E8EC'; c.fillRect(-it.w / 2, -it.h / 2, it.w, it.h); }
   c.restore();
 }
-const layerOf = it => it.t === 'page' ? 0 : it.t === 'hl' ? 1 : 2;
+/* Livelli: pagine PDF, immagini, evidenziatore (sopra le immagini, sotto la scrittura), tutto il resto */
+const layerOf = it => it.t === 'page' ? 0 : it.t === 'image' ? 1 : it.t === 'hl' ? 2 : 3;
 function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.append(s); }); }
 
 /* Inserimento di un'immagine dalla galleria o dalla fotocamera */
@@ -1826,7 +1831,7 @@ function renderInk() {
   c.setTransform(DPR * cam.z, 0, 0, DPR * cam.z, DPR * cam.ox, DPR * cam.oy);
   const vx0 = -cam.ox / cam.z, vy0 = -cam.oy / cam.z, vx1 = vx0 + SW / cam.z, vy1 = vy0 + SH / cam.z;
   const hide = ed.hide, seen = new Set(), pv = ed.preview;
-  for (const L of [0, 1, 2]) for (const it0 of ed.items) {
+  for (const L of [0, 1, 2, 3]) for (const it0 of ed.items) {
     const it = pv && pv.id === it0.id ? pv.item : it0;
     if (layerOf(it) !== L) continue;
     if (hide && hide.has(it.id)) continue;
@@ -2990,6 +2995,59 @@ function erFactor() {
   if (!meta.settings.erBoost || !drawing || drawing.kind !== 'er') return 1;
   return 1 + (drawing.f - 1) * Math.exp(-Math.max(0, performance.now() - drawing.lastT) / ER_DECAY_MS);
 }
+/* Punti in più lungo i tratti con segmenti lunghi (linee dritte, righello, forme), così la gomma precisa può tagliarli ovunque */
+function densify(p, step) {
+  const n = p.length / 3; if (n < 2) return p;
+  let need = false; for (let i = 1; i < n && !need; i++) if (Math.hypot(p[3 * i] - p[3 * i - 3], p[3 * i + 1] - p[3 * i - 2]) > step) need = true;
+  if (!need) return p;
+  const out = [p[0], p[1], p[2]];
+  for (let i = 1; i < n; i++) {
+    const x0 = p[3 * i - 3], y0 = p[3 * i - 2], q0 = p[3 * i - 1], x1 = p[3 * i], y1 = p[3 * i + 1], q1 = p[3 * i + 2];
+    const k = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0) / step));
+    for (let j = 1; j <= k; j++) { const t = j / k; out.push(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, q0 + (q1 - q0) * t); }
+  }
+  return Float32Array.from(out);
+}
+/* Distanza tra due segmenti */
+function segSegDist(ax, ay, bx, by, cx, cy, dx, dy) {
+  const d1x = bx - ax, d1y = by - ay, d2x = dx - cx, d2y = dy - cy, den = d1x * d2y - d1y * d2x;
+  if (Math.abs(den) > 1e-12) { const t = ((cx - ax) * d2y - (cy - ay) * d2x) / den, u = ((cx - ax) * d1y - (cy - ay) * d1x) / den; if (t >= 0 && t <= 1 && u >= 0 && u <= 1) return 0; }
+  return Math.min(segDist(ax, ay, cx, cy, dx, dy), segDist(bx, by, cx, cy, dx, dy), segDist(cx, cy, ax, ay, bx, by), segDist(dx, dy, ax, ay, bx, by));
+}
+/* Una forma, una linea o una freccia diventa tratti (stesso colore, spessore e tipo di linea) per poterla cancellare in parte.
+   Se è riempita, il riempimento resta come forma senza contorno. */
+function shapeToInk(it) {
+  const sh = it.t === 'conn' ? connAsShape(it) : it, g = geom(it), out = [], nP = g.S.polys.length, ls = lineStyle(sh);
+  g.wp.forEach((poly, i) => {
+    const q = poly.pts, pts = [];
+    for (let j = 0; j < q.length; j += 2) pts.push(q[j], q[j + 1], 0.5);
+    if (poly.closed) pts.push(q[0], q[1], 0.5);
+    const head = i >= nP;
+    out.push({ id: uid(), t: 'pen', k: 'marker', c: sh.c, w: sh.sw, p: head ? Float32Array.from(pts) : densify(Float32Array.from(pts), 2), ...(head ? { fillPath: true } : ls !== 'solid' ? { ls } : {}) });
+  });
+  if (it.t === 'shape' && !LINE_KINDS.has(it.k) && FILL_ALPHA[it.fill]) out.unshift({ ...it, noStroke: true });
+  return out;
+}
+/* Gomma precisa su un tratto: restano i pezzi non toccati (null se il tratto non è toccato) */
+function eraseStrokePart(it, a, b, r) {
+  const tol = r + it.w * 0.3, p0 = it.p;
+  let hit = false;
+  for (let i = 0; i < p0.length / 3 && !hit; i++) {
+    const x = p0[3 * i], y = p0[3 * i + 1];
+    if (segDist(x, y, a.x, a.y, b.x, b.y) <= tol) hit = true;
+    else if (i && segSegDist(p0[3 * i - 3], p0[3 * i - 2], x, y, a.x, a.y, b.x, b.y) <= tol) hit = true;
+  }
+  if (!hit) return null;
+  if (it.fillPath) return []; // punta di una freccia: si toglie tutta
+  const p = densify(p0, Math.max(0.5, Math.min(2, r * 0.5))), n = p.length / 3, keep = new Uint8Array(n), out = [];
+  for (let i = 0; i < n; i++) keep[i] = segDist(p[3 * i], p[3 * i + 1], a.x, a.y, b.x, b.y) > tol ? 1 : 0;
+  let start = -1;
+  for (let i = 0; i <= n; i++) {
+    if (i < n && keep[i]) { if (start < 0) start = i; }
+    else if (start >= 0) { if (i - start >= 2) out.push({ ...it, id: uid(), p: p.slice(start * 3, i * 3) }); start = -1; }
+  }
+  return out;
+}
 function eraseAt(a, b) {
   const T = meta.tool.er, r = ER_SIZES[T.s] / 2 * erFactor() / cam.z, precise = T.k === 'precise';
   const mnx = Math.min(a.x, b.x) - r, mxx = Math.max(a.x, b.x) + r, mny = Math.min(a.y, b.y) - r, mxy = Math.max(a.y, b.y) + r;
@@ -3003,7 +3061,16 @@ function eraseAt(a, b) {
       if (nt) { changed = true; res.push(nt); } else res.push(it);
       continue;
     }
-    if (it.t === 'shape' || it.t === 'conn') { if (segSamples(a, b, Math.max(2, r / 2)).some(q => nearShape(it, q.x, q.y, r))) changed = true; else res.push(it); continue; }
+    if (it.t === 'shape' || it.t === 'conn') {
+      if (it.noStroke) { // riempimento rimasto da una forma cancellata in parte: la gomma a tratto lo toglie toccandolo
+        if (!precise && segSamples(a, b, Math.max(2, r / 2)).some(q => shapeHit(it, q.x, q.y, r))) changed = true; else res.push(it);
+        continue;
+      }
+      if (!segSamples(a, b, Math.max(2, r / 2)).some(q => nearShape(it, q.x, q.y, r))) { res.push(it); continue; }
+      changed = true;
+      if (precise) for (const x of shapeToInk(it)) { if (x.t === 'shape') { res.push(x); continue; } const parts = eraseStrokePart(x, a, b, r); if (parts) res.push(...parts); else res.push(x); }
+      continue;
+    }
     if (it.t === 'text') {
       const parts = textSegHit(it, a, b, r) ? eraseTextLetters(it, segSamples(a, b, Math.max(2, r / 2)), r) : null;
       if (parts) { changed = true; res.push(...parts); } else res.push(it);
@@ -3012,19 +3079,15 @@ function eraseAt(a, b) {
     const p = it.p, n = p.length / 3;
     if (!precise) {
       const tol = r + it.w / 2; let hit = false;
-      for (let i = 0; i < n; i++) if (segDist(p[3 * i], p[3 * i + 1], a.x, a.y, b.x, b.y) <= tol) { hit = true; break; }
+      for (let i = 0; i < n && !hit; i++) {
+        if (segDist(p[3 * i], p[3 * i + 1], a.x, a.y, b.x, b.y) <= tol) hit = true;
+        else if (i && segSegDist(p[3 * i - 3], p[3 * i - 2], p[3 * i], p[3 * i + 1], a.x, a.y, b.x, b.y) <= tol) hit = true;
+      }
       if (hit) changed = true; else res.push(it);
       continue;
     }
-    const tol = r + it.w * 0.3, keep = new Uint8Array(n); let any = false;
-    for (let i = 0; i < n; i++) { const k = segDist(p[3 * i], p[3 * i + 1], a.x, a.y, b.x, b.y) > tol; keep[i] = k ? 1 : 0; if (!k) any = true; }
-    if (!any) { res.push(it); continue; }
-    changed = true;
-    let start = -1;
-    for (let i = 0; i <= n; i++) {
-      if (i < n && keep[i]) { if (start < 0) start = i; }
-      else if (start >= 0) { if (i - start >= 2) res.push({ ...it, id: uid(), p: p.slice(start * 3, i * 3) }); start = -1; }
-    }
+    const parts = eraseStrokePart(it, a, b, r);
+    if (parts) { changed = true; res.push(...parts); } else res.push(it);
   }
   if (changed) { ed.items = res; drawing.changed = true; }
 }
@@ -3577,7 +3640,7 @@ function pdfDrawItems(pdf, items, X, Y, k, imgs) {
   const rel = (q, step, x0, y0) => { const segs = []; for (let i = step; i < q.length; i += step) segs.push([(q[i] - q[i - step]) * k, (q[i + 1] - q[i - step + 1]) * k]); return segs; };
   const pdfPoly = (pts, closed, style) => { pdf.lines(rel(pts.map((v, i) => v), 2), X(pts[0]), Y(pts[1]), [1, 1], style, closed); };
   items = items.map(it => it.t === 'conn' ? connAsShape(it) : it);
-  for (const L of [1, 2]) for (const it of items) {
+  for (const L of [1, 2, 3]) for (const it of items) {
     if (layerOf(it) !== L) continue;
     if (it.t === 'image') {
       const im = imgs[it.id]; if (!im) continue;
@@ -3591,6 +3654,7 @@ function pdfDrawItems(pdf, items, X, Y, k, imgs) {
       g.wp.forEach((p, i) => {
         if (i >= nPolys) { pdfPoly(p.pts, true, 'F'); return; }
         if (p.closed && FILL_ALPHA[it.fill]) { pdf.setGState(new pdf.GState({ opacity: FILL_ALPHA[it.fill] })); pdfPoly(p.pts, true, 'F'); pdf.setGState(gsFull); }
+        if (it.noStroke) return;
         const ls = lineStyle(it);
         if (ls === 'dash') pdf.setLineDashPattern([it.sw * 3 * k, it.sw * 2.4 * k], 0);
         else if (ls === 'dot') pdf.setLineDashPattern([0, it.sw * 2.2 * k], 0);
@@ -3643,7 +3707,10 @@ function pdfDrawItems(pdf, items, X, Y, k, imgs) {
       else {
         pdf.setDrawColor(...col); pdf.setLineWidth(it.w * k);
         pdf.setLineCap(it.t === 'hl' ? 'butt' : 'round'); pdf.setLineJoin('round');
-        pdf.lines(rel(p, 3), X(p[0]), Y(p[1]), [1, 1], 'S', false);
+        if (it.ls === 'dash') pdf.setLineDashPattern([it.w * 3 * k, it.w * 2.4 * k], 0); else if (it.ls === 'dot') pdf.setLineDashPattern([0, it.w * 2.2 * k], 0);
+        if (it.fillPath) pdf.setFillColor(...col);
+        pdf.lines(rel(p, 3), X(p[0]), Y(p[1]), [1, 1], it.fillPath ? 'FD' : 'S', !!it.fillPath);
+        if (it.ls && it.ls !== 'solid') pdf.setLineDashPattern([], 0);
       }
       if (it.t === 'hl') pdf.setGState(gsFull);
       continue;
