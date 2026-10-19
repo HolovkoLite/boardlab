@@ -537,7 +537,7 @@ const PATTERNS = [['none', 'Nessuno'], ['lines', 'Righe'], ['grid', 'Quadretti']
 const PEN_SIZES = [1.2, 2, 3, 4.5, 6.5, 9.5];
 const HL_SIZES = [8, 12, 17, 24, 32, 44];
 const ER_SIZES = [6, 10, 16, 24, 36, 52];
-const APP_VERSION = '0.9.0';
+const APP_VERSION = '0.9.1';
 const ZMIN = 0.1, ZMAX = 6;
 const ER_DECAY_MS = 600; // tempo con cui la gomma ingrandita torna piccola
 const SORT_LABEL = { created: 'Data di creazione', modified: 'Data di modifica', name: 'Nome' };
@@ -2661,6 +2661,9 @@ function fillAt(w) {
       if (reg.rings.length === 1 && Math.abs(b.x0 - g.x0) + Math.abs(b.x1 - g.x1) + Math.abs(b.y0 - g.y0) + Math.abs(b.y1 - g.y1) < 0.1 * d + 4 * (shp.sw / 2 + 4)) { fillShape(); return; }
     }
     const it = blobItem(reg.rings, col, mode);
+    // se c'è già un riempimento della stessa area (es. toccando un angolino rimasto vuoto) lo si sostituisce
+    const old = ed.items.find(x => { if (x.t !== 'shape' || x.k !== 'blob') return false; const g = geom(x), b = reg.box, d = Math.hypot(b.x1 - b.x0, b.y1 - b.y0); return Math.abs(b.x0 - g.x0) + Math.abs(b.x1 - g.x1) + Math.abs(b.y0 - g.y0) + Math.abs(b.y1 - g.y1) < 0.15 * d + 16 / cam.z; });
+    if (old) { replaceItem(old, { ...it, id: old.id }); return; }
     const before = ed.items.slice(); ed.items = ed.items.concat([it]); pushHist(before); renderInk();
     return;
   }
@@ -2724,23 +2727,32 @@ function floodRegion(w) {
     }
   }
   const N = W * H, B = new Uint8Array(N);
-  for (let i = 0; i < N; i++) B[i] = diff(i, c0) > 90 ? 1 : 0;
-  const BD = dilate(B, W, H, FILL_GAP);
-  if (BD[seed]) { // il punto è molto vicino a una linea: si accetta senza chiusura dei buchi
-    if (B[seed]) return { onLine: true };
+  for (let i = 0; i < N; i++) B[i] = diff(i, c0) > 70 ? 1 : 0;
+  if (B[seed]) return { onLine: true };
+  // riempimento a partire da 'from' (pixel già dentro) sui pixel non bloccati; maxD limita la distanza (crescita controllata)
+  const flood = (blocked, from, maxD) => {
+    const R = from || new Uint8Array(N), q = new Int32Array(N), dist = maxD ? new Uint16Array(N) : null; let h = 0, t = 0, open = false;
+    if (from) { for (let i = 0; i < N; i++) if (R[i]) q[t++] = i; } else { R[seed] = 1; q[t++] = seed; }
+    while (h < t) {
+      const i = q[h++], X = i % W, Y = (i / W) | 0;
+      if (X === 0 || Y === 0 || X === W - 1 || Y === H - 1) { open = true; if (!maxD) break; continue; }
+      const d = dist ? dist[i] + 1 : 0; if (maxD && d > maxD) continue;
+      for (const j of [i - 1, i + 1, i - W, i + W]) if (!R[j] && !blocked[j]) { R[j] = 1; if (dist) dist[j] = d; q[t++] = j; }
+    }
+    return { R, open, count: t };
+  };
+  let M;
+  const exact = flood(B);
+  if (!exact.open) M = dilate(exact.R, W, H, 2); // contorno chiuso: l'area esatta, angoli compresi
+  else {
+    // contorno con piccoli buchi: si chiudono ingrossando le linee, poi l'area torna fino alle linee e negli angoli stretti
+    const BD = dilate(B, W, H, FILL_GAP);
+    if (BD[seed]) return { open: true };
+    const gap = flood(BD);
+    if (gap.open) return { open: true };
+    if (gap.count < 20) return { onLine: true };
+    M = dilate(flood(B, gap.R, FILL_GAP * 3).R, W, H, 2);
   }
-  const blocked = BD[seed] ? B : BD;
-  const R = new Uint8Array(N), st = new Int32Array(N); let sp = 0, open = false, count = 0;
-  R[seed] = 1; st[sp++] = seed;
-  while (sp) {
-    const i = st[--sp]; count++;
-    const X = i % W, Y = (i / W) | 0;
-    if (X === 0 || Y === 0 || X === W - 1 || Y === H - 1) { open = true; break; }
-    for (const j of [i - 1, i + 1, i - W, i + W]) if (!R[j] && !blocked[j]) { R[j] = 1; st[sp++] = j; }
-  }
-  if (open) return { open: true };
-  if (count < 20) return { onLine: true };
-  const M = blocked === BD ? dilate(R, W, H, FILL_GAP + 1) : dilate(R, W, H, 1);
   const rings = traceRings(M, W, H);
   if (!rings.length) return { open: true };
   let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
