@@ -535,7 +535,7 @@ const PATTERNS = [['none', 'Nessuno'], ['lines', 'Righe'], ['grid', 'Quadretti']
 const PEN_SIZES = [1.2, 2, 3, 4.5, 6.5, 9.5];
 const HL_SIZES = [8, 12, 17, 24, 32, 44];
 const ER_SIZES = [6, 10, 16, 24, 36, 52];
-const APP_VERSION = '0.8.1';
+const APP_VERSION = '0.8.2';
 const ZMIN = 0.1, ZMAX = 6;
 const ER_DECAY_MS = 600; // tempo con cui la gomma ingrandita torna piccola
 const SORT_LABEL = { created: 'Data di creazione', modified: 'Data di modifica', name: 'Nome' };
@@ -555,7 +555,7 @@ function seedMeta() {
   const board = { id: uid(), folder: folders[0].id, name: '1A - prova BoardLab', created: now, modified: now, deleted: 0, bg: '#FFFFFF' };
   return {
     v: 1, collections: [c1, c2], folders, boards: [board], palette: DEFAULT_PALETTE.slice(),
-    settings: { dbl: true, scribble: true, xErase: true, erBoost: true, erMax: 3, shapeRec: true, shapeHold: 'normal', sort: 'created', view: 'list' },
+    settings: { dbl: true, scribble: true, xErase: true, erBoost: true, erMax: 3, shapeRec: true, shapeHold: 'normal', shapeGrid: false, sort: 'created', view: 'list' },
     ui: { folder: folders[0].id, drawer: true, zoomLock: false },
     tool: { tool: 'pen', prev: 'pen', pen: { k: 'marker', s: 3, c: '#000000' }, hl: { k: 'free', s: 2, c: '#FFD83B' }, er: { k: 'stroke', s: 2 }, text: { s: 2, c: '#000000', b: false, i: false }, laser: { c: '#F0163A', f: 1 }, shape: { k: 'rect', s: 2, fill: 'none', ls: 'solid', c: '#000000' }, table: { header: true } }
   };
@@ -739,7 +739,7 @@ function renderBody() {
     const tg = (k, t, d) => `<button class="trow" data-act="toggle-setting" data-k="${k}"><span><b>${t}</b><small>${d}</small></span><span class="tg ${meta.settings[k] ? 'on' : ''}"></span></button>`;
     const pages = {
       penna: `<div class="setp">${tg('dbl', 'Doppio clic sul pulsante della penna', 'Passa dalla penna o dall\'evidenziatore alla gomma, e viceversa.')}<p>Il clic singolo sul pulsante non ha nessun effetto.</p></div>`,
-      interazioni: `<div class="setp">${tg('scribble', 'Cancella con lo scarabocchio', 'Uno zig-zag veloce con la penna sopra una scritta la cancella.')}${tg('xErase', 'Cancella con una X', 'Una X disegnata con la penna sopra una scritta la cancella. Su uno spazio vuoto la X resta disegnata.')}${tg('erBoost', 'Gomma che si allarga con la velocità', 'Se strofini la gomma velocemente, la sua area si ingrandisce.')}${meta.settings.erBoost ? `<div class="trow col"><span><b>Ingrandimento massimo della gomma</b><small>Quanto può diventare grande la gomma quando la muovi velocemente.</small></span><div class="seg nums">${[2,3,4,5,6,7].map(n => `<button class="seg-b ${meta.settings.erMax === n ? 'on' : ''}" data-act="set-ermax" data-v="${n}">${n}×</button>`).join('')}</div></div>` : ''}${tg('shapeRec', 'Riconoscimento delle forme', 'Disegna con la penna e tieni ferma la punta: il tratto diventa una forma precisa, con la sua inclinazione. Se non somiglia a una forma diventa una linea.')}${meta.settings.shapeRec ? `<div class="trow col"><span><b>Durata della pausa</b><small>Quanto a lungo tenere ferma la punta prima che il tratto diventi una forma.</small></span><div class="seg nums">${[['short', 'Breve'], ['normal', 'Normale'], ['long', 'Lunga']].map(([k, l]) => `<button class="seg-b ${meta.settings.shapeHold === k ? 'on' : ''}" data-act="set-hold" data-v="${k}">${l}</button>`).join('')}</div></div>` : ''}</div>`,
+      interazioni: `<div class="setp">${tg('scribble', 'Cancella con lo scarabocchio', 'Uno zig-zag veloce con la penna sopra una scritta la cancella.')}${tg('xErase', 'Cancella con una X', 'Una X disegnata con la penna sopra una scritta la cancella. Su uno spazio vuoto la X resta disegnata.')}${tg('erBoost', 'Gomma che si allarga con la velocità', 'Se strofini la gomma velocemente, la sua area si ingrandisce.')}${meta.settings.erBoost ? `<div class="trow col"><span><b>Ingrandimento massimo della gomma</b><small>Quanto può diventare grande la gomma quando la muovi velocemente.</small></span><div class="seg nums">${[2,3,4,5,6,7].map(n => `<button class="seg-b ${meta.settings.erMax === n ? 'on' : ''}" data-act="set-ermax" data-v="${n}">${n}×</button>`).join('')}</div></div>` : ''}${tg('shapeRec', 'Riconoscimento delle forme', 'Disegna con la penna e tieni ferma la punta: il tratto diventa una forma precisa, con la sua inclinazione. Se non somiglia a una forma diventa una linea.')}${meta.settings.shapeRec ? `<div class="trow col"><span><b>Durata della pausa</b><small>Quanto a lungo tenere ferma la punta prima che il tratto diventi una forma.</small></span><div class="seg nums">${[['short', 'Breve'], ['normal', 'Normale'], ['long', 'Lunga']].map(([k, l]) => `<button class="seg-b ${meta.settings.shapeHold === k ? 'on' : ''}" data-act="set-hold" data-v="${k}">${l}</button>`).join('')}</div></div>${tg('shapeGrid', 'Allinea le forme alla griglia', 'Rettangoli, quadrati, ellissi, cerchi, rombi e poligoni riconosciuti diventano dritti, con i bordi sulle righe della griglia: comodo per le mappe concettuali. Linee e frecce restano come le disegni.')}` : ''}</div>`,
       cloud: `<div class="setp"><div class="card"><p>La sincronizzazione automatica con Google Drive, attivabile e disattivabile, arriverà nella seconda versione di BoardLab.</p></div></div>`,
       info: `<div class="setp"><div class="card"><p><b>BoardLab ${APP_VERSION}</b> · prima versione completa</p></div><p>Raccolte, cartelle colorate, cestino, foglio infinito, penna, evidenziatore, gomme, scarabocchio e X, tavolozza, zoom, doppio clic della penna, testo da tastiera, lazo, forme, connettori, tabelle, modelli e modelli personali, righello e goniometro, immagini e PDF da annotare, puntatore laser, ricerca nel testo, esportazione e file .boardlab.</p><p>In arrivo: sincronizzazione con Google Drive.</p></div>`
     };
@@ -752,7 +752,7 @@ function renderBody() {
       <dt>Torna al contenuto</dt><dd>Il mirino in basso a sinistra riporta al centro di quello che hai scritto.</dd>
       <dt>Opzioni di uno strumento</dt><dd>Tocca una volta per sceglierlo, una seconda volta per aprire tipo e spessore.</dd>
       <dt>Gomma veloce</dt><dd>Doppio clic sul pulsante della penna. Un altro doppio clic torna allo strumento di prima.</dd>
-      <dt>Riconoscimento delle forme</dt><dd>Disegna con la penna e, alla fine, tieni ferma la punta: il tratto diventa linea, freccia, cerchio, ellisse, rettangolo, quadrato, rombo, triangolo, poligono, arco o spezzata (anche un rettangolo a tre lati), con l'inclinazione con cui l'hai tracciato. Se non somiglia a una forma diventa una linea. Una V disegnata in fondo a una linea la trasforma in freccia. Un Annulla riporta il tratto a mano. Si attiva e si regola in Impostazioni → Interazioni.</dd>
+      <dt>Riconoscimento delle forme</dt><dd>Disegna con la penna e, alla fine, tieni ferma la punta: il tratto diventa linea, freccia, cerchio, ellisse, rettangolo, quadrato, rombo, triangolo, poligono, arco o spezzata (anche un rettangolo a tre lati), con l'inclinazione con cui l'hai tracciato. Se non somiglia a una forma diventa una linea. Una V disegnata in fondo a una linea la trasforma in freccia. Un Annulla riporta il tratto a mano. Si attiva e si regola in Impostazioni → Interazioni, dove puoi anche far allineare le forme alla griglia (utile per le mappe concettuali; linee e frecce restano libere).</dd>
       <dt>Gomma precisa</dt><dd>Cancella solo il pezzo su cui passa, anche su forme, linee, frecce ed evidenziatore dritto. Una forma cancellata in parte diventa tratti; il suo riempimento resta.</dd>
       <dt>Scarabocchio e X</dt><dd>Uno zig-zag veloce o una X sopra una scritta la cancellano.</dd>
       <dt>Colori</dt><dd>Tocca di nuovo il colore attivo, o tienilo premuto, per modificarlo o eliminarlo. Il + aggiunge un colore.</dd>
@@ -2249,12 +2249,24 @@ const isOpenShape = it => LINE_KINDS.has(it.k) || it.k === 'brace' || it.k === '
 function holdArm(d) {
   clearTimeout(d.holdT);
   if (!meta.settings.shapeRec || d.kind !== 'ink' || d.item.t !== 'pen' || d.snap) return;
-  d.holdT = setTimeout(() => { if (drawing === d && !d.recog) { const r = recognizeStroke(d.pts, d.item); if (r) { d.recog = r; drawLive(); } } }, HOLD_MS[meta.settings.shapeHold] || 650);
+  d.holdT = setTimeout(() => { if (drawing === d && !d.recog) { const r = recognizeStroke(d.pts, d.item); if (r) { if (r.items && meta.settings.shapeGrid) r.items = r.items.map(gridAlign); d.recog = r; drawLive(); } } }, HOLD_MS[meta.settings.shapeHold] || 650);
 }
 function holdMove(d, s) {
   const hs = d.holdS, dd = hs ? Math.hypot(s.x - hs.x, s.y - hs.y) : Infinity;
   if (d.recog) { if (dd > 10) { d.recog = null; d.holdS = s; holdArm(d); } }
   else if (dd > 4) { d.holdS = s; holdArm(d); }
+}
+/* Allineamento alla griglia (opzione): le forme riconosciute diventano dritte e con i bordi sulle righe della griglia
+   dello sfondo (quadretti e puntini ogni 28, righe ogni 36; senza sfondo si usa comunque la griglia da 28).
+   Linee, frecce, connettori e archi restano come sono stati disegnati. */
+function gridAlign(it) {
+  if (it.t !== 'shape' || LINE_KINDS.has(it.k) || it.k === 'arc') return it;
+  const st = ed && ed.bg && ed.bg.pattern === 'lines' ? 36 : 28, snap = v => Math.round(v / st) * st;
+  let w = Math.abs(it.w), h = Math.abs(it.h);
+  if (it.k === 'square' || it.k === 'circle') { const s = Math.max(st, snap((w + h) / 2)); w = h = s; }
+  else { w = Math.max(st, snap(w)); h = Math.max(st, snap(h)); }
+  const x0 = snap(it.x - w / 2), y0 = snap(it.y - h / 2);
+  return { ...it, r: 0, w, h, x: x0 + w / 2, y: y0 + h / 2 };
 }
 /* --- geometria di supporto --- */
 const pDist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
@@ -2384,7 +2396,7 @@ function arrowHeadAt(V, m, atEnd) {
   if (!rest.length) return false;
   let barbs = 0;
   for (const v of rest) {
-    const d = pDist(v, o); if (d < 0.15 * len) continue;
+    const d = pDist(v, o); if (d < Math.max(6 / cam.z, 0.06 * len)) continue; // di nuovo sulla punta
     if (d > 0.5 * len) return false;
     const ang = Math.acos(clamp(((v.x - o.x) * back.x + (v.y - o.y) * back.y) / d, -1, 1)) * 180 / Math.PI;
     if (ang < 12 || ang > 75) return false;

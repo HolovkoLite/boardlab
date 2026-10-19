@@ -1,5 +1,5 @@
 /* BoardLab — service worker. Cambia VERSION a ogni nuova versione: il tablet la scarica e propone AGGIORNA. */
-const VERSION = '0.8.1';
+const VERSION = '0.8.2';
 const CACHE = 'boardlab-' + VERSION;
 const FILES = [
   './', 'index.html', 'manifest.webmanifest',
