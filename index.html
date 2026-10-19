@@ -272,6 +272,31 @@ input { font: inherit; color: inherit; }
 .exp-rows { margin-top: 6px; }
 .exp-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; padding: 13px 2px; font-size: 16px; text-align: left; }
 .exp-out { margin: 8px 2px 0; font-size: 13px; color: var(--muted); }
+.dlg-p { white-space: pre-line; }
+.exp-row small.dim { color: var(--muted); font-size: 13px; }
+.drv-b { position: relative; }
+.drv-con { display: flex; align-items: center; gap: 12px; }
+.drv-con p { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.drv-con .ic { color: var(--blue); flex: none; }
+.drv-act { display: flex; justify-content: flex-end; margin-top: 12px; }
+.dr-sync span { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.drv-b.off { color: var(--muted); }
+.drv-b .bdg { position: absolute; top: 3px; right: 1px; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 9px; background: var(--blue); color: #fff; font-size: 11px; font-weight: 600; display: grid; place-items: center; line-height: 1; }
+.drv-opt { display: flex; align-items: center; gap: 14px; width: 100%; padding: 10px 2px; text-align: left; }
+.drv-opt b { display: block; font-weight: 500; font-size: 15.5px; }
+.drv-opt small { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
+.drv-opt .rb { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #9AA0A6; box-sizing: border-box; flex: none; }
+.drv-opt.on .rb { border-color: var(--blue); background: var(--blue); box-shadow: inset 0 0 0 3px #fff; }
+.drvd #drvLink { margin: 4px 0 6px 34px; width: calc(100% - 34px); }
+.drv-unl { display: block; margin-top: 14px; font-size: 14px; color: var(--danger); }
+.drv-bar { height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; margin: 14px 0 2px; }
+.drv-bar i { display: block; height: 100%; width: 0; background: var(--blue); transition: width .3s; }
+.drv-list .drv-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line); }
+.drv-list .drv-row:first-of-type { border-top: 0; }
+.drv-row > span { flex: 1; min-width: 0; }
+.drv-row b { display: block; font-weight: 500; }
+.drv-row small { display: block; color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.drv-row .fi { color: var(--fc); flex: none; }
 .exp-prev { display: block; max-width: 100%; max-height: 42vh; margin: 0 auto 6px; border: 1px solid var(--line); border-radius: 4px; }
 .exp-file { display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--pane); border-radius: 8px; font-size: 15px; }
 .sk-grid { display: grid; grid-template-columns: repeat(6, 44px); justify-content: center; gap: 4px; margin-bottom: 4px; }
@@ -425,6 +450,8 @@ const I = {
   bg: '<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 9.3h16M4 14.6h16M9.3 4v16M14.6 4v16" stroke-width="1"/>',
   export: '<path d="M12 4v11M7.5 8.5L12 4l4.5 4.5"/><path d="M5 14v5h14v-5"/>',
   cloud: '<path d="M7 18h10.5a4 4 0 00.5-8 6 6 0 00-11.5 1.5A3.3 3.3 0 007 18z"/>',
+  cloudUp: '<path d="M7 18h10.5a4 4 0 00.5-8 6 6 0 00-11.5 1.5A3.3 3.3 0 007 18z"/><path d="M12 16v-5.5M9.6 12.6L12 10.2l2.4 2.4"/>',
+  cloudOk: '<path d="M7 18h10.5a4 4 0 00.5-8 6 6 0 00-11.5 1.5A3.3 3.3 0 007 18z"/><path d="M9.3 13.4l1.9 1.9 3.6-3.8"/>',
   info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="7.8" r="1" class="f"/>',
   laser: '<circle cx="7.5" cy="16.5" r="3" class="f"/><path d="M10 14l8.5-8.5M14 4l.6-1.8M20 10l1.8-.6M17.2 6.8l2.6-2.6"/><circle cx="7.5" cy="16.5" r="5.2" stroke-width="1.2" opacity=".5"/>',
   import: '<path d="M12 4v11M7.5 10.5L12 15l4.5-4.5"/><path d="M5 14v5h14v-5"/>',
@@ -544,7 +571,7 @@ const PATTERNS = [['none', 'Nessuno'], ['lines', 'Righe'], ['grid', 'Quadretti']
 const PEN_SIZES = [1.2, 2, 3, 4.5, 6.5, 9.5];
 const HL_SIZES = [8, 12, 17, 24, 32, 44];
 const ER_SIZES = [6, 10, 16, 24, 36, 52];
-const APP_VERSION = '0.9.2';
+const APP_VERSION = '0.10.0';
 const ZMIN = 0.1, ZMAX = 6;
 const ER_DECAY_MS = 600; // tempo con cui la gomma ingrandita torna piccola
 const SORT_LABEL = { created: 'Data di creazione', modified: 'Data di modifica', name: 'Nome' };
@@ -619,7 +646,7 @@ function dialog(o) {
     if (o.input !== undefined) { inp = h('input', 'dlg-in'); inp.id = 'dlgIn'; inp.value = o.input; inp.placeholder = o.placeholder || ''; inp.setAttribute('autocomplete', 'off'); box.append(inp); }
     if (o.body) box.append(o.body);
     const btns = h('div', 'dlg-b'), cancel = h('button', 'tbtn', 'ANNULLA'), ok = h('button', 'tbtn' + (o.danger ? ' danger' : ''), esc(o.ok || 'OK'));
-    btns.append(cancel, ok); box.append(btns); L.append(box);
+    if (o.noCancel) btns.append(ok); else btns.append(cancel, ok); box.append(btns); L.append(box);
     cancel.onclick = () => finish(null);
     ok.onclick = () => { if (inp) { const v = inp.value.trim(); if (!v) { inp.focus(); return; } finish(v); } else finish(true); };
     if (inp) {
@@ -674,6 +701,7 @@ function renderDrawer() {
   $('#drTitle').textContent = setMode ? 'Impostazioni' : 'Lavagne';
   $('#drPlus').hidden = setMode;
   $('#drSync').hidden = setMode;
+  $('#drSync').innerHTML = drvOn() ? `<span>Google Drive${drvConf().email ? ' · ' + esc(drvConf().email) : ''}</span><button class="link" data-act="sync-info">GESTISCI</button>` : `<span>Nessuna sincronizzazione cloud</span><button class="link" data-act="sync-info">ABILITA</button>`;
   let html = '';
   if (setMode) {
     for (const [k, l, i] of SETTINGS_PAGES) html += `<button class="srow ${settingsPage === k ? 'sel' : ''}" data-act="set-page" data-v="${k}">${ic(i)}<span>${l}</span></button>`;
@@ -696,6 +724,11 @@ function renderDrawer() {
     .map(([k, l, i]) => `<button class="${navOn === k ? 'on' : ''}" data-act="nav" data-v="${k}" aria-label="${l}">${ic(i)}<span>${l}</span></button>`).join('');
 }
 
+function drvHeadBtn(f) {
+  if (!f.drive) return `<button class="ib drv-b off" data-act="drv-folder" aria-label="Collega a Google Drive">${ic('cloudUp')}</button>`;
+  const n = drvPending(f).length;
+  return `<button class="ib drv-b" data-act="drv-sync" aria-label="Invia a Google Drive">${ic(n ? 'cloudUp' : 'cloudOk')}${n ? `<span class="bdg">${n > 99 ? '99+' : n}</span>` : ''}</button>`;
+}
 function renderMain() {
   const head = $('#mnHead'), sub = $('#mnSub');
   const ham = meta.ui.drawer ? '' : `<button class="ib" data-act="drawer-open" aria-label="Apri pannello">${ic('menu')}</button>`;
@@ -703,7 +736,7 @@ function renderMain() {
   if (libMode === 'folder') {
     const f = curFolder();
     if (searching) head.innerHTML = `${ham}<div class="srch">${ic('search')}<input id="srchIn" placeholder="Cerca nei nomi e nei testi delle lavagne" autocomplete="off" value="${esc(searchQ)}"></div><button class="ib" data-act="search-close" aria-label="Chiudi ricerca">${ic('close')}</button>`;
-    else head.innerHTML = `${ham}<h1>${f ? esc(f.name) : 'Nessuna cartella'}</h1><span class="sp"></span><button class="ib" data-act="search" aria-label="Cerca">${ic('search')}</button>${f ? `<button class="ib" data-act="folder-menu" aria-label="Opzioni cartella">${ic('more')}</button>` : ''}`;
+    else head.innerHTML = `${ham}<h1>${f ? esc(f.name) : 'Nessuna cartella'}</h1><span class="sp"></span>${f && drvOn() ? drvHeadBtn(f) : ''}<button class="ib" data-act="search" aria-label="Cerca">${ic('search')}</button>${f ? `<button class="ib" data-act="folder-menu" aria-label="Opzioni cartella">${ic('more')}</button>` : ''}`;
     sub.hidden = false;
     sub.innerHTML = `<button class="ib" data-act="view-toggle" aria-label="Cambia vista">${ic(meta.settings.view === 'grid' ? 'list' : 'grid')}</button><button class="chip" data-act="sort-menu">${ic('sort')}<span>${SORT_LABEL[meta.settings.sort]}</span></button>`;
   } else {
@@ -749,8 +782,8 @@ function renderBody() {
     const pages = {
       penna: `<div class="setp">${tg('dbl', 'Doppio clic sul pulsante della penna', 'Passa dalla penna o dall\'evidenziatore alla gomma, e viceversa.')}<p>Il clic singolo sul pulsante non ha nessun effetto.</p></div>`,
       interazioni: `<div class="setp">${tg('scribble', 'Cancella con lo scarabocchio', 'Uno zig-zag veloce con la penna sopra una scritta la cancella.')}${tg('xErase', 'Cancella con una X', 'Una X disegnata con la penna sopra una scritta la cancella. Su uno spazio vuoto la X resta disegnata.')}${tg('erBoost', 'Gomma che si allarga con la velocità', 'Se strofini la gomma velocemente, la sua area si ingrandisce.')}${meta.settings.erBoost ? `<div class="trow col"><span><b>Ingrandimento massimo della gomma</b><small>Quanto può diventare grande la gomma quando la muovi velocemente.</small></span><div class="seg nums">${[2,3,4,5,6,7].map(n => `<button class="seg-b ${meta.settings.erMax === n ? 'on' : ''}" data-act="set-ermax" data-v="${n}">${n}×</button>`).join('')}</div></div>` : ''}${tg('shapeRec', 'Riconoscimento delle forme', 'Disegna con la penna e tieni ferma la punta: il tratto diventa una forma precisa, con la sua inclinazione. Se non somiglia a una forma diventa una linea.')}${meta.settings.shapeRec ? `<div class="trow col"><span><b>Durata della pausa</b><small>Quanto a lungo tenere ferma la punta prima che il tratto diventi una forma.</small></span><div class="seg nums">${[['short', 'Breve'], ['normal', 'Normale'], ['long', 'Lunga']].map(([k, l]) => `<button class="seg-b ${meta.settings.shapeHold === k ? 'on' : ''}" data-act="set-hold" data-v="${k}">${l}</button>`).join('')}</div></div>${tg('shapeGrid', 'Allinea le forme alla griglia', 'Rettangoli, quadrati, ellissi, cerchi, rombi e poligoni riconosciuti diventano dritti, con i bordi sulle righe della griglia: comodo per le mappe concettuali. Linee e frecce restano come le disegni.')}` : ''}</div>`,
-      cloud: `<div class="setp"><div class="card"><p>La sincronizzazione automatica con Google Drive, attivabile e disattivabile, arriverà nella seconda versione di BoardLab.</p></div></div>`,
-      info: `<div class="setp"><div class="card"><p><b>BoardLab ${APP_VERSION}</b> · prima versione completa</p></div><p>Raccolte, cartelle colorate, cestino, foglio infinito, penna, evidenziatore, gomme, scarabocchio e X, tavolozza, zoom, doppio clic della penna, testo da tastiera, lazo, forme, connettori, tabelle, modelli e modelli personali, righello e goniometro, immagini e PDF da annotare, puntatore laser, ricerca nel testo, esportazione e file .boardlab.</p><p>In arrivo: sincronizzazione con Google Drive.</p></div>`
+      cloud: drvSettingsHTML(),
+      info: `<div class="setp"><div class="card"><p><b>BoardLab ${APP_VERSION}</b> · prima versione completa</p></div><p>Raccolte, cartelle colorate, cestino, foglio infinito, penna, evidenziatore, gomme, scarabocchio e X, tavolozza, zoom, doppio clic della penna, testo da tastiera, lazo, forme, connettori, tabelle, modelli e modelli personali, righello e goniometro, immagini e PDF da annotare, puntatore laser, ricerca nel testo, esportazione e file .boardlab, invio a Google Drive.</p></div>`
     };
     body.innerHTML = pages[settingsPage] || '';
   } else if (libMode === 'help') {
@@ -778,6 +811,7 @@ function renderBody() {
       <dt>Puntatore laser</dt><dd>Indica con la penna: la scia rossa svanisce da sola e non lascia segni.</dd>
       <dt>I miei modelli</dt><dd>Seleziona qualcosa con il lazo e tocca Modello: gli dai un nome e lo ritrovi in + → Modelli, pronto da inserire in qualsiasi lavagna. Con ⋮ sul modello lo rinomini o lo elimini.</dd>
       <dt>Cercare</dt><dd>Con la lente della libreria cerchi nei nomi delle lavagne, nei testi scritti con la tastiera e nelle tabelle (non nella scrittura a mano). Tocca un risultato per aprire la lavagna proprio lì. Dentro una lavagna: ⋮ → Cerca nella lavagna, con le frecce per passare da un risultato all'altro.</dd>
+      <dt>Google Drive</dt><dd>Si collega in Impostazioni → Sincronizzazione con il cloud, con lo script "BoardLab Drive" del tuo account. Poi, in una cartella, tocca la nuvola in alto: la prima volta scegli la cartella di Drive e i formati (PDF, PNG, BoardLab); dopo, ogni tocco invia solo le lavagne nuove o modificate (il numero sulla nuvola dice quante sono). Le lavagne già inviate vengono aggiornate, non duplicate; su Drive non si cancella mai niente.</dd>
       <dt>Esporta</dt><dd>Dal menu ⋮ della lavagna: PNG, PDF o file .boardlab. Un file .boardlab si riapre con il pulsante blu + della libreria.</dd>
       <dt>Lavagne e cartelle</dt><dd>Tieni premuto su una lavagna o su una cartella per le altre opzioni.</dd>
     </dl></div></div>`;
@@ -805,7 +839,7 @@ async function dupBoard(id) {
   const b = meta.boards.find(x => x.id === id); if (!b) return;
   const d = (await DB.get('b:' + id)) || { items: [], bg: NEW_BG() };
   const now = Date.now();
-  const nb = { ...b, id: uid(), name: b.name + ' (copia)', created: now, modified: now };
+  const nb = { ...b, id: uid(), name: b.name + ' (copia)', created: now, modified: now }; delete nb.drv;
   const th = THUMBS.get(b.id) || await DB.get('th:' + b.id); if (th) setThumb(nb.id, th);
   meta.boards.push(nb); await DB.set('b:' + nb.id, d); saveMeta(); renderLibrary(); toast('Lavagna duplicata');
 }
@@ -886,6 +920,7 @@ function folderMenu(anchor, id) {
     { label: 'Colore', icon: 'palette', fn: () => colorFolder(id) }
   ];
   if (meta.collections.length > 1) items.push({ label: 'Sposta in un\'altra raccolta', icon: 'move', fn: () => moveFolder(id) });
+  items.push({ label: 'Google Drive…', icon: 'cloud', fn: () => drvFolderDialog(id) });
   items.push({ sep: true }, { label: 'Elimina cartella', icon: 'trash', danger: true, fn: () => deleteFolder(id) });
   menu(anchor, items);
 }
@@ -4211,32 +4246,37 @@ function exportDialog() {
     doExport({ fmt: st.fmt, what: sel && st.selOnly ? 'sel' : 'all', col: st.col || white, pat: st.pat, name: st.name.trim() || ed.b.name });
   });
 }
-async function doExport(st) {
-  const items = st.what === 'sel' && sel ? selItemsList() : ed.items;
-  const base = fileSafe(st.name || ed.b.name), bg = st.col === false ? { ...ed.bg, color: '#FFFFFF' } : ed.bg;
-  if (st.fmt === 'boardlab') {
+/* Crea il file di una lavagna: usato dall'esportazione e dall'invio a Google Drive */
+async function buildFile(items, boardBg, fmt, o = {}) {
+  const bg = o.col === false ? { ...boardBg, color: '#FFFFFF' } : boardBg, pat = o.pat !== false;
+  if (fmt === 'boardlab') {
     const images = {};
     for (const it of items) if (it.img && !images[it.img]) { const bl = await DB.get('img:' + it.img); if (bl) images[it.img] = await blobToDataURL(bl); }
-    const data = { format: 'boardlab', version: 1, app: 'BoardLab ' + APP_VERSION, name: ed.b.name, exported: new Date().toISOString(), bg: ed.bg, items: serializeItems(items), images };
-    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-    deliverFile(blob, base + '.boardlab');
-    return;
+    const data = { format: 'boardlab', version: 1, app: 'BoardLab ' + APP_VERSION, name: o.name || '', exported: new Date().toISOString(), bg: boardBg, items: serializeItems(items), images };
+    return new Blob([JSON.stringify(data)], { type: 'application/json' });
   }
-  if (!items.length) { toast('Non c\'è niente da esportare'); return; }
-  const withPages = st.fmt === 'pdf' && st.what !== 'sel' && items.some(i => i.t === 'page');
-  toast('Preparo l\'esportazione…');
+  if (!items.length) return null;
   await Promise.all(items.filter(i => i.img).map(i => loadImage(i.img)));
-  if (st.fmt === 'png') {
-    const { canvas } = renderScene(items, 2, bg, st.pat);
+  if (fmt === 'png') {
+    const { canvas } = renderScene(items, 2, bg, pat);
     const blob = await canvasBlob(canvas, 'image/png'); canvas.width = canvas.height = 1;
-    deliverFile(blob, base + '.png');
-    return;
+    return blob;
   }
-  toast('Preparo il PDF…');
-  let jsPDF;
-  try { jsPDF = await loadJsPDF(); } catch (_) { toast('Non riesco a caricare il generatore di PDF. Chiudi e riapri BoardLab.'); return; }
-  const blob = withPages ? await pagesPdf(jsPDF, items) : await vectorPdf(jsPDF, items, bg, st.pat);
-  deliverFile(blob, base + '.pdf');
+  const jsPDF = await loadJsPDF();
+  const withPages = o.pages !== false && items.some(i => i.t === 'page');
+  return withPages ? await pagesPdf(jsPDF, items) : await vectorPdf(jsPDF, items, bg, pat);
+}
+async function doExport(st) {
+  const items = st.what === 'sel' && sel ? selItemsList() : ed.items;
+  const base = fileSafe(st.name || ed.b.name);
+  if (st.fmt !== 'boardlab') {
+    if (!items.length) { toast('Non c\'è niente da esportare'); return; }
+    toast(st.fmt === 'pdf' ? 'Preparo il PDF…' : 'Preparo l\'esportazione…');
+  }
+  let blob;
+  try { blob = await buildFile(items, ed.bg, st.fmt, { col: st.col, pat: st.pat, pages: st.what !== 'sel', name: ed.b.name }); }
+  catch (_) { toast('Non riesco a caricare il generatore di PDF. Chiudi e riapri BoardLab.'); return; }
+  if (blob) deliverFile(blob, base + '.' + st.fmt);
 }
 /* PDF vettoriale: tratti come linee e forme, testo come testo vero. Leggero e nitido a qualsiasi ingrandimento. */
 function mixRgb(a, b, t) { const A = hex2rgb(a), B = hex2rgb(b); return A.map((v, i) => Math.round(v + (B[i] - v) * t)); }
@@ -4419,12 +4459,213 @@ async function importFile(file) {
 const onPick = (id, fn) => $('#' + id).addEventListener('change', async e => { const f = e.target.files && e.target.files[0]; try { if (f) await fn(f); } finally { e.target.value = ''; } });
 onPick('fileIn', importFile); onPick('pdfIn', openPdfFile); onPick('imgIn', insertImageFile); onPick('camIn', insertImageFile);
 
+/* ================= Google Drive ================= */
+/* BoardLab parla con lo script "BoardLab Drive" del tuo account (Google Apps Script, app web).
+   Solo quando premi il pulsante della nuvola in una cartella: invia le lavagne nuove o modificate,
+   aggiorna i file già inviati (stesso file, stesso link) e su Drive non cancella mai niente.
+   Nessuna attività in background. */
+const DRV_FMTS = [['pdf', 'PDF'], ['png', 'PNG'], ['boardlab', 'BoardLab']];
+const DRV_MIME = { pdf: 'application/pdf', png: 'image/png', boardlab: 'application/json' };
+const DRV_URL_RE = /^https:\/\/script\.google\.com\/(?:a\/macros\/[^/\s]+|macros)\/s\/[\w-]+\/exec$/;
+const DRV_MAX = 36e6; // byte: oltre, lo script non riesce a ricevere il file
+const drvConf = () => meta.settings.drive || null; // { url, email, ok }
+const drvOn = () => !!(drvConf() && drvConf().ok);
+const drvFmts = f => (f.drive && f.drive.fmts && f.drive.fmts.length ? f.drive.fmts : ['pdf']);
+function drvNeeds(b, f) {
+  const s = b.drv;
+  if (!s || s.fid !== f.drive.id || s.at !== b.modified || s.name !== b.name) return true;
+  if (s.empty) return false;
+  return drvFmts(f).some(k => !(s.files && s.files[k]));
+}
+const drvPending = f => (f && f.drive ? liveBoards().filter(b => b.folder === f.id && drvNeeds(b, f)) : []);
+function drvKey() {
+  if (meta.settings.drvKey) return meta.settings.drvKey;
+  const a = new Uint8Array(32); crypto.getRandomValues(a);
+  const C = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  meta.settings.drvKey = Array.from(a, v => C[v % 62]).join(''); saveMeta();
+  return meta.settings.drvKey;
+}
+class DrvError extends Error { constructor(code, msg) { super(msg || code); this.code = code; } }
+async function drvCall(body, url = drvConf().url) {
+  if (!navigator.onLine) throw new DrvError('offline');
+  const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 180000);
+  let res, txt;
+  try {
+    res = await fetch(url, { method: 'POST', body: JSON.stringify({ ...body, key: drvKey() }), headers: { 'Content-Type': 'text/plain;charset=utf-8' }, redirect: 'follow', signal: ctl.signal });
+    txt = await res.text();
+  } catch (e) { throw new DrvError(e && e.name === 'AbortError' ? 'timeout' : 'net'); }
+  finally { clearTimeout(t); }
+  let j;
+  try { j = JSON.parse(txt); } catch (_) { throw new DrvError(/accounts\.google\.com|ServiceLogin/i.test(txt) ? 'access' : /too large|troppo grand/i.test(txt) ? 'big' : 'bad'); }
+  if (!j || !j.ok) throw new DrvError((j && j.err) || 'bad', j && j.msg);
+  return j;
+}
+function drvMsg(e) {
+  const c = e && e.code, m = (e && e.message) || '';
+  if (c === 'offline') return 'Nessuna connessione a Internet. Riprova quando sei collegato.';
+  if (c === 'net') return window.top !== window ? 'In questa versione di prova Google Drive non è raggiungibile: usa l\'app installata.' : 'Non riesco a raggiungere lo script. Controlla l\'indirizzo e che, nel deployment, "Chi ha accesso" sia "Chiunque".';
+  if (c === 'access') return 'Lo script non è aperto a BoardLab: nel deployment, in "Chi ha accesso", scegli "Chiunque".';
+  if (c === 'timeout') return 'Google Drive non ha risposto in tempo. Riprova.';
+  if (c === 'big') return 'Il file è troppo grande per essere inviato (massimo circa 35 MB).';
+  if (c === 'chiave') return 'Lo script è già collegato a un altro BoardLab. Su script.google.com esegui la funzione "scollegaBoardLab", poi ricollega.';
+  if (c === 'link') return 'Il link non è quello di una cartella di Google Drive.';
+  if (c === 'cartella') return 'La cartella di Drive non esiste più o non hai accesso. Collega di nuovo la cartella.';
+  if (c === 'pdf') return 'Non riesco a creare il PDF. Chiudi e riapri BoardLab.';
+  if (c === 'drive' && /Drive.{0,3}\s*(is not defined|non è definit)/i.test(m)) return 'Nello script manca il servizio Drive API: su script.google.com, a sinistra, Servizi → + → Drive API → Aggiungi. Poi crea un nuovo deployment.';
+  if (c === 'drive') return 'Google Drive ha segnalato un errore: ' + m.slice(0, 160);
+  return 'Lo script ha risposto in modo inatteso. Controlla che l\'indirizzo sia quello dell\'app web.';
+}
+const drvAlert = text => dialog({ title: 'Google Drive', text, ok: 'OK', noCancel: true });
+const blobB64 = blob => blobToDataURL(blob).then(u => u.slice(u.indexOf(',') + 1));
+const drvGoSettings = () => { settingsPage = 'cloud'; libMode = 'settings'; drawerMode = 'settings'; searching = false; renderLibrary(); };
+
+async function drvConnect() {
+  const inp = $('#drvUrl'), url = inp ? inp.value.trim() : '';
+  if (!DRV_URL_RE.test(url)) { drvAlert('Incolla l\'indirizzo dell\'app web dello script: inizia con https://script.google.com/ e finisce con /exec.'); return; }
+  toast('Collegamento a Google Drive…');
+  try {
+    const j = await drvCall({ a: 'ping' }, url);
+    meta.settings.drive = { url, email: j.email || '', ok: true }; saveMeta(); renderLibrary();
+    toast('Collegato a Google Drive' + (j.email ? ' · ' + j.email : ''));
+  } catch (e) { $('#toast').hidden = true; drvAlert(drvMsg(e)); }
+}
+async function drvDisconnect() {
+  const ok = await dialog({ title: 'Scollegare Google Drive?', text: 'Quello che hai già inviato resta su Drive. Potrai ricollegare lo stesso script in qualsiasi momento.', ok: 'SCOLLEGA', danger: true });
+  if (!ok) return;
+  meta.settings.drive = null; saveMeta(); renderLibrary();
+}
+
+/* Collegamento di una cartella di BoardLab a una cartella di Drive, con i formati da caricare */
+async function drvFolderDialog(fid) {
+  const f = meta.folders.find(x => x.id === fid); if (!f) return;
+  if (!drvOn()) {
+    if (await dialog({ title: 'Google Drive', text: 'Prima collega BoardLab al tuo Google Drive, in Impostazioni → Sincronizzazione con il cloud.', ok: 'VAI' })) drvGoSettings();
+    return;
+  }
+  const st = { mode: f.drive ? 'keep' : 'auto', link: '', fmts: new Set(f.drive ? drvFmts(f) : ['pdf', 'boardlab']), unlink: false };
+  const body = h('div', 'expo drvd');
+  const opt = (v, title, sub) => `<button class="drv-opt ${st.mode === v ? 'on' : ''}" data-m="${v}"><span class="rb"></span><span><b>${title}</b><small>${sub}</small></span></button>`;
+  const render = () => {
+    body.innerHTML = `<div class="exp-l">Cartella su Drive</div>
+      ${f.drive ? opt('keep', esc(f.drive.name), 'La cartella collegata ora') : ''}
+      ${opt('auto', 'Crea automaticamente', 'BoardLab / ' + esc(f.name))}
+      ${opt('link', 'Usa una cartella che ho già', 'Incolla il link della cartella di Drive')}
+      ${st.mode === 'link' ? '<input class="dlg-in" id="drvLink" placeholder="https://drive.google.com/drive/folders/…" autocomplete="off" spellcheck="false">' : ''}
+      <div class="exp-l">Formati da caricare</div>
+      <div class="exp-rows">${DRV_FMTS.map(([k, l]) => `<button class="exp-row" data-f="${k}"><span>${l}${k === 'boardlab' ? ' <small class="dim">· si riapre in BoardLab, modificabile</small>' : ''}</span><span class="tg ${st.fmts.has(k) ? 'on' : ''}"></span></button>`).join('')}</div>
+      ${f.drive ? '<button class="link drv-unl" data-u="1">Scollega questa cartella</button>' : ''}`;
+    const li = $('#drvLink', body);
+    if (li) { li.value = st.link; li.addEventListener('input', () => { st.link = li.value.trim(); }); setTimeout(() => li.focus(), 50); }
+  };
+  body.addEventListener('click', e => {
+    const m = e.target.closest('[data-m]'), k = e.target.closest('[data-f]'), u = e.target.closest('[data-u]');
+    if (m) { st.mode = m.dataset.m; render(); }
+    else if (k) {
+      if (st.fmts.has(k.dataset.f)) { if (st.fmts.size === 1) { toast('Serve almeno un formato'); return; } st.fmts.delete(k.dataset.f); } else st.fmts.add(k.dataset.f);
+      render();
+    } else if (u) { st.unlink = true; const c = body.closest('.dlg'); if (c) c.querySelector('.dlg-b .tbtn:last-child').click(); }
+  });
+  render();
+  const ok = await dialog({ title: 'Google Drive · ' + f.name, body, ok: 'SALVA' });
+  if (!ok) return;
+  if (st.unlink) { f.drive = null; saveMeta(); renderLibrary(); toast('Cartella scollegata da Drive'); return; }
+  const fmts = DRV_FMTS.map(x => x[0]).filter(k => st.fmts.has(k));
+  if (st.mode === 'keep') { f.drive.fmts = fmts; saveMeta(); renderLibrary(); return; }
+  if (st.mode === 'link' && !st.link) { drvAlert('Non hai incollato il link della cartella.'); return; }
+  toast('Collego la cartella…');
+  try {
+    const j = await drvCall(st.mode === 'link' ? { a: 'folder', link: st.link } : { a: 'folder', name: f.name });
+    f.drive = { id: j.id, name: j.name, url: j.url, fmts }; saveMeta(); renderLibrary();
+    const n = drvPending(f).length;
+    if (n) toast(`Collegata a ${j.name}`, `INVIA ${n === 1 ? 'LA LAVAGNA' : n + ' LAVAGNE'}`, () => drvSync(f.id));
+    else toast('Collegata a ' + j.name);
+  } catch (e) { $('#toast').hidden = true; drvAlert(drvMsg(e)); }
+}
+
+/* Invio di una lavagna in tutti i formati della cartella */
+async function drvSendBoard(b, f, fmts) {
+  const data = (await DB.get('b:' + b.id)) || { items: [], bg: NEW_BG() };
+  const items = data.items || [], bg = data.bg || NEW_BG(), at = b.modified, name = b.name;
+  const s = b.drv && b.drv.fid === f.drive.id ? b.drv : null, same = !!(s && s.at === at && s.name === name);
+  const files = { ...((s && s.files) || {}) };
+  if (!items.length) { b.drv = { fid: f.drive.id, at, name, files, empty: true }; saveMeta(); return; }
+  const prev = connScope; connScope = new Map(items.map(i => [i.id, i]));
+  try {
+    for (const k of fmts) {
+      if (same && files[k]) continue;
+      let blob;
+      try { blob = await buildFile(items, bg, k, { name }); } catch (_) { throw new DrvError('pdf'); }
+      if (!blob) continue;
+      if (blob.size > DRV_MAX) throw new DrvError('big');
+      const j = await drvCall({ a: 'put', folder: f.drive.id, board: b.id, fmt: k, name: fileSafe(name) + '.' + k, mime: DRV_MIME[k], file: files[k] || '', data: await blobB64(blob) });
+      files[k] = j.id;
+    }
+  } finally { connScope = prev; evictImages(new Set()); }
+  b.drv = { fid: f.drive.id, at, name, files }; saveMeta();
+}
+
+/* Il pulsante: invia le lavagne nuove o modificate della cartella, mostrando l'avanzamento */
+let drvBusy = false;
+async function drvSync(fid) {
+  const f = meta.folders.find(x => x.id === fid); if (!f || drvBusy) return;
+  if (!drvOn() || !f.drive) { drvFolderDialog(fid); return; }
+  const list = drvPending(f).sort((a, b) => a.modified - b.modified);
+  if (!list.length) { toast('Su Drive è già tutto aggiornato'); return; }
+  if (!navigator.onLine) { drvAlert(drvMsg(new DrvError('offline'))); return; }
+  drvBusy = true;
+  const L = h('div', 'layer dim'), box = h('div', 'dlg drv-prog');
+  box.innerHTML = `<div class="dlg-t">Invio a Google Drive</div><p class="dlg-p" id="drvP"></p><div class="drv-bar"><i></i></div><div class="dlg-b"><button class="tbtn">INTERROMPI</button></div>`;
+  L.append(box); $('#layers').append(L);
+  let stop = false; const sb = $('.tbtn', box), P = $('#drvP', box), bar = $('.drv-bar i', box);
+  sb.onclick = () => { stop = true; sb.disabled = true; sb.textContent = 'MI FERMO DOPO QUESTA LAVAGNA'; };
+  const fmts = drvFmts(f), errs = [];
+  let sent = 0, fatal = null;
+  for (let i = 0; i < list.length && !stop; i++) {
+    const b = list[i];
+    P.textContent = `Lavagna ${i + 1} di ${list.length} · ${b.name}`; bar.style.width = (100 * i / list.length) + '%';
+    try { await drvSendBoard(b, f, fmts); sent++; }
+    catch (e) {
+      if (['big', 'pdf'].includes(e.code)) errs.push(b.name + ': ' + drvMsg(e));
+      else { fatal = e; break; }
+    }
+  }
+  bar.style.width = '100%';
+  L.remove(); drvBusy = false;
+  f.drive.last = Date.now(); saveMeta(); renderLibrary();
+  const done = sent ? `${sent === 1 ? 'Inviata 1 lavagna' : `Inviate ${sent} lavagne`} a Drive.` : '';
+  if (fatal) drvAlert((done ? done + ' ' : '') + drvMsg(fatal));
+  else if (errs.length) drvAlert((done ? done + '\n\n' : '') + 'Non inviate:\n' + errs.join('\n'));
+  else if (stop && sent < list.length) toast(`Interrotto · inviate ${sent} di ${list.length}`);
+  else toast(done.replace(/\.$/, ''));
+}
+
+/* Pagina delle impostazioni */
+function drvSettingsHTML() {
+  const c = drvConf();
+  const intro = `<div class="card"><p><b>Google Drive</b></p><p>Quando tocchi la nuvola in una cartella, BoardLab invia a Drive le lavagne nuove o modificate, nei formati che scegli per quella cartella. Una lavagna già inviata viene aggiornata (stesso file, stesso link), mai duplicata. Su Drive non viene cancellato niente. Non c'è nessuna attività in background.</p></div>`;
+  if (!drvOn()) return `<div class="setp">${intro}
+    <div class="card expo"><div class="exp-l">Indirizzo dello script (app web)</div><input class="dlg-in" id="drvUrl" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" spellcheck="false" value="${esc((c && c.url) || '')}"><div class="drv-act"><button class="tbtn" data-act="drv-connect">COLLEGA</button></div></div>
+    <p>Lo script "BoardLab Drive" si prepara una volta sola su script.google.com, con l'account Google che vuoi usare: si incolla il codice, si aggiunge il servizio Drive API, si pubblica come app web (Esegui come: io · Chi ha accesso: chiunque) e se ne copia qui l'indirizzo.</p></div>`;
+  const rows = meta.folders.map(f => {
+    const n = drvPending(f).length;
+    const sub = f.drive ? `${esc(f.drive.name)} · ${drvFmts(f).map(k => DRV_FMTS.find(x => x[0] === k)[1]).join(', ')} · ${n ? (n === 1 ? '1 da inviare' : n + ' da inviare') : 'aggiornata'}` : 'Non collegata';
+    return `<div class="drv-row" style="--fc:${f.color}">${ic('folder', 'fi')}<span><b>${esc(f.name)}</b><small>${sub}</small></span><button class="tbtn" data-act="drv-folder" data-id="${f.id}">${f.drive ? 'MODIFICA' : 'COLLEGA'}</button>${f.drive && n ? `<button class="tbtn" data-act="drv-sync" data-id="${f.id}">INVIA</button>` : ''}</div>`;
+  }).join('');
+  return `<div class="setp">${intro}
+    <div class="card drv-con">${ic('cloudOk')}<p><b>Collegato</b>${c.email ? ' · ' + esc(c.email) : ''}</p><button class="tbtn danger" data-act="drv-disconnect">SCOLLEGA</button></div>
+    <div class="card drv-list"><p><b>Cartelle</b></p>${rows || '<p>Non ci sono cartelle.</p>'}</div></div>`;
+}
+
 /* ================= Eventi globali ================= */
 const ACT = {
   'drawer-close': () => { meta.ui.drawer = false; saveMeta(); renderLibrary(); },
   'drawer-open': () => { meta.ui.drawer = true; saveMeta(); renderLibrary(); },
   'drawer-plus': t => menu(t, [{ label: 'Nuova raccolta', icon: 'books', fn: newCollection }, { label: 'Nuova cartella', icon: 'folderPlus', fn: () => newFolder() }]),
-  'sync-info': () => toast('La sincronizzazione con Google Drive arriva nella seconda versione'),
+  'sync-info': () => drvGoSettings(),
+  'drv-connect': () => drvConnect(),
+  'drv-disconnect': () => drvDisconnect(),
+  'drv-folder': t => drvFolderDialog(t.dataset.id || (curFolder() || {}).id),
+  'drv-sync': t => drvSync(t.dataset.id || (curFolder() || {}).id),
   'toggle-coll': t => { const c = meta.collections.find(x => x.id === t.dataset.id); if (c) { c.open = !c.open; saveMeta(); renderDrawer(); } },
   'coll-menu': t => collMenu(t, t.dataset.id),
   'new-folder': t => newFolder(t.dataset.id),
