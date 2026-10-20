@@ -185,7 +185,6 @@ input { font: inherit; color: inherit; }
 .seg-b .ic { width: 26px; height: 26px; color: #222; }
 .abc { font-weight: 700; font-size: 17px; color: #222; padding: 0 3px; line-height: 26px; }
 .abc.free { background: linear-gradient(170deg, transparent 30%, rgba(160,160,160,.55) 30%, rgba(160,160,160,.55) 75%, transparent 75%); }
-.abc.straight { background: linear-gradient(transparent 32%, rgba(160,160,160,.55) 32%, rgba(160,160,160,.55) 80%, transparent 80%); }
 .sizes { display: flex; justify-content: space-between; margin: 14px 4px 4px; }
 .sz { width: 50px; height: 50px; border-radius: 50%; display: grid; place-items: center; }
 .sz.on { background: var(--sel); }
@@ -467,8 +466,7 @@ input { font: inherit; color: inherit; }
 .astprev { width: 140px; flex: none; display: flex; align-items: center; justify-content: center; background: var(--pane); border-radius: 12px; margin: 16px 0; }
 .ast-mini { width: 56px; background: #1E2430; border-radius: 20px; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 7px 0 5px; color: #E7EBF0; }
 .ast-mini .am { width: 44px; height: 40px; display: grid; place-items: center; }
-.ast-mini .am.pen { background: #fff; border-radius: 14px; }
-.ast-mini .am.pen svg { width: 34px; height: 14px; }
+.ast-mini .am.pen svg { width: 42px; height: 15px; }
 .ast-mini .am.sm { height: 30px; color: #A9B1BC; }
 .ast-mini .am .ic { width: 20px; height: 20px; }
 .ast-mini .asep { width: 30px; height: 1px; background: #39414D; margin: 3px 0; }
@@ -525,11 +523,10 @@ input { font: inherit; color: inherit; }
 .ast.h { flex-direction: row; height: 72px; padding: 0 8px 0 6px; max-width: calc(100% - 48px); }
 .ast.scroll.v { overflow-y: auto; overflow-x: hidden; }
 .ast.scroll.h { overflow-x: auto; overflow-y: hidden; }
-.ast.scroll .pen.on { width: 56px; height: 50px; margin: 0; }
-.ast.scroll.h .pen.on { width: 50px; height: 56px; }
 .ast.right { right: 16px; top: 50%; transform: translateY(-50%); }
 .ast.left { left: 16px; top: 50%; transform: translateY(-50%); }
-.ast.top { top: 80px; left: 50%; transform: translateX(-50%); }
+.ast.top { top: 16px; left: 50%; transform: translateX(-50%); }
+.ast.above { z-index: 55; }
 .ast.bottom { bottom: 16px; left: 50%; transform: translateX(-50%); }
 .ast.closed.v { max-height: none; }
 .ast.free, .ast.dragging { right: auto; bottom: auto; transform: none; }
@@ -543,16 +540,71 @@ input { font: inherit; color: inherit; }
 .ast .ab.sm { height: 40px; color: #A9B1BC; }
 .ast.h .ab.sm { width: 40px; height: 56px; }
 .ast .ab.on:not(.pen) { background: #3A4454; box-shadow: inset 0 0 0 1.5px #5B6576; color: #fff; }
-.ast .pen.on { background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,.25); }
-.ast.right .pen.on { width: 68px; margin-left: -12px; }
-.ast.left .pen.on { width: 68px; margin-right: -12px; }
-.ast.top .pen.on { height: 68px; margin-bottom: -12px; }
-.ast.bottom .pen.on { height: 68px; margin-top: -12px; }
-.ast.closed .pen.on { width: 56px; margin: 0; }
-.ast.h.closed .pen.on { width: 50px; height: 56px; margin: 0; }
+.ast .penic { overflow: visible; transition: transform .16s ease; }
 .ast.left .penic { transform: scaleX(-1); }
 .ast.top .penic { transform: rotate(-90deg); }
 .ast.bottom .penic { transform: rotate(90deg); }
+.ast.right .pen.on .penic { transform: translateX(-24px); }
+.ast.left .pen.on .penic { transform: translateX(24px) scaleX(-1); }
+.ast.top .pen.on .penic { transform: translateY(24px) rotate(-90deg); }
+.ast.bottom .pen.on .penic { transform: translateY(-24px) rotate(90deg); }
+.ast.closed.right .pen.on .penic, .ast.scroll.right .pen.on .penic { transform: none; }
+.ast.closed.left .pen.on .penic, .ast.scroll.left .pen.on .penic { transform: scaleX(-1); }
+.ast.closed.top .pen.on .penic, .ast.scroll.top .pen.on .penic { transform: rotate(-90deg); }
+.ast.closed.bottom .pen.on .penic, .ast.scroll.bottom .pen.on .penic { transform: rotate(90deg); }
+.ast.scroll .pen.on { background: rgba(255,255,255,.1); }
+.ast.h .penic { flex: none; }
+
+/* Cassetto: esce da dietro l'astuccio; i colori stanno in un vassoio chiaro */
+.pop.drw { width: 470px; box-sizing: border-box; background: #1E2430; color: #E7EBF0; border-radius: 24px; box-shadow: 0 12px 32px rgba(30,36,48,.28); padding: 14px 20px 18px; }
+.pop.drw.drw-right { padding-right: 50px; }
+.pop.drw.drw-left { padding-left: 50px; }
+.pop.drw.drw-top { padding-top: 46px; }
+.pop.drw.drw-bottom { padding-bottom: 46px; }
+.drw .pop-h { font-size: 16px; font-weight: 500; margin-bottom: 12px; color: #E7EBF0; }
+.drw .lbl { color: #A9B1BC; }
+.drw .ib { color: #E7EBF0; }
+.drw .ib:active { background: rgba(255,255,255,.08); }
+.drw .seg-b, .drw .fmt-b { color: #C9CFD8; }
+.drw .seg-b .ic, .drw .fmt-b b, .drw .fmt-b i, .drw .fmt-b u, .drw .fmt-b s, .drw .fnt span, .drw .sk { color: #E7EBF0; }
+.drw .seg-b.on, .drw .fmt-b.on, .drw .fnt.on, .drw .sk.on, .drw .sz.on { background: transparent; color: #fff; box-shadow: inset 0 0 0 1.5px rgba(231,235,240,.75); }
+.drw .sz i { background: #C9CFD8; }
+.drw .ptv { background: #2E3644; color: #E7EBF0; }
+.drw .ptin { color: #fff; }
+.drw .fillsw { border-color: #E7EBF0; }
+.drw .fillsw.fs-light { background: rgba(255,255,255,.28); }
+.drw .fillsw.fs-solid { background: #E7EBF0; }
+.drw .linesw { border-top-color: #E7EBF0; }
+.drw .amore-h .ib { color: #A9B1BC; }
+.drw .amore-t { background: #2A313D; color: #E7EBF0; }
+.drw .amore-t.on { background: transparent; color: #fff; box-shadow: inset 0 0 0 1.5px rgba(231,235,240,.75); }
+.drw .try { background: #F5F7FA; border-radius: 14px; }
+.dw-h { display: flex; align-items: center; gap: 8px; height: 44px; margin: -4px 0 8px; }
+.dw-name { height: 36px; max-width: 210px; padding: 0 8px; margin-left: -8px; border-radius: 10px; font-size: 16px; font-weight: 500; display: flex; align-items: center; gap: 6px; color: inherit; min-width: 0; }
+.dw-name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dw-name .ic { width: 14px; height: 14px; color: #8A93A1; flex: none; }
+.dw-mm { font-size: 14px; color: #A9B1BC; white-space: nowrap; }
+.dw-chip { height: 34px; padding: 0 10px 0 14px; border-radius: 17px; background: #2E3644; color: inherit; font-size: 13.5px; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+.dw-chip .ic { width: 14px; height: 14px; }
+.dw-in { width: 210px; height: 36px; box-sizing: border-box; border: 0; border-radius: 10px; background: #2E3644; color: #fff; font: inherit; font-size: 16px; font-weight: 500; padding: 0 10px; outline: 1.5px solid rgba(231,235,240,.6); }
+.ctray { background: #F5F7FA; color: var(--ink); border-radius: 16px; padding: 12px; margin-top: 14px; display: flex; flex-direction: column; gap: 12px; }
+.pdrw .ctray { margin-top: 0; }
+.tc-rows { display: flex; flex-direction: column; gap: 10px; }
+.tc-row { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+.tc-row .sp { flex: 1; }
+.tc-clk { width: 32px; display: grid; place-items: center; color: #8A93A1; }
+.tc-clk .ic { width: 18px; height: 18px; }
+.tc { width: 32px; height: 32px; border-radius: 50%; background: var(--c); flex: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,.14); }
+.tc.on { box-shadow: 0 0 0 3px #F5F7FA, 0 0 0 5px #1E2430; }
+.tc.more { background: conic-gradient(#DC2626, #FACC15, #16A34A, #0EA5E9, #2563EB, #7C3AED, #DC2626); }
+.tc.big { width: 36px; height: 36px; }
+.tc.add { background: none; border: 1.5px dashed #9AA0A6; color: #6B7075; display: grid; place-items: center; box-sizing: border-box; box-shadow: none; }
+.tc.add .ic { width: 16px; height: 16px; }
+.fxrow { display: flex; flex-wrap: wrap; gap: 10px; padding: 8px 20px 18px; }
+.dw-sz { display: flex; gap: 4px; background: #E9EDF2; border-radius: 12px; padding: 4px; }
+.dsz { flex: 1; height: 36px; border-radius: 9px; display: grid; place-items: center; }
+.dsz.on { background: #fff; box-shadow: 0 1px 2px rgba(30,36,48,.15); }
+.dsz i { display: block; border-radius: 50%; }
 .ast .addpen { height: 40px; color: #A9B1BC; }
 .ast.h .addpen { width: 40px; height: 56px; }
 .ast .addpen span { width: 26px; height: 26px; border-radius: 50%; border: 1.5px dashed #6B7480; display: grid; place-items: center; box-sizing: border-box; }
@@ -677,6 +729,7 @@ const I = {
   menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
   close: '<path d="M6 6l12 12M18 6L6 18"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
+  clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
   plusCircle: '<circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/>',
   more: '<circle cx="12" cy="5.5" r="1.7" class="f"/><circle cx="12" cy="12" r="1.7" class="f"/><circle cx="12" cy="18.5" r="1.7" class="f"/>',
   search: '<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/>',
@@ -851,7 +904,7 @@ const PATTERNS = [['none', 'Nessuno'], ['lines', 'Righe'], ['grid', 'Quadretti']
 const PEN_SIZES = [1.2, 2, 3, 4.5, 6.5, 9.5];
 const HL_SIZES = [8, 12, 17, 24, 32, 44];
 const ER_SIZES = [6, 10, 16, 24, 36, 52];
-const APP_VERSION = '0.12.0';
+const APP_VERSION = '0.13.0';
 const ZMIN = 0.1, ZMAX = 6;
 const ER_DECAY_MS = 600; // tempo con cui la gomma ingrandita torna piccola
 const SORT_LABEL = { created: 'Data di creazione', modified: 'Data di modifica', name: 'Nome' };
@@ -871,7 +924,7 @@ function seedMeta() {
   const board = { id: uid(), folder: folders[0].id, name: '1A - prova BoardLab', created: now, modified: now, deleted: 0, bg: '#FFFFFF' };
   return {
     v: 1, collections: [c1, c2], folders, boards: [board], palette: DEFAULT_PALETTE.slice(),
-    settings: { dbl: true, scribble: true, xErase: true, erBoost: true, erMax: 3, shapeRec: true, shapeHold: 'normal', shapeGrid: false, sort: 'created', view: 'list' },
+    settings: { dbl: true, scribble: true, xErase: true, erBoost: true, erMax: 3, shapeRec: true, shapeHold: 'normal', shapeGrid: false, hlStraight: true, sort: 'created', view: 'list' },
     ui: { folder: folders[0].id, drawer: true, zoomLock: false },
     tool: { tool: 'pen', prev: 'pen', pen: { k: 'marker', s: 3, c: '#000000' }, hl: { k: 'free', s: 2, c: '#FFD83B' }, er: { k: 'stroke', s: 2 }, text: { pt: 24, f: 'roboto', c: '#000000', b: false, i: false, u: false, st: false }, laser: { c: '#F0163A', f: 1 }, shape: { k: 'rect', s: 2, fill: 'none', ls: 'solid', c: '#000000' }, fill: { c: '#FFD83B', mode: 'solid' }, table: { header: true } }
   };
@@ -890,7 +943,7 @@ function layer(modal) {
   L.addEventListener('pointerdown', e => { if (e.target === L) { e.preventDefault(); swallowUntil = performance.now() + 450; closeLayer(L); } });
   return L;
 }
-function closeLayer(L) { if (!L.isConnected) return; L.remove(); if (L.onClose) L.onClose(); }
+function closeLayer(L) { if (!L.isConnected) return; L.remove(); if (L._base) L._base(); if (L.onClose) L.onClose(); }
 function closeAllLayers() { [...$('#layers').children].forEach(closeLayer); }
 function place(el, anchor, mode) {
   const r = anchor.getBoundingClientRect(), w = el.offsetWidth, hh = el.offsetHeight, W = innerWidth, H = innerHeight;
@@ -921,7 +974,10 @@ function menu(anchor, items) {
   L.append(m); place(m, anchor, 'auto');
   return L;
 }
-function popover(anchor, content, mode = 'center') { const L = layer(false); L.append(content); content.style.position = 'absolute'; place(content, anchor, mode); return L; }
+function popover(anchor, content, mode = 'center') {
+  // le opzioni degli strumenti dell'astuccio escono come cassetto da dietro l'astuccio
+  if (anchor && anchor.closest && anchor.closest('#ast')) { const d = anchor.dataset || {}; return drawer(anchor, content, d.atool ? 'tool:' + d.atool : d.pen ? 'pen:' + d.pen : d.act === 'ast-more' ? 'more' : 'x'); }
+  const L = layer(false); L.append(content); content.style.position = 'absolute'; place(content, anchor, mode); return L; }
 function dialog(o) {
   return new Promise(res => {
     const L = layer(true), box = h('div', 'dlg');
@@ -1227,10 +1283,12 @@ async function drvSendBoards(ids) {
 const SET_PAGES = [['penna', 'Penna e astuccio', 'pen'], ['gesti', 'Gesti e riconoscimento', 'sparkle'], ['cloud', 'Google Drive', 'cloud'], null, ['aiuto', 'Aiuto', 'help'], ['info', 'Informazioni', 'info']];
 const HELP = [
   ['astuccio', 'L\'astuccio e le penne', 'pen', [
-    ['Scegliere una penna', 'Tocca una penna dell\'astuccio. Toccala di nuovo per aprire la ruota: colori sul giro esterno, spessori su quello interno, tipo nella pastiglia. Il cerchio colorato apre tutta la tavolozza.'],
-    ['Aggiungere, rinominare, togliere', 'Il + sotto le penne ne aggiunge una. Tieni premuta una penna per rinominarla, cambiarne il tipo o toglierla.'],
+    ['Scegliere una penna', 'Tocca una penna dell\'astuccio: quella in uso sporge verso il foglio. Toccala di nuovo per aprire il suo cassetto: nome, spessore in millimetri, tipo, spessori e colori. Tocca il nome per rinominarla, il tipo per cambiarlo.'],
+    ['Colori', 'Nel cassetto ci sono i colori fissi, gli ultimi tre colori presi dalla tavolozza con quella penna o quello strumento e il cerchio della tavolozza completa. I colori fissi (fino a 10) si scelgono in Impostazioni → Penna e astuccio.'],
+    ['Aggiungere ed eliminare penne', 'Il + sotto le penne ne aggiunge una, fino a 5. Tieni premuta una penna per eliminarla.'],
+    ['Evidenziatore dritto', 'Traccia la riga con l\'evidenziatore e tieni ferma la punta: diventa dritta, e orizzontale se lo era quasi. Si attiva e disattiva in Impostazioni → Penna e astuccio.'],
     ['Strumenti dell\'astuccio', 'Nell\'astuccio stanno fino a 5 strumenti; gli altri sono nei tre puntini. L\'ingranaggio in Altri strumenti sceglie quali tenere e in che ordine.'],
-    ['Opzioni di uno strumento', 'Tocca uno strumento già scelto per aprire le sue opzioni (tipo di gomma, carattere del testo, forma, riempimento).'],
+    ['Opzioni di uno strumento', 'Tocca uno strumento già scelto: il suo cassetto esce da dietro l\'astuccio (tipo di gomma, carattere del testo, forma, riempimento, colori). Toccalo ancora per chiuderlo.'],
     ['Spostare e ridurre l\'astuccio', 'Trascinalo dai puntini: si aggancia al lato più vicino (sinistra, destra, sopra o sotto). Le frecce in fondo lo riducono a icona e lo riaprono. Ridotto, tienilo premuto per spostarlo dove vuoi.'],
     ['Gomma veloce', 'Doppio clic sul tasto della penna: passa alla gomma; un altro doppio clic torna allo strumento di prima.']
   ]],
@@ -1285,7 +1343,8 @@ function settingsPageHTML(k) {
     <div class="scard row"><div class="scol"><div class="shead">Astuccio chiuso</div>
       ${srowS('Penne ed evidenziatori', seg2('ast-cpens', meta.ast.cPens, [[0, '0'], [1, '1'], [2, '2'], [3, '3'], [4, '4']]))}
       ${srowS('Strumenti', seg2('ast-ctools', meta.ast.cTools, [[0, '0'], [1, '1'], [2, '2'], [3, '3']]))}</div>${astPreviewHTML()}</div>
-    <div class="scard"><div class="shead">Penna</div>${srowT('dbl', 'Doppio clic sul tasto della penna: gomma')}</div>`;
+    <div class="scard"><div class="shead">Colori fissi</div><div class="fxrow">${fixedCols().map((c, i) => `<button class="tc big" data-act="fx-edit" data-i="${i}" style="--c:${c}" aria-label="Colore fisso ${c}"></button>`).join('')}${fixedCols().length < FIXED_MAX ? `<button class="tc big add" data-act="fx-add" aria-label="Aggiungi un colore fisso">${ic('plus')}</button>` : ''}</div></div>
+    <div class="scard"><div class="shead">Penna</div>${srowT('dbl', 'Doppio clic sul tasto della penna: gomma')}${srowT('hlStraight', 'Evidenziatore: tieni premuto per tracciare dritto')}</div>`;
   if (k === 'gesti') return `<div class="set-h">Gesti e riconoscimento</div>
     <div class="scard"><div class="shead">Cancellare</div>${srowT('scribble', 'Cancella con lo scarabocchio')}${srowT('xErase', 'Cancella con una X')}${srowT('erBoost', 'Gomma che si allarga con la velocità')}${S.erBoost ? srowS('Ingrandimento massimo', seg2('set-ermax', S.erMax, [2, 3, 4, 5, 6, 7].map(n => [n, n + '×']))) : ''}</div>
     <div class="scard"><div class="shead">Forme</div>${srowT('shapeRec', 'Riconoscimento delle forme')}${S.shapeRec ? srowS('Pausa', seg2('set-hold', S.shapeHold, [['short', 'Breve'], ['normal', 'Normale'], ['long', 'Lunga']])) + srowT('shapeGrid', 'Allinea le forme alla griglia') : ''}</div>`;
@@ -2161,8 +2220,8 @@ function shapePopover(anchor, styleOnly) {
   const o = sample ? { s: Math.max(0, SHAPE_SIZES.indexOf(sample.sw)), fill: sample.fill, ls: lineStyle(sample) } : T;
   if (sample && o.s < 0) o.s = 1;
   const box = h('div', 'pop ptool');
-  const colL = h('div', 'crow-l', 'Colore'), colR = styleOnly ? null : colorRow(() => T.c, c => { T.c = c; saveMeta(); });
-  const render = () => { box.innerHTML = `<div class="pop-h">${styleOnly ? 'Stile delle forme' : 'Forme'}</div>${shapeStyleHTML(o, !styleOnly)}`; if (colR) box.append(colL, colR); };
+  const colR = styleOnly ? null : colorTray('shape', () => T.c, c => { T.c = c; saveMeta(); });
+  const render = () => { box.innerHTML = `<div class="pop-h">${styleOnly ? 'Stile delle forme' : 'Forme'}</div>${shapeStyleHTML(o, !styleOnly)}`; if (colR) box.append(colR); };
   render();
   box.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
@@ -2487,7 +2546,7 @@ function drawLive() {
   if (find) drawFindHits(c);
   if (drawing && drawing.kind === 'ink' && drawing.recog) drawRecog(c, drawing);
   else if (drawing && drawing.kind === 'ink') {
-    const pts = drawing.snap ? snapPts(drawing) : drawing.item.k === 'straight' ? straighten(drawing.pts) : drawing.pts;
+    const pts = drawing.snap ? snapPts(drawing) : drawing.pts;
     const it = { ...drawing.item, p: pts }, clipP = pageClipPath();
     if (clipP) { c.save(); c.clip(clipP); }
     drawItem(c, it, buildGeom(it));
@@ -2877,7 +2936,19 @@ const HOLD_MS = { short: 400, normal: 650, long: 1000 };
 const isOpenShape = it => LINE_KINDS.has(it.k) || it.k === 'brace' || it.k === 'arc' || (it.k === 'poly' && !it.closed);
 function holdArm(d) {
   clearTimeout(d.holdT);
-  if (!meta.settings.shapeRec || d.kind !== 'ink' || d.item.t !== 'pen' || d.snap) return;
+  if (d.kind !== 'ink' || d.snap) return;
+  // evidenziatore: tracci la riga, tieni ferma la punta e diventa dritta (orizzontale se lo è quasi)
+  if (d.item.t === 'hl') {
+    if (meta.settings.hlStraight === false) return;
+    d.holdT = setTimeout(() => {
+      if (drawing !== d || d.recog || d.pts.length < 6) return;
+      const q = straighten(d.pts);
+      if (Math.hypot(q[3] - q[0], q[4] - q[1]) * cam.z < 12) return;
+      d.recog = { hl: true, items: [{ ...d.item, p: Float32Array.from(q) }] }; drawLive();
+    }, HOLD_MS[meta.settings.shapeHold] || 650);
+    return;
+  }
+  if (!meta.settings.shapeRec || d.item.t !== 'pen') return;
   d.holdT = setTimeout(() => { if (drawing === d && !d.recog) { const r = recognizeStroke(d.pts, d.item); if (r) { if (r.items && meta.settings.shapeGrid) r.items = r.items.map(gridAlign); d.recog = r; drawLive(); } } }, HOLD_MS[meta.settings.shapeHold] || 650);
 }
 function holdMove(d, s) {
@@ -3409,8 +3480,8 @@ function traceRings(M, W, H) {
 }
 function fillPopover(anchor) {
   const T = meta.tool.fill, box = h('div', 'pop ptool');
-  const colL = h('div', 'crow-l', 'Colore'), colR = colorRow(() => T.c, c => { T.c = c; saveMeta(); });
-  const render = () => { box.innerHTML = `<div class="pop-h">Riempi</div><div class="seg">${[['solid', 'Pieno'], ['light', 'Chiaro']].map(([k, l]) => `<button class="seg-b ${(T.mode || 'solid') === k ? 'on' : ''}" data-m="${k}"><span class="fillsw fs-${k}"></span><span>${l}</span></button>`).join('')}</div>`; box.append(colL, colR); };
+  const colR = colorTray('fill', () => T.c, c => { T.c = c; saveMeta(); });
+  const render = () => { box.innerHTML = `<div class="pop-h">Riempi</div><div class="seg">${[['solid', 'Pieno'], ['light', 'Chiaro']].map(([k, l]) => `<button class="seg-b ${(T.mode || 'solid') === k ? 'on' : ''}" data-m="${k}"><span class="fillsw fs-${k}"></span><span>${l}</span></button>`).join('')}</div>`; box.append(colR); };
   render();
   box.addEventListener('click', e => { const b = e.target.closest('[data-m]'); if (!b) return; T.mode = b.dataset.m; saveMeta(); render(); });
   popover(anchor, box, 'center');
@@ -4148,6 +4219,11 @@ function finishTool(e) {
     const before = ed.items.slice(); ed.items.push(it); pushHist(before); renderInk(); setSelection([it]); return;
   }
   clearTimeout(d.holdT);
+  if (d.recog && d.recog.hl) {
+    const it = { ...d.item, p: d.recog.items[0].p }, before = ed.items.slice(), parts = clipInkToPages(it);
+    if (parts.length) { ed.items.push(...parts); pushHist(before); }
+    lastPen = null; renderInk(); drawLive(); return;
+  }
   if (d.recog) { commitRecog(d); return; }
   let pts = d.pts;
   if (d.snap) {
@@ -4157,7 +4233,6 @@ function finishTool(e) {
     if (!parts.length) { drawLive(); return; }
     ed.items.push(...parts); pushHist(before); lastPen = null; renderInk(); drawLive(); return;
   }
-  if (d.item.t === 'hl' && d.item.k === 'straight') pts = straighten(pts);
   const it = { ...d.item, p: finalizePts(pts, clamp(1.5 / cam.z, 0.25, 3)) };
   const before = ed.items.slice();
   if (it.t === 'pen' && meta.settings.scribble && isScribble(it.p)) {
@@ -4514,7 +4589,7 @@ const AST_TOOLS = {
 };
 const AST_DEFAULT = ['er', 'lasso', 'text', 'shape'];
 const AST_MAX = 5;
-const PEN_TYPES = [['pen', 'marker', 'Pennarello'], ['pen', 'fountain', 'Stilografica'], ['pen', 'brush', 'Pennello'], ['hl', 'free', 'Evidenziatore'], ['hl', 'straight', 'Evidenziatore dritto']];
+const PEN_TYPES = [['pen', 'marker', 'Pennarello'], ['pen', 'fountain', 'Stilografica'], ['pen', 'brush', 'Pennello'], ['hl', 'free', 'Evidenziatore']];
 const penTypeName = p => (PEN_TYPES.find(x => x[0] === p.t && x[1] === p.k) || PEN_TYPES[0])[2];
 function seedPens() {
   return [
@@ -4528,6 +4603,8 @@ function astInit() {
   if (!Array.isArray(meta.pens) || !meta.pens.length) meta.pens = seedPens();
   meta.ast = Object.assign({ tools: AST_DEFAULT.slice(), pos: 'right', closed: false, free: null, cPens: 1, cTools: 1 }, meta.ast || {});
   meta.ast.tools = meta.ast.tools.filter((k, i, a) => AST_TOOLS[k] && a.indexOf(k) === i).slice(0, AST_MAX);
+  for (const p of meta.pens) if (p.t === 'hl') p.k = 'free';
+  if (meta.tool.hl && meta.tool.hl.k !== 'free') meta.tool.hl.k = 'free';
   if (!meta.pens.some(p => p.id === meta.ui.pen)) meta.ui.pen = meta.pens[0].id;
   applyPen(curPen());
 }
@@ -4538,10 +4615,16 @@ function setPen(id) { const p = meta.pens.find(x => x.id === id); if (!p) return
 const astToolOn = k => (k === 'ruler' || k === 'prot' ? !!guides[k] : meta.tool.tool === k);
 function darker(hex) { const [r, g, b] = mixRgb(hex, '#000000', 0.45); return `rgb(${r},${g},${b})`; }
 function penIcon(p) {
-  const c = esc(p.c), d = darker(p.c), o = isLight(p.c) ? 'rgba(0,0,0,.25)' : 'rgba(255,255,255,.4)';
-  return p.t === 'hl'
-    ? `<svg class="penic" width="44" height="20" viewBox="0 0 44 20" aria-hidden="true"><path d="M44 2H16l-8 5v6l8 5h28z" fill="${c}" stroke="${o}" stroke-width="1"/><path d="M8 7L2 8.5v3L8 13z" fill="${d}"/></svg>`
-    : `<svg class="penic" width="44" height="16" viewBox="0 0 44 16" aria-hidden="true"><path d="M44 3H14L2 8l12 5h30z" fill="${c}" stroke="${o}" stroke-width="1"/><path d="M2 8l6-2.5v5z" fill="${d}"/></svg>`;
+  const c = esc(p.c), [r, g, b] = hex2rgb(p.c), dark = (0.299 * r + 0.587 * g + 0.114 * b) / 255 < 0.3;
+  const o = dark ? ' stroke="rgba(255,255,255,.45)" stroke-width=".8"' : '', m = '#C9CFD8';
+  const kind = p.t === 'hl' ? 'hl' : p.k === 'fountain' || p.k === 'brush' ? p.k : 'marker';
+  const body = {
+    marker: `<path d="M16 4h31a3 3 0 013 3v4a3 3 0 01-3 3H16z" fill="${c}"${o}/><path d="M16 4l-7 3.2v3.6L16 14z" fill="${m}"/><path d="M9 7.2L4 8.3a.75.75 0 000 1.4l5 1.1z" fill="${c}"${o}/>`,
+    fountain: `<path d="M20 5.5h27a2.5 2.5 0 012.5 2.5v2a2.5 2.5 0 01-2.5 2.5H20z" fill="${c}"${o}/><path d="M20 5.5L3 9l17 3.5z" fill="${m}"/>`,
+    brush: `<path d="M26 7.3h20c2.5 0 4 .8 4 1.7s-1.5 1.7-4 1.7H26z" fill="${c}"${o}/><rect x="21" y="6" width="5" height="6" rx="1" fill="${m}"/><path d="M21 6C14 6 7.5 7.6 2.5 9 7.5 10.4 14 12 21 12z" fill="${c}"${o}/>`,
+    hl: `<path d="M17 3h30a3 3 0 013 3v6a3 3 0 01-3 3H17z" fill="${c}"${o}/><path d="M17 4.5L11 6v6l6 1.5z" fill="${m}"/><path d="M11 6L4 7v4.5l7 .5z" fill="${c}"${o}/>`
+  }[kind];
+  return `<svg class="penic" width="52" height="18" viewBox="0 0 52 18" aria-hidden="true">${body}</svg>`;
 }
 /* Lato verso cui guarda l'astuccio: quello agganciato, oppure (ridotto e spostato) verso il centro dello schermo */
 function astSide() {
@@ -4560,7 +4643,7 @@ function renderAst() {
   const a = meta.ast, side = a.pos, vert = side === 'left' || side === 'right', cur = curPen();
   const penBtn = (p, ctx) => `<button class="ab pen ${penOn() && cur && p.id === cur.id ? 'on' : ''}" data-pen="${p.id}" ${ctx ? `data-ctx="pen" data-id="${p.id}"` : ''} aria-label="${esc(p.name)}">${penIcon(p)}</button>`;
   const toolBtn = k => `<button class="ab ${astToolOn(k) ? 'on' : ''}" data-atool="${k}" aria-label="${AST_TOOLS[k][0]}">${ic(AST_TOOLS[k][1])}</button>`;
-  el.className = `ast ${vert ? 'v' : 'h'} ${side}${a.closed ? ' closed' : ''}${a.closed && a.free ? ' free' : ''}`;
+  el.className = `ast ${vert ? 'v' : 'h'} ${side}${a.closed ? ' closed' : ''}${a.closed && a.free ? ' free' : ''}${drawerL ? ' above' : ''}`;
   el.style.left = el.style.top = '';
   if (a.closed) {
     const pens = cur ? [cur].concat(meta.pens.filter(p => p !== cur)).slice(0, a.cPens) : [];
@@ -4573,12 +4656,20 @@ function renderAst() {
   const others = Object.keys(AST_TOOLS).filter(k => !a.tools.includes(k));
   el.innerHTML = `<span class="grip" data-grip="1" aria-hidden="true">${'<i></i>'.repeat(6)}</span>` +
     meta.pens.map(p => penBtn(p, true)).join('') +
-    `<button class="ab addpen" data-act="pen-add" aria-label="Aggiungi una penna"><span>${ic('plus')}</span></button>` +
+    (meta.pens.length < PEN_MAX ? `<button class="ab addpen" data-act="pen-add" aria-label="Aggiungi una penna"><span>${ic('plus')}</span></button>` : '') +
     (a.tools.length ? '<span class="asep"></span>' + a.tools.map(toolBtn).join('') : '') +
     `<span class="asep"></span><button class="ab ${others.some(astToolOn) ? 'on' : ''}" data-act="ast-more" aria-label="Altri strumenti">${ic('moreH')}</button>` +
     `<span class="asep"></span><button class="ab sm" data-act="ast-close" aria-label="Riduci l'astuccio a icona">${ic(AST_ARROW[side])}</button>`;
   el.classList.remove('scroll');
-  requestAnimationFrame(() => el.classList.toggle('scroll', vert ? el.scrollHeight > el.clientHeight + 2 : el.scrollWidth > el.clientWidth + 2));
+  requestAnimationFrame(() => {
+    el.classList.toggle('scroll', vert ? el.scrollHeight > el.clientHeight + 2 : el.scrollWidth > el.clientWidth + 2);
+    // in alto sta all'altezza dei pulsanti; scende solo se li toccherebbe
+    if (side === 'top') {
+      const r = el.getBoundingClientRect();
+      const hit = ['.ed-tl', '.ed-tr'].some(q => { const x = $(q); if (!x) return false; const b = x.getBoundingClientRect(); return b.width > 0 && r.left < b.right + 8 && r.right > b.left - 8; });
+      el.style.top = hit ? '80px' : '';
+    }
+  });
 }
 /* L'astuccio ridotto e spostato resta sempre dentro lo schermo */
 function astClamp() {
@@ -4589,9 +4680,11 @@ function astClamp() {
 }
 function astTap(e) {
   const b = e.target.closest('button'); if (!b || performance.now() - astDragEnd < 400) return;
+  const key = b.dataset.pen ? 'pen:' + b.dataset.pen : b.dataset.atool ? 'tool:' + b.dataset.atool : b.dataset.act === 'ast-more' ? 'more' : null;
+  if (drawerL) { const k = drawerL.key; closeAllLayers(); if (k === key) { e.stopPropagation(); return; } }
   if (b.dataset.pen) {
     const p = meta.pens.find(x => x.id === b.dataset.pen); if (!p) return;
-    if (penOn() && meta.ui.pen === p.id) openWheel(b); else setPen(p.id);
+    if (penOn() && meta.ui.pen === p.id) openPenDrawer(b); else setPen(p.id);
     return;
   }
   const k = b.dataset.atool; if (!k) return;
@@ -4613,7 +4706,7 @@ function toolOptions(k, anchor) {
 let astDrag = null, astDragEnd = 0, astHold = null;
 function astPointerDown(e) {
   const el = $('#ast'), a = meta.ast;
-  if (!a.closed && e.target.closest('[data-grip]')) { e.preventDefault(); astStartDrag(e, false); return; }
+  if (!a.closed && e.target.closest('[data-grip]')) { e.preventDefault(); if (drawerL) closeAllLayers(); astStartDrag(e, false); return; }
   if (a.closed) {
     const x = e.clientX, y = e.clientY;
     astHold = { x, y, id: e.pointerId, t: setTimeout(() => { astHold = null; if (navigator.vibrate) { try { navigator.vibrate(15); } catch (_) {} } astStartDrag({ clientX: x, clientY: y, pointerId: e.pointerId }, true); }, 450) };
@@ -4649,73 +4742,106 @@ const astUp = () => {
 window.addEventListener('pointerup', astUp);
 window.addEventListener('pointercancel', astUp);
 
-/* Ruota della penna: colori sul giro esterno, spessori su quello interno, tipo nella pastiglia */
-function openWheel(btn) {
-  const p = curPen(); if (!p) return;
-  const L = layer(false); L.classList.add('wheel-l');
-  const side = astSide(), r = btn.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-  const dir = { right: Math.PI, left: 0, top: Math.PI / 2, bottom: -Math.PI / 2 }[side];
-  const ux = Math.cos(dir), uy = Math.sin(dir), R = 152, off = 30;
-  // il disco si vede solo dalla parte del foglio: la metà sotto l'astuccio è tagliata
-  const sq = [[0, 0], [2 * R, 0], [2 * R, 2 * R], [0, 2 * R]], keep = ([x, y]) => (x - R) * ux + (y - R) * uy - off;
-  const poly = [];
-  for (let i = 0; i < 4; i++) {
-    const A = sq[i], B = sq[(i + 1) % 4], ka = keep(A), kb = keep(B);
-    if (ka >= 0) poly.push(A);
-    if ((ka >= 0) !== (kb >= 0)) { const t = ka / (ka - kb); poly.push([A[0] + (B[0] - A[0]) * t, A[1] + (B[1] - A[1]) * t]); }
-  }
-  const disc = h('div', 'wh-disc');
-  disc.style.left = (cx - R) + 'px'; disc.style.top = (cy - R) + 'px';
-  disc.style.clipPath = `polygon(${poly.map(([x, y]) => `${x.toFixed(1)}px ${y.toFixed(1)}px`).join(',')})`;
-  L.append(disc);
-  const sizes = p.t === 'hl' ? HL_SIZES : PEN_SIZES;
-  const at = (deg, rad, w) => { const a = dir + deg * Math.PI / 180; return `left:${(cx + rad * Math.cos(a) - w / 2).toFixed(1)}px;top:${(cy + rad * Math.sin(a) - w / 2).toFixed(1)}px`; };
-  const cols = meta.palette.slice(0, 6);
+/* ---- Colori: i fissi scelti in Impostazioni, gli ultimi 3 usati con quello strumento, la tavolozza completa ---- */
+const FIXED_DEFAULT = ['#000000', '#808080', '#F0163A', '#FF7F0F', '#FFD83B', '#22D45E', '#1E88F5', '#0B52E0', '#6C7FE0', '#8B5A0B'];
+const FIXED_MAX = 10;
+const PEN_MAX = 5;
+const fixedCols = () => (Array.isArray(meta.fixed) && meta.fixed.length ? meta.fixed : (meta.fixed = FIXED_DEFAULT.slice()));
+function recentCols(key) { if (!meta.recent) meta.recent = {}; return meta.recent[key] || (meta.recent[key] = []); }
+/* Un colore preso dalla tavolozza entra fra gli ultimi 3 di quello strumento (i colori fissi no: sono già lì) */
+function noteRecent(key, c) {
+  if (!key || !c) return;
+  const C = c.toUpperCase();
+  if (fixedCols().some(x => x.toUpperCase() === C)) return;
+  meta.recent[key] = [C].concat(recentCols(key).filter(x => x.toUpperCase() !== C)).slice(0, 3);
+}
+function colorTray(key, get, set) {
+  const tray = h('div', 'ctray'), rows = h('div', 'tc-rows');
+  tray.append(rows);
+  const sw = (c, on, attr, label) => `<button class="tc ${on ? 'on' : ''}" ${attr} style="--c:${c}" aria-label="${label}"></button>`;
   const render = () => {
-    $$('.wh-i', L).forEach(x => x.remove());
-    const curC = p.c.toUpperCase(); let marked = false;
-    cols.forEach((c, i) => {
-      const on = !marked && c.toUpperCase() === curC; if (on) marked = true;
-      const b = h('button', 'wh-i wh-c' + (on ? ' on' : '') + (isLight(c) ? ' lt' : ''));
-      b.style.cssText = at(-60 + i * 20, 124, 32) + `;--c:${c}`; b.dataset.c = c; b.setAttribute('aria-label', 'Colore ' + c);
-      L.append(b);
-    });
-    const more = h('button', 'wh-i wh-c more' + (marked ? '' : ' on'));
-    more.style.cssText = at(60, 124, 32); more.dataset.more = '1'; more.setAttribute('aria-label', 'Altri colori');
-    if (!marked) more.style.setProperty('--c', p.c);
-    L.append(more);
-    sizes.forEach((v, i) => {
-      const b = h('button', 'wh-i wh-s' + (p.s === i ? ' on' : ''));
-      b.style.cssText = at(-50 + i * 20, 80, 28); b.dataset.s = i; b.setAttribute('aria-label', 'Spessore ' + (i + 1));
-      const d = p.t === 'hl' ? 4 + i * 3 : 3 + i * 2.6;
-      b.innerHTML = `<i style="width:${d}px;height:${d}px;background:${esc(p.c)}"></i>`;
-      L.append(b);
-    });
-    pill.innerHTML = `<span><b>${esc(p.name)}</b></span><button class="wh-k" data-kind="1">${penTypeName(p)}${ic('chevD')}</button>`;
+    const c0 = (get() || '').toUpperCase(); let marked = false;
+    const mk = c => { const on = !marked && c.toUpperCase() === c0; if (on) marked = true; return on; };
+    const fx = fixedCols().map((c, i) => sw(c, mk(c), `data-fx="${i}"`, 'Colore ' + c)).join('');
+    const rc = recentCols(key).map((c, i) => sw(c, mk(c), `data-rc="${i}"`, 'Usato di recente ' + c)).join('');
+    rows.innerHTML = `<div class="tc-row">${fx}</div><div class="tc-row tc-r"><span class="tc-clk">${ic('clock')}</span>${rc}<span class="sp"></span><button class="tc more ${marked ? '' : 'on'}" data-more="1" aria-label="Tavolozza completa"></button></div>`;
   };
-  const pill = h('div', 'wh-pill'); L.append(pill);
   render();
-  // pastiglia: sotto il disco (astuccio a lato) o accanto (astuccio sopra o sotto)
-  requestAnimationFrame(() => {
-    const pw = pill.offsetWidth, ph = pill.offsetHeight, W = innerWidth, H = innerHeight;
-    let x, y;
-    if (side === 'left' || side === 'right') { x = cx + ux * R * 0.55 - pw / 2; y = cy + R + 8; if (y + ph > H - 8) y = cy - R - ph - 8; }
-    else { x = cx + R + 10; y = cy + uy * R * 0.55 - ph / 2; if (x + pw > W - 8) x = cx - R - pw - 10; }
-    const ar = $('#ast').getBoundingClientRect();
-    if (side === 'right') x = Math.min(x, ar.left - pw - 10);
-    else if (side === 'left') x = Math.max(x, ar.right + 10);
-    else if (side === 'top') y = Math.max(y, ar.bottom + 10);
-    else y = Math.min(y, ar.top - ph - 10);
-    pill.style.left = clamp(x, 8, W - pw - 8) + 'px'; pill.style.top = clamp(y, 8, H - ph - 8) + 'px';
-  });
-  const changed = () => { applyPen(p); saveMeta(); renderAst(); drawLive(); render(); };
-  L.addEventListener('click', e => {
+  rows.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
-    if (b.dataset.c) { p.c = b.dataset.c; changed(); }
-    else if (b.dataset.s !== undefined) { p.s = +b.dataset.s; changed(); }
-    else if (b.dataset.more) paletteMenu(b, p.c, c => { p.c = c; changed(); });
-    else if (b.dataset.kind) penKindMenu(b, p, changed);
+    e.stopPropagation();
+    if (b.dataset.fx !== undefined) set(fixedCols()[+b.dataset.fx]);
+    else if (b.dataset.rc !== undefined) set(recentCols(key)[+b.dataset.rc]);
+    else if (b.dataset.more) {
+      let last = null;
+      const L = paletteMenu(b, get(), c => { last = c; set(c); render(); });
+      L.onClose = () => { if (last) { noteRecent(key, last); saveMeta(); render(); } };
+      return;
+    }
+    render();
   });
+  tray.render = render;
+  return tray;
+}
+
+/* ---- Cassetto: le opzioni di penne e strumenti escono da dietro l'astuccio, dalla parte del foglio ---- */
+let drawerL = null;
+function drawer(anchor, box, key) {
+  if (drawerL) closeLayer(drawerL);
+  const side = astSide(), ast = $('#ast');
+  const L = layer(false); L.classList.add('drw-l');
+  box.classList.add('drw', 'drw-' + side); box.style.position = 'absolute';
+  L.append(box); L.key = key; drawerL = L;
+  ast.classList.add('above');
+  L._base = () => { if (drawerL === L) { drawerL = null; ast.classList.remove('above'); } };
+  placeDrawer(box, anchor, side);
+  return L;
+}
+function placeDrawer(box, anchor, side) {
+  const ar = $('#ast').getBoundingClientRect(), r = anchor.getBoundingClientRect(), W = innerWidth, H = innerHeight, OV = 30;
+  const w = box.offsetWidth, hh = box.offsetHeight;
+  let x, y;
+  if (side === 'right' || side === 'left') {
+    x = side === 'right' ? ar.left + OV - w : ar.right - OV;
+    y = clamp(r.top + r.height / 2 - hh / 2, 8, Math.max(8, H - hh - 8));
+  } else {
+    y = side === 'top' ? ar.bottom - OV : ar.top + OV - hh;
+    x = clamp(r.left + r.width / 2 - w / 2, 8, Math.max(8, W - w - 8));
+  }
+  box.style.left = Math.round(x) + 'px'; box.style.top = Math.round(y) + 'px';
+}
+const fmtMm = px => { const mm = px * 25.4 / 96; return (mm < 2 ? mm.toFixed(1) : String(Math.round(mm * 2) / 2)).replace(/\.0$/, '').replace('.', ','); };
+/* Tocco sul nome: si scrive direttamente al suo posto */
+function renameInline(btn, value, done) {
+  const inp = h('input', 'dw-in'); inp.type = 'text'; inp.value = value; inp.setAttribute('autocomplete', 'off'); inp.setAttribute('aria-label', 'Nome');
+  btn.replaceWith(inp); inp.focus(); inp.select();
+  let ended = false;
+  const end = keep => { if (ended) return; ended = true; const n = inp.value.trim(); done(keep && n ? n.slice(0, 40) : value); };
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); end(true); } else if (e.key === 'Escape') { e.preventDefault(); end(false); } });
+  inp.addEventListener('blur', () => end(true));
+}
+/* Cassetto della penna: nome (tocca per rinominare) · spessore in mm · tipo; nel vassoio spessori e colori */
+function openPenDrawer(btn) {
+  const p = curPen(); if (!p) return;
+  const box = h('div', 'pop pdrw'), head = h('div', 'dw-h'), szEl = h('div', 'dw-sz');
+  const sizes = () => (p.t === 'hl' ? HL_SIZES : PEN_SIZES);
+  const renderHead = () => {
+    head.innerHTML = `<button class="dw-name" data-rn="1" aria-label="Rinomina la penna"><span>${esc(p.name)}</span>${ic('rename')}</button><span class="dw-mm">${fmtMm(sizes()[p.s])} mm</span><span class="sp"></span><button class="dw-chip" data-kind="1">${penTypeName(p)}${ic('chevD')}</button>`;
+  };
+  const renderSz = () => {
+    szEl.innerHTML = sizes().map((v, i) => { const d = p.t === 'hl' ? 4 + i * 3 : 3 + i * 2.6; return `<button class="dsz ${p.s === i ? 'on' : ''}" data-s="${i}" aria-label="${fmtMm(v)} mm"><i style="width:${d.toFixed(1)}px;height:${d.toFixed(1)}px;background:${esc(p.c)}${isLight(p.c) ? ';box-shadow:0 0 0 1px rgba(0,0,0,.28)' : ''}"></i></button>`; }).join('');
+  };
+  const changed = () => { applyPen(p); saveMeta(); renderAst(); drawLive(); renderHead(); renderSz(); };
+  const tray = colorTray('pen:' + p.id, () => p.c, c => { p.c = c; changed(); });
+  tray.prepend(szEl);
+  renderHead(); renderSz(); box.append(head, tray);
+  head.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.rn) renameInline(b, p.name, n => { p.name = n; saveMeta(); renderAst(); renderHead(); });
+    else if (b.dataset.kind) penKindMenu(b, p, () => { changed(); tray.render(); });
+  });
+  szEl.addEventListener('click', e => { const b = e.target.closest('[data-s]'); if (!b) return; p.s = +b.dataset.s; changed(); });
+  return drawer(btn, box, 'pen:' + p.id);
 }
 function penKindMenu(anchor, p, done) {
   menu(anchor, PEN_TYPES.map(([t, k, l]) => ({ label: l, icon: p.t === t && p.k === k ? 'check' : null, fn: () => {
@@ -4751,41 +4877,23 @@ function paletteMenu(anchor, cur, pick) {
   });
   return L;
 }
-/* Riga di colori per le finestre degli strumenti (testo, forme, riempimento, laser) */
-function colorRow(get, set) {
-  const row = h('div', 'crow');
-  const render = () => {
-    const c0 = (get() || '').toUpperCase(); let marked = false;
-    row.innerHTML = meta.palette.map((c, i) => { const on = !marked && c.toUpperCase() === c0; if (on) marked = true; return `<button class="sw ${on ? 'on' : ''} ${isLight(c) ? 'lt' : ''}" data-ci="${i}" style="--c:${c}" aria-label="Colore ${c}">${ic('check')}</button>`; }).join('') +
-      `<button class="sw add" data-cmore="1" aria-label="Altri colori">${ic('plus')}</button>`;
-  };
-  render();
-  row.addEventListener('click', e => {
-    const b = e.target.closest('button'); if (!b) return;
-    e.stopPropagation();
-    if (b.dataset.cmore) { paletteMenu(b, get(), c => { set(c); render(); }); return; }
-    set(meta.palette[+b.dataset.ci]); render();
-  });
-  return row;
-}
 function penMenu(anchor, id) {
   const p = meta.pens.find(x => x.id === id); if (!p) return;
-  menu(anchor, [
-    { label: 'Rinomina', icon: 'rename', fn: async () => { const n = await dialog({ title: 'Nome della penna', input: p.name }); if (n) { p.name = n; saveMeta(); renderAst(); } } },
-    { label: 'Tipo: ' + penTypeName(p), icon: 'pen', fn: () => penKindMenu(anchor, p, () => { applyPen(p); saveMeta(); renderAst(); }) },
-    { sep: true },
-    { label: 'Togli dall\'astuccio', icon: 'trash', danger: true, disabled: meta.pens.length <= 1, note: meta.pens.length <= 1 ? 'Serve almeno una penna' : '', fn: () => {
-      meta.pens = meta.pens.filter(x => x !== p);
-      if (meta.ui.pen === p.id) { meta.ui.pen = meta.pens[0].id; applyPen(meta.pens[0]); if (penOn()) setTool(meta.pens[0].t); }
-      saveMeta(); renderAst();
-    } }
-  ]);
+  if (drawerL) closeAllLayers();
+  menu(anchor, [{ label: 'Elimina', icon: 'trash', danger: true, disabled: meta.pens.length <= 1, fn: () => {
+    meta.pens = meta.pens.filter(x => x !== p);
+    if (meta.recent) delete meta.recent['pen:' + p.id];
+    if (meta.ui.pen === p.id) { meta.ui.pen = meta.pens[0].id; applyPen(meta.pens[0]); if (penOn()) setTool(meta.pens[0].t); }
+    saveMeta(); renderAst();
+  } }]);
 }
 function addPen() {
+  if (meta.pens.length >= PEN_MAX) return;
+  if (drawerL) closeAllLayers();
   const c = curPen() || { t: 'pen', k: 'marker', s: 2, c: '#000000' };
   const p = { id: uid(), name: 'Penna ' + (meta.pens.length + 1), t: c.t, k: c.k, s: c.s, c: c.c };
   meta.pens.push(p); saveMeta(); setPen(p.id);
-  requestAnimationFrame(() => { const b = $(`#ast [data-pen="${p.id}"]`); if (b) { b.scrollIntoView({ block: 'nearest', inline: 'nearest' }); openWheel(b); } });
+  requestAnimationFrame(() => { const b = $(`#ast [data-pen="${p.id}"]`); if (b) { b.scrollIntoView({ block: 'nearest', inline: 'nearest' }); openPenDrawer(b); } });
 }
 /* Altri strumenti: quelli che non stanno nell'astuccio; l'ingranaggio sceglie cosa tenere nell'astuccio */
 function astMore(anchor) {
@@ -4934,7 +5042,7 @@ function tryPad(getProps) {
   const draw = () => {
     c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, cv.width, cv.height); c.setTransform(d, 0, 0, d, 0, 0);
     const props = getProps();
-    for (const s of cur ? strokes.concat([cur]) : strokes) { const pts = props.k === 'straight' ? straighten(s) : s; const it = { ...props, p: pts }; drawItem(c, it, buildGeom(it)); }
+    for (const s of cur ? strokes.concat([cur]) : strokes) { const it = { ...props, p: s }; drawItem(c, it, buildGeom(it)); }
     lab.hidden = strokes.length > 0 || !!cur;
   };
   const pt = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top, pressure(e)]; };
@@ -4960,9 +5068,9 @@ function textPopover(anchor) {
       <div class="ptrow"><button class="ib sm" data-step="-1" aria-label="Più piccolo">${ic('minus')}</button><button class="ptv" data-ptin="1" aria-label="Scrivi la dimensione">${fmtPt(v.pt * PT)} pt</button><button class="ib sm" data-step="1" aria-label="Più grande">${ic('plus')}</button></div>
       <div class="lbl">Stile</div>
       <div class="fmt fmt4"><button class="fmt-b ${v.b ? 'on' : ''}" data-f="b" aria-label="Grassetto"><b>G</b></button><button class="fmt-b ${v.i ? 'on' : ''}" data-f="i" aria-label="Corsivo"><i>C</i></button><button class="fmt-b ${v.u ? 'on' : ''}" data-f="u" aria-label="Sottolineato"><u>S</u></button><button class="fmt-b ${v.st ? 'on' : ''}" data-f="st" aria-label="Barrato"><s>abc</s></button></div>`;
-    box.append(colL, colR);
+    box.append(colR);
   };
-  const colL = h('div', 'crow-l', 'Colore'), colR = colorRow(() => (textEd && !textEd.cell ? textEd.c : T.c), c => { T.c = c; if (textEd) { textEd.c = c; layoutTextEd(); } saveMeta(); });
+  const colR = colorTray('text', () => (textEd && !textEd.cell ? textEd.c : T.c), c => { T.c = c; if (textEd) { textEd.c = c; layoutTextEd(); } saveMeta(); });
   render();
   box.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
@@ -5003,9 +5111,9 @@ function laserPopover(anchor) {
   const render = () => {
     box.innerHTML = `<div class="pop-h">Puntatore laser</div>
       <div class="seg">${LASER_SPEEDS.map(([ms, l], i) => `<button class="seg-b ${T.f === i ? 'on' : ''}" data-f="${i}"><span>${l}</span></button>`).join('')}</div>`;
-    box.append(colL, colR);
+    box.append(colR);
   };
-  const colL = h('div', 'crow-l', 'Colore'), colR = colorRow(() => T.c, c => { T.c = c; saveMeta(); });
+  const colR = colorTray('laser', () => T.c, c => { T.c = c; saveMeta(); });
   render();
   box.addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (!b) return; T.f = +b.dataset.f; saveMeta(); render(); });
   popover(anchor, box, 'center');
@@ -5017,7 +5125,7 @@ function toolPopover(t, anchor) {
   const conf = t === 'pen'
     ? { title: 'Penna', obj: T.pen, sizes: PEN_SIZES, tryIt: true, opts: [['marker', 'Pennarello', ic('pen')], ['fountain', 'Stilografica', ic('nib')], ['brush', 'Pennello', ic('brush')]] }
     : t === 'hl'
-      ? { title: 'Evidenziatore', obj: T.hl, sizes: HL_SIZES, tryIt: true, opts: [['free', 'A mano libera', '<span class="abc free">Abc</span>'], ['straight', 'Dritto', '<span class="abc straight">Abc</span>']] }
+      ? { title: 'Evidenziatore', obj: T.hl, sizes: HL_SIZES, tryIt: true, opts: [] }
       : { title: 'Gomma', obj: T.er, sizes: ER_SIZES, tryIt: false, opts: [['stroke', 'Tratto', ic('erStroke')], ['precise', 'Precisa', ic('erPrecise')]] };
   const box = h('div', 'pop ptool');
   box.innerHTML = `<div class="pop-h">${conf.title}</div>
@@ -5612,6 +5720,16 @@ const ACT = {
   'ast-more': t => astMore(t),
   'ast-tools': () => astToolsDialog(),
   'pen-add': () => addPen(),
+  'fx-edit': t => {
+    const fx = fixedCols(), i = +t.dataset.i;
+    colorEditor(t, fx[i], { title: 'Colore fisso', onChange(hex) { fx[i] = hex; t.style.setProperty('--c', hex); saveMeta(); }, onDelete: () => { if (fx.length <= 1) return false; fx.splice(i, 1); saveMeta(); renderBody(); return true; } });
+  },
+  'fx-add': t => {
+    const fx = fixedCols(); if (fx.length >= FIXED_MAX) return;
+    let idx = -1;
+    const L = paletteMenu(t, '', c => { if (idx < 0) { fx.push(c.toUpperCase()); idx = fx.length - 1; } else fx[idx] = c.toUpperCase(); saveMeta(); });
+    L.onClose = () => renderBody();
+  },
   'ast-pos': t => { meta.ast.pos = t.dataset.v; meta.ast.free = null; saveMeta(); renderBody(); },
   'ast-cpens': t => { meta.ast.cPens = +t.dataset.v; saveMeta(); renderBody(); },
   'ast-ctools': t => { meta.ast.cTools = +t.dataset.v; saveMeta(); renderBody(); },
