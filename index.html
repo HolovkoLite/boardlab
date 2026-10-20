@@ -544,15 +544,13 @@ input { font: inherit; color: inherit; }
 .ast.left .penic { transform: scaleX(-1); }
 .ast.top .penic { transform: rotate(-90deg); }
 .ast.bottom .penic { transform: rotate(90deg); }
-.ast.right .pen.on .penic { transform: translateX(-24px); }
-.ast.left .pen.on .penic { transform: translateX(24px) scaleX(-1); }
-.ast.top .pen.on .penic { transform: translateY(24px) rotate(-90deg); }
-.ast.bottom .pen.on .penic { transform: translateY(-24px) rotate(90deg); }
-.ast.closed.right .pen.on .penic, .ast.scroll.right .pen.on .penic { transform: none; }
-.ast.closed.left .pen.on .penic, .ast.scroll.left .pen.on .penic { transform: scaleX(-1); }
-.ast.closed.top .pen.on .penic, .ast.scroll.top .pen.on .penic { transform: rotate(-90deg); }
-.ast.closed.bottom .pen.on .penic, .ast.scroll.bottom .pen.on .penic { transform: rotate(90deg); }
-.ast.scroll .pen.on { background: rgba(255,255,255,.1); }
+/* penna attiva: lo stesso riquadro degli strumenti attivi e una lineetta del suo colore dalla parte del foglio */
+.ast .pen.on { position: relative; background: #3A4454; box-shadow: inset 0 0 0 1.5px #5B6576; }
+.ast .pen.on::after { content: ''; position: absolute; background: var(--pc); border-radius: 2px; box-shadow: 0 0 0 1px rgba(255,255,255,.28); }
+.ast.right .pen.on::after { left: -5px; top: 12px; bottom: 12px; width: 3px; }
+.ast.left .pen.on::after { right: -5px; top: 12px; bottom: 12px; width: 3px; }
+.ast.top .pen.on::after { bottom: -5px; left: 12px; right: 12px; height: 3px; }
+.ast.bottom .pen.on::after { top: -5px; left: 12px; right: 12px; height: 3px; }
 .ast.h .penic { flex: none; }
 
 /* Cassetto: esce da dietro l'astuccio; i colori stanno in un vassoio chiaro */
@@ -904,7 +902,7 @@ const PATTERNS = [['none', 'Nessuno'], ['lines', 'Righe'], ['grid', 'Quadretti']
 const PEN_SIZES = [1.2, 2, 3, 4.5, 6.5, 9.5];
 const HL_SIZES = [8, 12, 17, 24, 32, 44];
 const ER_SIZES = [6, 10, 16, 24, 36, 52];
-const APP_VERSION = '0.13.0';
+const APP_VERSION = '0.13.1';
 const ZMIN = 0.1, ZMAX = 6;
 const ER_DECAY_MS = 600; // tempo con cui la gomma ingrandita torna piccola
 const SORT_LABEL = { created: 'Data di creazione', modified: 'Data di modifica', name: 'Nome' };
@@ -1283,7 +1281,7 @@ async function drvSendBoards(ids) {
 const SET_PAGES = [['penna', 'Penna e astuccio', 'pen'], ['gesti', 'Gesti e riconoscimento', 'sparkle'], ['cloud', 'Google Drive', 'cloud'], null, ['aiuto', 'Aiuto', 'help'], ['info', 'Informazioni', 'info']];
 const HELP = [
   ['astuccio', 'L\'astuccio e le penne', 'pen', [
-    ['Scegliere una penna', 'Tocca una penna dell\'astuccio: quella in uso sporge verso il foglio. Toccala di nuovo per aprire il suo cassetto: nome, spessore in millimetri, tipo, spessori e colori. Tocca il nome per rinominarla, il tipo per cambiarlo.'],
+    ['Scegliere una penna', 'Tocca una penna dell\'astuccio: quella in uso ha il riquadro chiaro e una lineetta del suo colore verso il foglio. Toccala di nuovo per aprire il suo cassetto: nome, spessore in millimetri, tipo, spessori e colori. Tocca il nome per rinominarla, il tipo per cambiarlo.'],
     ['Colori', 'Nel cassetto ci sono i colori fissi, gli ultimi tre colori presi dalla tavolozza con quella penna o quello strumento e il cerchio della tavolozza completa. I colori fissi (fino a 10) si scelgono in Impostazioni → Penna e astuccio.'],
     ['Aggiungere ed eliminare penne', 'Il + sotto le penne ne aggiunge una, fino a 5. Tieni premuta una penna per eliminarla.'],
     ['Evidenziatore dritto', 'Traccia la riga con l\'evidenziatore e tieni ferma la punta: diventa dritta, e orizzontale se lo era quasi. Si attiva e disattiva in Impostazioni → Penna e astuccio.'],
@@ -4641,7 +4639,7 @@ const AST_BACK = { right: 'dblL', left: 'dblR', top: 'dblD', bottom: 'dblU' };
 function renderAst() {
   const el = $('#ast'); if (!el || !meta || !meta.ast) return;
   const a = meta.ast, side = a.pos, vert = side === 'left' || side === 'right', cur = curPen();
-  const penBtn = (p, ctx) => `<button class="ab pen ${penOn() && cur && p.id === cur.id ? 'on' : ''}" data-pen="${p.id}" ${ctx ? `data-ctx="pen" data-id="${p.id}"` : ''} aria-label="${esc(p.name)}">${penIcon(p)}</button>`;
+  const penBtn = (p, ctx) => `<button class="ab pen ${penOn() && cur && p.id === cur.id ? 'on' : ''}" style="--pc:${esc(p.c)}" data-pen="${p.id}" ${ctx ? `data-ctx="pen" data-id="${p.id}"` : ''} aria-label="${esc(p.name)}">${penIcon(p)}</button>`;
   const toolBtn = k => `<button class="ab ${astToolOn(k) ? 'on' : ''}" data-atool="${k}" aria-label="${AST_TOOLS[k][0]}">${ic(AST_TOOLS[k][1])}</button>`;
   el.className = `ast ${vert ? 'v' : 'h'} ${side}${a.closed ? ' closed' : ''}${a.closed && a.free ? ' free' : ''}${drawerL ? ' above' : ''}`;
   el.style.left = el.style.top = '';
