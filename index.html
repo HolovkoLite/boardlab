@@ -260,6 +260,19 @@ input { font: inherit; color: inherit; }
 .fmt-b { flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px; height: 46px; border-radius: 8px; font-size: 15px; color: #55595E; }
 .fmt-b b, .fmt-b i { font-size: 20px; color: #222; font-family: Georgia, serif; }
 .fmt-b.on { background: var(--sel); color: var(--ink); }
+.ptxt { width: 380px; box-sizing: border-box; }
+.fonts { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.fnt { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 7px 10px; border-radius: 8px; text-align: left; min-width: 0; }
+.fnt span { font-size: 17px; color: #222; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.fnt small { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.fnt.on { background: var(--sel); }
+.ptrow { display: flex; align-items: center; justify-content: center; gap: 18px; }
+.ptv { font-size: 18px; min-width: 76px; text-align: center; font-variant-numeric: tabular-nums; }
+.pts { display: grid; grid-template-columns: repeat(9, 1fr); gap: 3px; margin-top: 6px; }
+.ptc { height: 32px; border-radius: 6px; font-size: 13.5px; color: #4A4E53; font-variant-numeric: tabular-nums; }
+.ptc.on { background: var(--sel); color: var(--ink); font-weight: 600; }
+.fmt4 .fmt-b { gap: 0; }
+.fmt-b u, .fmt-b s { font-size: 20px; color: #222; font-family: Georgia, serif; }
 .seg-s { font-size: 12px; color: var(--muted); margin-top: -2px; }
 .exp-seg .seg-b { min-width: 0; padding: 11px 6px; font-size: 14.5px; }
 .exp-note { margin: 10px 0 4px; color: #4C5157; font-size: 14px; line-height: 1.5; }
@@ -571,7 +584,7 @@ const PATTERNS = [['none', 'Nessuno'], ['lines', 'Righe'], ['grid', 'Quadretti']
 const PEN_SIZES = [1.2, 2, 3, 4.5, 6.5, 9.5];
 const HL_SIZES = [8, 12, 17, 24, 32, 44];
 const ER_SIZES = [6, 10, 16, 24, 36, 52];
-const APP_VERSION = '0.10.0';
+const APP_VERSION = '0.11.0';
 const ZMIN = 0.1, ZMAX = 6;
 const ER_DECAY_MS = 600; // tempo con cui la gomma ingrandita torna piccola
 const SORT_LABEL = { created: 'Data di creazione', modified: 'Data di modifica', name: 'Nome' };
@@ -593,7 +606,7 @@ function seedMeta() {
     v: 1, collections: [c1, c2], folders, boards: [board], palette: DEFAULT_PALETTE.slice(),
     settings: { dbl: true, scribble: true, xErase: true, erBoost: true, erMax: 3, shapeRec: true, shapeHold: 'normal', shapeGrid: false, sort: 'created', view: 'list' },
     ui: { folder: folders[0].id, drawer: true, zoomLock: false },
-    tool: { tool: 'pen', prev: 'pen', pen: { k: 'marker', s: 3, c: '#000000' }, hl: { k: 'free', s: 2, c: '#FFD83B' }, er: { k: 'stroke', s: 2 }, text: { s: 2, c: '#000000', b: false, i: false }, laser: { c: '#F0163A', f: 1 }, shape: { k: 'rect', s: 2, fill: 'none', ls: 'solid', c: '#000000' }, fill: { c: '#FFD83B', mode: 'solid' }, table: { header: true } }
+    tool: { tool: 'pen', prev: 'pen', pen: { k: 'marker', s: 3, c: '#000000' }, hl: { k: 'free', s: 2, c: '#FFD83B' }, er: { k: 'stroke', s: 2 }, text: { pt: 24, f: 'roboto', c: '#000000', b: false, i: false, u: false, st: false }, laser: { c: '#F0163A', f: 1 }, shape: { k: 'rect', s: 2, fill: 'none', ls: 'solid', c: '#000000' }, fill: { c: '#FFD83B', mode: 'solid' }, table: { header: true } }
   };
 }
 let metaT;
@@ -799,7 +812,7 @@ function renderBody() {
       <dt>Gomma precisa</dt><dd>Cancella solo il pezzo su cui passa, anche su forme, linee, frecce ed evidenziatore dritto. Una forma cancellata in parte diventa tratti; il suo riempimento resta.</dd>
       <dt>Scarabocchio e X</dt><dd>Uno zig-zag veloce o una X sopra una scritta la cancellano.</dd>
       <dt>Colori</dt><dd>Tocca di nuovo il colore attivo, o tienilo premuto, per modificarlo o eliminarlo. Il + aggiunge un colore.</dd>
-      <dt>Testo</dt><dd>Con lo strumento tastiera tocca un punto e scrivi. Tocca un testo esistente per modificarlo. Il secondo tocco sullo strumento apre dimensione, grassetto e corsivo.</dd>
+      <dt>Testo</dt><dd>Con lo strumento tastiera tocca un punto e scrivi. Tocca un testo esistente per modificarlo. Il secondo tocco sullo strumento apre carattere (8 tipi, inclusi nell'app), dimensione in punti come nei programmi di videoscrittura (12 pt è il corpo di un normale documento a zoom 100%), grassetto, corsivo, sottolineato e barrato. Mentre scrivi, le scelte valgono per il testo che stai scrivendo.</dd>
       <dt>Lazo</dt><dd>Disegna un giro attorno a ciò che vuoi selezionare, oppure tocca un singolo elemento. Trascina dentro il riquadro per spostare, usa gli angoli per ingrandire e il pallino blu in alto per ruotare.</dd>
       <dt>Incolla</dt><dd>Con il lazo, tocca un punto vuoto dopo aver copiato qualcosa.</dd>
       <dt>Forme</dt><dd>Scegli lo strumento Forme (o + in alto → Forme), poi trascina con la penna. Il secondo tocco sullo strumento apre forma, spessore, riempimento e tratteggio.</dd>
@@ -986,7 +999,63 @@ const NIB = -Math.PI / 4;
 const TEXT_SIZES = [16, 22, 30, 40, 54, 72];
 const FONT_STACK = 'Roboto, "Segoe UI", system-ui, -apple-system, sans-serif';
 const measureC = document.createElement('canvas').getContext('2d');
-const textFont = it => `${it.i ? 'italic ' : ''}${it.b ? 700 : 400} ${it.s}px ${FONT_STACK}`;
+/* Caratteri del testo: inclusi nell'app (cartella fonts/), funzionano anche senza rete e finiscono uguali nel PDF */
+const FONTS = [
+  ['roboto', 'Roboto', 'predefinito'], ['arimo', 'Arimo', 'come Arial'], ['carlito', 'Carlito', 'come Calibri'], ['tinos', 'Tinos', 'come Times New Roman'],
+  ['eb-garamond', 'EB Garamond', 'come Garamond'], ['cousine', 'Cousine', 'come Courier New'], ['comic-neue', 'Comic Neue', 'come Comic Sans'], ['atkinson-hyperlegible', 'Atkinson Hyperlegible', 'alta leggibilità']
+];
+const FONT_KEYS = new Set(FONTS.map(f => f[0]));
+const FONT_PATH = 'fonts/';
+const fontKey = it => (FONT_KEYS.has(it.f) ? it.f : 'roboto');
+const fontFam = k => `"BL ${k}"`;
+const fontId = it => `${fontKey(it)}|${it.b ? 700 : 400}|${it.i ? 'italic' : 'normal'}`;
+const textFont = it => `${it.i ? 'italic ' : ''}${it.b ? 700 : 400} ${it.s}px ${fontFam(fontKey(it))}, ${FONT_STACK}`;
+(() => {
+  const css = [];
+  for (const [k] of FONTS) for (const w of [400, 700]) for (const st of ['normal', 'italic'])
+    css.push(`@font-face { font-family: ${fontFam(k)}; src: url("${FONT_PATH}${k}-${w}-${st}.woff2") format("woff2"); font-weight: ${w}; font-style: ${st}; font-display: block; }`);
+  const el = document.createElement('style'); el.textContent = css.join('\n'); document.head.append(el);
+})();
+const FONT_OK = new Set(), FONT_WAIT = new Map(), FONT_MET = new Map();
+function loadFont(id) {
+  if (FONT_OK.has(id)) return Promise.resolve(false);
+  if (!FONT_WAIT.has(id)) {
+    const [k, w, st] = id.split('|');
+    FONT_WAIT.set(id, document.fonts.load(`${st === 'italic' ? 'italic ' : ''}${w} 40px ${fontFam(k)}`).catch(() => {}).then(() => { FONT_OK.add(id); FONT_WAIT.delete(id); return true; }));
+  }
+  return FONT_WAIT.get(id);
+}
+/* Carica i caratteri usati dagli elementi; se qualcuno mancava, le misure dei testi vanno rifatte */
+async function loadFontsFor(items) {
+  const ids = new Set(); for (const it of items) if (it.t === 'text') ids.add(fontId(it));
+  const res = await Promise.all([...ids].map(loadFont));
+  if (res.some(Boolean)) for (const it of items) if (it.t === 'text') GEOM.delete(it);
+}
+/* Se un carattere non è ancora pronto lo si carica e poi si ridisegna */
+function fontNeeded(it) {
+  const id = fontId(it); if (FONT_OK.has(id)) return;
+  loadFont(id).then(ch => {
+    if (!ch || !ed) return;
+    for (const x of ed.items) if (x.t === 'text' && fontId(x) === id) GEOM.delete(x);
+    if (textEd) layoutTextEd();
+    renderInk();
+  });
+}
+/* Posizione della linea di base e del centro delle minuscole, in frazioni della dimensione */
+function fontMetrics(it) {
+  const id = fontId(it); let m = FONT_MET.get(id);
+  if (m) return m;
+  measureC.font = textFont({ ...it, s: 100 }); measureC.textBaseline = 'top';
+  const H = measureC.measureText('H'), xx = measureC.measureText('x');
+  measureC.textBaseline = 'alphabetic';
+  const base = H.actualBoundingBoxDescent / 100, xTop = -xx.actualBoundingBoxAscent / 100;
+  m = { base: base > 0.5 && base < 1.2 ? base : 0.93, xmid: (xTop + base) / 2 > 0.3 ? (xTop + base) / 2 : 0.66 };
+  if (FONT_OK.has(id)) FONT_MET.set(id, m);
+  return m;
+}
+const PT = 4 / 3; // 1 punto = 4/3 di pixel a zoom 100%
+const TEXT_PTS = [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40, 48, 54, 60, 72];
+const fmtPt = px => { const v = Math.round(px / PT * 2) / 2; return String(v).replace('.', ','); };
 function geom(it) { let g = GEOM.get(it); if (g && it.t === 'conn' && !connFresh(it, g)) g = null; if (!g) { g = buildGeom(it); GEOM.set(it, g); } return g; }
 function buildGeom(it) {
   if (it.t === 'text') return textGeom(it);
@@ -1004,6 +1073,7 @@ function buildGeom(it) {
   return g;
 }
 function textLayout(it) {
+  fontNeeded(it);
   measureC.font = textFont(it);
   const lines = String(it.txt).split('\n');
   let w = 0; for (const l of lines) w = Math.max(w, measureC.measureText(l).width);
@@ -1127,7 +1197,16 @@ function drawItem(c, it, g) {
     const L = g.L;
     c.save(); c.translate(it.x, it.y); if (it.r) c.rotate(it.r);
     c.font = textFont(it); c.fillStyle = it.c; c.textBaseline = 'top';
-    L.lines.forEach((l, k) => c.fillText(l, -L.w / 2, -L.h / 2 + k * L.lh + it.s * 0.125));
+    const M = (it.u || it.st) && fontMetrics(it), th = Math.max(1, it.s * 0.065);
+    L.lines.forEach((l, k) => {
+      const y = -L.h / 2 + k * L.lh + it.s * 0.125;
+      c.fillText(l, -L.w / 2, y);
+      if (M && l.trim()) {
+        const w = c.measureText(l.replace(/\s+$/, '')).width;
+        if (it.u) c.fillRect(-L.w / 2, y + it.s * (M.base + 0.09) - th / 2, w, th);
+        if (it.st) c.fillRect(-L.w / 2, y + it.s * M.xmid - th / 2, w, th);
+      }
+    });
     c.restore(); return;
   }
   if (g.type === 'stroke') {
@@ -3035,13 +3114,14 @@ function drawLaser(c, now) {
 
 /* ================= Testo da tastiera ================= */
 let textEd = null;
-function textProps() { const T = meta.tool.text; return { s: TEXT_SIZES[T.s], c: T.c, b: !!T.b, i: !!T.i }; }
+const toolPt = T => T.pt || (TEXT_SIZES[T.s] ? Math.round(TEXT_SIZES[T.s] * 0.75) : 24);
+function textProps() { const T = meta.tool.text; return { s: toolPt(T) * PT, c: T.c, b: !!T.b, i: !!T.i, u: !!T.u, st: !!T.st, f: FONT_KEYS.has(T.f) ? T.f : 'roboto' }; }
 function startText(w, existing) {
   commitText();
   let st;
   if (existing) {
     const g = geom(existing), L = g.L, r = existing.r || 0, cs = Math.cos(r), sn = Math.sin(r);
-    st = { item: existing, r, s: existing.s, c: existing.c, b: !!existing.b, i: !!existing.i, txt: existing.txt,
+    st = { item: existing, r, s: existing.s, c: existing.c, b: !!existing.b, i: !!existing.i, u: !!existing.u, st: !!existing.st, f: fontKey(existing), txt: existing.txt,
       tlx: existing.x - (L.w / 2) * cs + (L.h / 2) * sn, tly: existing.y - (L.w / 2) * sn - (L.h / 2) * cs };
     ed.hide = new Set([existing.id]); renderInk();
   } else {
@@ -3058,7 +3138,7 @@ function startText(w, existing) {
 function layoutTextEd() {
   if (!textEd) return;
   const t = textEd, z = cam.z;
-  const L = textLayout({ txt: (txtEl.value || ' ') + ' ', s: t.s, b: t.b, i: t.i });
+  const L = textLayout({ t: 'text', txt: (txtEl.value || ' ') + ' ', s: t.s, b: t.b, i: t.i, f: t.f });
   const st = txtEl.style;
   st.left = (t.tlx * z + cam.ox) + 'px'; st.top = (t.tly * z + cam.oy) + 'px';
   if (t.cellW) {
@@ -3075,6 +3155,8 @@ function layoutTextEd() {
   }
   st.fontSize = (t.s * z) + 'px'; st.lineHeight = (1.25 * t.s * z) + 'px';
   st.fontWeight = t.b ? '700' : '400'; st.fontStyle = t.i ? 'italic' : 'normal';
+  st.fontFamily = t.cellW ? '' : `${fontFam(t.f || 'roboto')}, ${FONT_STACK}`;
+  st.textDecoration = t.cellW ? '' : [t.u ? 'underline' : '', t.st ? 'line-through' : ''].filter(Boolean).join(' ') || 'none';
   st.color = t.c; st.transform = t.r ? `rotate(${t.r}rad)` : '';
 }
 function ensureTextVisible() {
@@ -3106,7 +3188,8 @@ function commitText() {
     renderInk(); return;
   }
   const base = { t: 'text', txt, s: t.s, c: t.c, b: t.b, i: t.i, r: t.r };
-  if (t.item && t.item.txt === txt && t.item.s === t.s && t.item.c === t.c && !!t.item.b === t.b && !!t.item.i === t.i) { renderInk(); return; }
+  if (t.u) base.u = true; if (t.st) base.st = true; if (t.f && t.f !== 'roboto') base.f = t.f;
+  if (t.item && t.item.txt === txt && t.item.s === t.s && t.item.c === t.c && !!t.item.b === t.b && !!t.item.i === t.i && !!t.item.u === !!t.u && !!t.item.st === !!t.st && fontKey(t.item) === (t.f || 'roboto')) { renderInk(); return; }
   const L = textLayout(base), cs = Math.cos(t.r), sn = Math.sin(t.r);
   const it = { ...base, id: t.item ? t.item.id : uid(), x: t.tlx + (L.w / 2) * cs - (L.h / 2) * sn, y: t.tly + (L.w / 2) * sn + (L.h / 2) * cs };
   if (t.item) { const i = ed.items.indexOf(t.item); ed.items = ed.items.slice(); if (i >= 0) ed.items[i] = it; else ed.items.push(it); }
@@ -3871,6 +3954,7 @@ function makeThumb(e) {
 async function openBoard(id) {
   const b = meta.boards.find(x => x.id === id); if (!b) return;
   const data = (await DB.get('b:' + id)) || { items: [], bg: NEW_BG(), view: null };
+  await loadFontsFor(data.items || []);
   closeAllLayers(); closeFind();
   ed = { b, items: data.items || [], bg: data.bg || NEW_BG(), hist: [], fut: [], changed: false, saveT: 0, hide: null, hideCell: null };
   sel = null; pasteAt = null; textEd = null; drawing = null; laser.pts = []; guides = { ruler: null, prot: null }; selBar.hidden = true; txtEl.hidden = true;
@@ -4065,21 +4149,33 @@ function tryPad(getProps) {
 }
 function textPopover(anchor) {
   const T = meta.tool.text;
-  const box = h('div', 'pop ptool');
+  if (!T.pt) T.pt = toolPt(T);
+  const box = h('div', 'pop ptool ptxt');
+  // mentre scrivi (non in una cella) la finestra mostra e cambia il testo che stai scrivendo
+  const cur = () => (textEd && !textEd.cell ? { pt: textEd.s / PT, f: textEd.f || 'roboto', b: textEd.b, i: textEd.i, u: !!textEd.u, st: !!textEd.st } : { pt: T.pt, f: FONT_KEYS.has(T.f) ? T.f : 'roboto', b: !!T.b, i: !!T.i, u: !!T.u, st: !!T.st });
   const render = () => {
+    const v = cur();
     box.innerHTML = `<div class="pop-h">Testo</div>
+      <div class="lbl">Carattere</div>
+      <div class="fonts">${FONTS.map(([k, n, d]) => `<button class="fnt ${v.f === k ? 'on' : ''}" data-font="${k}"><span style="font-family:${fontFam(k).replace(/"/g, '&quot;')}, ${FONT_STACK.replace(/"/g, '&quot;')}">${n}</span><small>${d}</small></button>`).join('')}</div>
       <div class="lbl">Dimensione</div>
-      <div class="sizes">${TEXT_SIZES.map((v, i) => `<button class="sz szA ${T.s === i ? 'on' : ''}" data-s="${i}" aria-label="Dimensione ${i + 1}"><span style="font-size:${12 + i * 3.6}px">A</span></button>`).join('')}</div>
+      <div class="ptrow"><button class="ib sm" data-step="-1" aria-label="Più piccolo">${ic('minus')}</button><span class="ptv">${fmtPt(v.pt * PT)} pt</span><button class="ib sm" data-step="1" aria-label="Più grande">${ic('plus')}</button></div>
+      <div class="pts">${TEXT_PTS.map(p => `<button class="ptc ${Math.abs(v.pt - p) < 0.01 ? 'on' : ''}" data-pt="${p}">${p}</button>`).join('')}</div>
       <div class="lbl">Stile</div>
-      <div class="fmt"><button class="fmt-b ${T.b ? 'on' : ''}" data-f="b"><b>G</b><span>Grassetto</span></button><button class="fmt-b ${T.i ? 'on' : ''}" data-f="i"><i>C</i><span>Corsivo</span></button></div>`;
+      <div class="fmt fmt4"><button class="fmt-b ${v.b ? 'on' : ''}" data-f="b" aria-label="Grassetto"><b>G</b></button><button class="fmt-b ${v.i ? 'on' : ''}" data-f="i" aria-label="Corsivo"><i>C</i></button><button class="fmt-b ${v.u ? 'on' : ''}" data-f="u" aria-label="Sottolineato"><u>S</u></button><button class="fmt-b ${v.st ? 'on' : ''}" data-f="st" aria-label="Barrato"><s>abc</s></button></div>`;
   };
   render();
   box.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
-    if (b.dataset.s) T.s = +b.dataset.s;
-    else if (b.dataset.f) T[b.dataset.f] = !T[b.dataset.f];
+    const v = cur();
+    if (b.dataset.font) v.f = b.dataset.font;
+    else if (b.dataset.pt) v.pt = +b.dataset.pt;
+    else if (b.dataset.step) { const d = +b.dataset.step; v.pt = d > 0 ? (TEXT_PTS.find(p => p > v.pt + 0.01) || TEXT_PTS[TEXT_PTS.length - 1]) : ([...TEXT_PTS].reverse().find(p => p < v.pt - 0.01) || TEXT_PTS[0]); }
+    else if (b.dataset.f) v[b.dataset.f] = !v[b.dataset.f];
     else return;
-    if (textEd) { Object.assign(textEd, { s: TEXT_SIZES[T.s], b: !!T.b, i: !!T.i }); layoutTextEd(); }
+    Object.assign(T, { pt: Math.round(v.pt * 2) / 2, f: v.f, b: v.b, i: v.i, u: v.u, st: v.st });
+    if (textEd && !textEd.cell) { Object.assign(textEd, { s: v.pt * PT, f: v.f, b: v.b, i: v.i, u: v.u, st: v.st }); layoutTextEd(); }
+    else if (textEd) { textEd.b = v.b; textEd.i = v.i; layoutTextEd(); }
     saveMeta(); render();
   });
   const L = popover(anchor, box, 'center');
@@ -4256,6 +4352,7 @@ async function buildFile(items, boardBg, fmt, o = {}) {
     return new Blob([JSON.stringify(data)], { type: 'application/json' });
   }
   if (!items.length) return null;
+  await loadFontsFor(items);
   await Promise.all(items.filter(i => i.img).map(i => loadImage(i.img)));
   if (fmt === 'png') {
     const { canvas } = renderScene(items, 2, bg, pat);
@@ -4300,9 +4397,31 @@ async function vectorPdf(jsPDF, items, bg, withPattern) {
       for (let gy = Y0; gy <= Y1; gy += step) pdf.line(0, Y(gy), W, Y(gy));
     }
   }
+  await prepPdfFonts(pdf, items);
   pdfDrawItems(pdf, items, X, Y, k, imgs);
   return pdf.output('blob');
 }
+/* Caratteri nel PDF: i file .ttf della cartella fonts/ vengono letti una volta e inclusi nel documento */
+const TTF = new Map();
+async function prepPdfFonts(pdf, items) {
+  const need = new Set(); for (const it of items) if (it.t === 'text') need.add(fontId(it));
+  pdf.__bl = pdf.__bl || new Set();
+  for (const id of need) {
+    if (pdf.__bl.has(id)) continue;
+    const [k, w, st] = id.split('|'), file = `${k}-${w}-${st}.ttf`;
+    try {
+      if (!TTF.has(file)) {
+        const buf = new Uint8Array(await (await fetch(FONT_PATH + file)).arrayBuffer());
+        let bin = ''; for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000));
+        TTF.set(file, bin);
+      }
+      pdf.addFileToVFS(file, TTF.get(file));
+      pdf.addFont(file, 'BL-' + k, w === '700' ? (st === 'italic' ? 'bolditalic' : 'bold') : (st === 'italic' ? 'italic' : 'normal'));
+      pdf.__bl.add(id);
+    } catch (_) {}
+  }
+}
+const pdfFamily = (pdf, it) => (pdf.__bl && pdf.__bl.has(fontId(it)) ? 'BL-' + fontKey(it) : null);
 /* Disegna gli elementi nel PDF; X e Y convertono le coordinate della lavagna in punti della pagina */
 function pdfDrawItems(pdf, items, X, Y, k, imgs) {
   const gsHl = new pdf.GState({ opacity: 0.38, 'stroke-opacity': 0.38 }), gsFull = new pdf.GState({ opacity: 1, 'stroke-opacity': 1 });
@@ -4366,12 +4485,21 @@ function pdfDrawItems(pdf, items, X, Y, k, imgs) {
     }
     if (it.t === 'text') {
       const L = geom(it).L, r = it.r || 0, cs = Math.cos(r), sn = Math.sin(r);
-      pdf.setFont('helvetica', it.b && it.i ? 'bolditalic' : it.b ? 'bold' : it.i ? 'italic' : 'normal');
+      const style = it.b && it.i ? 'bolditalic' : it.b ? 'bold' : it.i ? 'italic' : 'normal', fam = pdfFamily(pdf, it);
+      pdf.setFont(fam || 'helvetica', style);
       pdf.setFontSize(it.s * k); pdf.setTextColor(...hex2rgb(it.c));
+      const M = fontMetrics(it), th = Math.max(1, it.s * 0.065), P = (lx, ly) => [X(it.x + lx * cs - ly * sn), Y(it.y + lx * sn + ly * cs)];
+      measureC.font = textFont(it);
       L.lines.forEach((line, li) => {
         if (!line.trim()) return;
-        const lx = -L.w / 2, ly = -L.h / 2 + li * L.lh + it.s * 0.125;
-        pdf.text(line, X(it.x + lx * cs - ly * sn), Y(it.y + lx * sn + ly * cs), { baseline: 'top', angle: -r * 180 / Math.PI });
+        const lx = -L.w / 2, top = -L.h / 2 + li * L.lh + it.s * 0.125;
+        if (fam) pdf.text(line, ...P(lx, top + it.s * M.base), { baseline: 'alphabetic', angle: -r * 180 / Math.PI });
+        else pdf.text(line, ...P(lx, top), { baseline: 'top', angle: -r * 180 / Math.PI });
+        if (it.u || it.st) {
+          const w = measureC.measureText(line.replace(/\s+$/, '')).width;
+          pdf.setDrawColor(...hex2rgb(it.c)); pdf.setLineWidth(th * k);
+          for (const yy of [it.u && top + it.s * (M.base + 0.09), it.st && top + it.s * M.xmid]) if (yy) pdf.line(...P(lx, yy), ...P(lx + w, yy));
+        }
       });
       continue;
     }
@@ -4403,7 +4531,7 @@ async function pagesPdf(jsPDF, items) {
   let pdf = null;
   for (const pg of pages) {
     const W = pg.w * k, H = pg.h * k, o = W >= H ? 'landscape' : 'portrait';
-    if (!pdf) pdf = new jsPDF({ orientation: o, unit: 'pt', format: [W, H], compress: true }); else pdf.addPage([W, H], o);
+    if (!pdf) { pdf = new jsPDF({ orientation: o, unit: 'pt', format: [W, H], compress: true }); await prepPdfFonts(pdf, others); } else pdf.addPage([W, H], o);
     const blob = pg.img ? await DB.get('img:' + pg.img) : null;
     if (blob) pdf.addImage(await blobToDataURL(blob), 'JPEG', 0, 0, W, H, undefined, 'FAST');
     const x0 = pg.x - pg.w / 2, y0 = pg.y - pg.h / 2;
