@@ -598,6 +598,11 @@ input { font: inherit; color: inherit; }
 .tc.big { width: 36px; height: 36px; }
 .tc.add { background: none; border: 1.5px dashed #9AA0A6; color: #6B7075; display: grid; place-items: center; box-sizing: border-box; box-shadow: none; }
 .tc.add .ic { width: 16px; height: 16px; }
+.shead-r { display: flex; align-items: center; justify-content: space-between; padding-right: 16px; }
+.shead-r .pill-b { text-transform: none; letter-spacing: 0; }
+.mmrow .mmset { display: flex; gap: 6px; }
+.mmv { width: 54px; height: 36px; border-radius: 9px; background: #F1F4F8; font-size: 14px; font-variant-numeric: tabular-nums; color: var(--ink); }
+.mmin { width: 54px; height: 36px; box-sizing: border-box; border: 0; border-radius: 9px; background: #fff; outline: 2px solid var(--blue); text-align: center; font: inherit; font-size: 14px; }
 .fxrow { display: flex; flex-wrap: wrap; gap: 10px; padding: 8px 20px 18px; }
 .dw-sz { display: flex; gap: 4px; background: #E9EDF2; border-radius: 12px; padding: 4px; }
 .dsz { flex: 1; height: 36px; border-radius: 9px; display: grid; place-items: center; }
@@ -899,10 +904,16 @@ const FOLDER_COLORS = ['#F2D600', '#FFA21A', '#F44336', '#E91E63', '#A33AF5', '#
 const DEFAULT_PALETTE = ['#000000', '#808080', '#D3D3D3', '#FFFFFF', '#1E88F5', '#F0163A', '#22D45E', '#FFD83B', '#6C7FE0', '#2EA80A', '#8B5A0B', '#FF7F0F', '#0B52E0'];
 const BG_COLORS = ['#FFFFFF', '#FFFBEA', '#F4F4F4', '#EAF3FC', '#EAF6EC', '#FDECEC', '#2B3A42', '#1F3A2E', '#111111'];
 const PATTERNS = [['none', 'Nessuno'], ['lines', 'Righe'], ['grid', 'Quadretti'], ['dots', 'Puntini']];
-const PEN_SIZES = [1.2, 2, 3, 4.5, 6.5, 9.5];
-const HL_SIZES = [8, 12, 17, 24, 32, 44];
+/* Spessori delle penne in millimetri: 6 livelli per ogni tipo, modificabili in Impostazioni */
+const MM_DEFAULT = { marker: [0.3, 0.5, 0.8, 1.2, 1.7, 2.5], fountain: [0.3, 0.5, 0.8, 1.2, 1.7, 2.5], brush: [0.3, 0.5, 0.8, 1.2, 1.7, 2.5], hl: [2, 3, 4.5, 6.5, 8.5, 11.5] };
+const MM_TYPES = [['marker', 'Pennarello'], ['fountain', 'Stilografica'], ['brush', 'Pennello'], ['hl', 'Evidenziatore']];
+const sizeKey = (t, k) => (t === 'hl' ? 'hl' : k === 'fountain' || k === 'brush' ? k : 'marker');
+function penMm(key) { const m = meta && meta.settings && meta.settings.mm, a = m && m[key]; return Array.isArray(a) && a.length === 6 ? a : MM_DEFAULT[key]; }
+const mmPx = mm => mm * 96 / 25.4;
+const penSizes = (t, k) => penMm(sizeKey(t, k)).map(mmPx);
+const fmtMmV = mm => String(Math.round(mm * 10) / 10).replace('.', ',');
 const ER_SIZES = [6, 10, 16, 24, 36, 52];
-const APP_VERSION = '0.13.1';
+const APP_VERSION = '0.13.2';
 const ZMIN = 0.1, ZMAX = 6;
 const ER_DECAY_MS = 600; // tempo con cui la gomma ingrandita torna piccola
 const SORT_LABEL = { created: 'Data di creazione', modified: 'Data di modifica', name: 'Nome' };
@@ -1283,6 +1294,7 @@ const HELP = [
   ['astuccio', 'L\'astuccio e le penne', 'pen', [
     ['Scegliere una penna', 'Tocca una penna dell\'astuccio: quella in uso ha il riquadro chiaro e una lineetta del suo colore verso il foglio. Toccala di nuovo per aprire il suo cassetto: nome, spessore in millimetri, tipo, spessori e colori. Tocca il nome per rinominarla, il tipo per cambiarlo.'],
     ['Colori', 'Nel cassetto ci sono i colori fissi, gli ultimi tre colori presi dalla tavolozza con quella penna o quello strumento e il cerchio della tavolozza completa. I colori fissi (fino a 10) si scelgono in Impostazioni → Penna e astuccio.'],
+    ['Spessori', 'Ogni penna ha 6 spessori. In Impostazioni → Penna e astuccio scegli a quanti millimetri corrisponde ciascuno, separatamente per pennarello, stilografica, pennello ed evidenziatore. Tocca un valore per cambiarlo.'],
     ['Aggiungere ed eliminare penne', 'Il + sotto le penne ne aggiunge una, fino a 5. Tieni premuta una penna per eliminarla.'],
     ['Evidenziatore dritto', 'Traccia la riga con l\'evidenziatore e tieni ferma la punta: diventa dritta, e orizzontale se lo era quasi. Si attiva e disattiva in Impostazioni → Penna e astuccio.'],
     ['Strumenti dell\'astuccio', 'Nell\'astuccio stanno fino a 5 strumenti; gli altri sono nei tre puntini. L\'ingranaggio in Altri strumenti sceglie quali tenere e in che ordine.'],
@@ -1342,6 +1354,7 @@ function settingsPageHTML(k) {
       ${srowS('Penne ed evidenziatori', seg2('ast-cpens', meta.ast.cPens, [[0, '0'], [1, '1'], [2, '2'], [3, '3'], [4, '4']]))}
       ${srowS('Strumenti', seg2('ast-ctools', meta.ast.cTools, [[0, '0'], [1, '1'], [2, '2'], [3, '3']]))}</div>${astPreviewHTML()}</div>
     <div class="scard"><div class="shead">Colori fissi</div><div class="fxrow">${fixedCols().map((c, i) => `<button class="tc big" data-act="fx-edit" data-i="${i}" style="--c:${c}" aria-label="Colore fisso ${c}"></button>`).join('')}${fixedCols().length < FIXED_MAX ? `<button class="tc big add" data-act="fx-add" aria-label="Aggiungi un colore fisso">${ic('plus')}</button>` : ''}</div></div>
+    <div class="scard"><div class="shead shead-r"><span>Spessori in mm</span><button class="pill-b" data-act="mm-reset">Ripristina</button></div>${MM_TYPES.map(([k, l]) => `<div class="srow2 mmrow"><span>${l}</span><div class="mmset">${penMm(k).map((v, i) => `<button class="mmv" data-act="mm-edit" data-k="${k}" data-i="${i}" aria-label="${l}, spessore ${i + 1}">${fmtMmV(v)}</button>`).join('')}</div></div>`).join('')}</div>
     <div class="scard"><div class="shead">Penna</div>${srowT('dbl', 'Doppio clic sul tasto della penna: gomma')}${srowT('hlStraight', 'Evidenziatore: tieni premuto per tracciare dritto')}</div>`;
   if (k === 'gesti') return `<div class="set-h">Gesti e riconoscimento</div>
     <div class="scard"><div class="shead">Cancellare</div>${srowT('scribble', 'Cancella con lo scarabocchio')}${srowT('xErase', 'Cancella con una X')}${srowT('erBoost', 'Gomma che si allarga con la velocità')}${S.erBoost ? srowS('Ingrandimento massimo', seg2('set-ermax', S.erMax, [2, 3, 4, 5, 6, 7].map(n => [n, n + '×']))) : ''}</div>
@@ -4175,7 +4188,7 @@ function beginTool(e) {
   if (sel && T.tool !== 'lasso' && T.tool !== 'shape') clearSel();
   if (T.tool === 'pen' || T.tool === 'hl') {
     const isHl = T.tool === 'hl', cfg = isHl ? T.hl : T.pen;
-    drawing = { pid: e.pointerId, kind: 'ink', item: { id: uid(), t: isHl ? 'hl' : 'pen', k: cfg.k, c: cfg.c, w: (isHl ? HL_SIZES : PEN_SIZES)[cfg.s] }, pts: [w.x, w.y, pressure(e)], lastS: s, snap: (guides.ruler || guides.prot) ? guideSnap(w) : null };
+    drawing = { pid: e.pointerId, kind: 'ink', item: { id: uid(), t: isHl ? 'hl' : 'pen', k: cfg.k, c: cfg.c, w: penSizes(isHl ? 'hl' : 'pen', cfg.k)[cfg.s] }, pts: [w.x, w.y, pressure(e)], lastS: s, snap: (guides.ruler || guides.prot) ? guideSnap(w) : null };
     drawing.holdS = s; holdArm(drawing);
     drawLive();
   } else if (T.tool === 'er') {
@@ -4808,7 +4821,6 @@ function placeDrawer(box, anchor, side) {
   }
   box.style.left = Math.round(x) + 'px'; box.style.top = Math.round(y) + 'px';
 }
-const fmtMm = px => { const mm = px * 25.4 / 96; return (mm < 2 ? mm.toFixed(1) : String(Math.round(mm * 2) / 2)).replace(/\.0$/, '').replace('.', ','); };
 /* Tocco sul nome: si scrive direttamente al suo posto */
 function renameInline(btn, value, done) {
   const inp = h('input', 'dw-in'); inp.type = 'text'; inp.value = value; inp.setAttribute('autocomplete', 'off'); inp.setAttribute('aria-label', 'Nome');
@@ -4822,12 +4834,13 @@ function renameInline(btn, value, done) {
 function openPenDrawer(btn) {
   const p = curPen(); if (!p) return;
   const box = h('div', 'pop pdrw'), head = h('div', 'dw-h'), szEl = h('div', 'dw-sz');
-  const sizes = () => (p.t === 'hl' ? HL_SIZES : PEN_SIZES);
+  const sizes = () => penMm(sizeKey(p.t, p.k));
   const renderHead = () => {
-    head.innerHTML = `<button class="dw-name" data-rn="1" aria-label="Rinomina la penna"><span>${esc(p.name)}</span>${ic('rename')}</button><span class="dw-mm">${fmtMm(sizes()[p.s])} mm</span><span class="sp"></span><button class="dw-chip" data-kind="1">${penTypeName(p)}${ic('chevD')}</button>`;
+    head.innerHTML = `<button class="dw-name" data-rn="1" aria-label="Rinomina la penna"><span>${esc(p.name)}</span>${ic('rename')}</button><span class="dw-mm">${fmtMmV(sizes()[p.s])} mm</span><span class="sp"></span><button class="dw-chip" data-kind="1">${penTypeName(p)}${ic('chevD')}</button>`;
   };
   const renderSz = () => {
-    szEl.innerHTML = sizes().map((v, i) => { const d = p.t === 'hl' ? 4 + i * 3 : 3 + i * 2.6; return `<button class="dsz ${p.s === i ? 'on' : ''}" data-s="${i}" aria-label="${fmtMm(v)} mm"><i style="width:${d.toFixed(1)}px;height:${d.toFixed(1)}px;background:${esc(p.c)}${isLight(p.c) ? ';box-shadow:0 0 0 1px rgba(0,0,0,.28)' : ''}"></i></button>`; }).join('');
+    const mx = Math.max(...sizes());
+    szEl.innerHTML = sizes().map((v, i) => { const d = clamp(3 + 15 * v / mx, 3, 18); return `<button class="dsz ${p.s === i ? 'on' : ''}" data-s="${i}" aria-label="${fmtMmV(v)} mm"><i style="width:${d.toFixed(1)}px;height:${d.toFixed(1)}px;background:${esc(p.c)}${isLight(p.c) ? ';box-shadow:0 0 0 1px rgba(0,0,0,.28)' : ''}"></i></button>`; }).join('');
   };
   const changed = () => { applyPen(p); saveMeta(); renderAst(); drawLive(); renderHead(); renderSz(); };
   const tray = colorTray('pen:' + p.id, () => p.c, c => { p.c = c; changed(); });
@@ -4843,7 +4856,6 @@ function openPenDrawer(btn) {
 }
 function penKindMenu(anchor, p, done) {
   menu(anchor, PEN_TYPES.map(([t, k, l]) => ({ label: l, icon: p.t === t && p.k === k ? 'check' : null, fn: () => {
-    p.s = clamp(p.s, 0, (t === 'hl' ? HL_SIZES : PEN_SIZES).length - 1);
     p.t = t; p.k = k; if (penOn() && meta.ui.pen === p.id) setTool(t); done();
   } })));
 }
@@ -5121,9 +5133,9 @@ function toolPopover(t, anchor) {
   if (t === 'laser') { laserPopover(anchor); return; }
   const T = meta.tool;
   const conf = t === 'pen'
-    ? { title: 'Penna', obj: T.pen, sizes: PEN_SIZES, tryIt: true, opts: [['marker', 'Pennarello', ic('pen')], ['fountain', 'Stilografica', ic('nib')], ['brush', 'Pennello', ic('brush')]] }
+    ? { title: 'Penna', obj: T.pen, sizes: penSizes('pen', T.pen.k), tryIt: true, opts: [['marker', 'Pennarello', ic('pen')], ['fountain', 'Stilografica', ic('nib')], ['brush', 'Pennello', ic('brush')]] }
     : t === 'hl'
-      ? { title: 'Evidenziatore', obj: T.hl, sizes: HL_SIZES, tryIt: true, opts: [] }
+      ? { title: 'Evidenziatore', obj: T.hl, sizes: penSizes('hl'), tryIt: true, opts: [] }
       : { title: 'Gomma', obj: T.er, sizes: ER_SIZES, tryIt: false, opts: [['stroke', 'Tratto', ic('erStroke')], ['precise', 'Precisa', ic('erPrecise')]] };
   const box = h('div', 'pop ptool');
   box.innerHTML = `<div class="pop-h">${conf.title}</div>
@@ -5718,6 +5730,25 @@ const ACT = {
   'ast-more': t => astMore(t),
   'ast-tools': () => astToolsDialog(),
   'pen-add': () => addPen(),
+  'mm-edit': t => {
+    const k = t.dataset.k, i = +t.dataset.i, arr = penMm(k).slice(), [lo, hi] = k === 'hl' ? [0.5, 40] : [0.1, 20];
+    const inp = h('input', 'mmin'); inp.type = 'text'; inp.inputMode = 'decimal'; inp.value = fmtMmV(arr[i]); inp.setAttribute('autocomplete', 'off'); inp.setAttribute('aria-label', t.getAttribute('aria-label'));
+    t.replaceWith(inp); inp.focus(); inp.select();
+    let done = false;
+    const end = keep => {
+      if (done) return; done = true;
+      const n = parseFloat(inp.value.replace(',', '.'));
+      if (keep && isFinite(n)) {
+        if (n < lo || n > hi) toast(`Da ${fmtMmV(lo)} a ${fmtMmV(hi)} mm`);
+        arr[i] = Math.round(clamp(n, lo, hi) * 10) / 10;
+        meta.settings.mm = Object.assign({}, meta.settings.mm, { [k]: arr }); saveMeta();
+      }
+      renderBody();
+    };
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); end(true); } else if (e.key === 'Escape') { e.preventDefault(); end(false); } });
+    inp.addEventListener('blur', () => end(true));
+  },
+  'mm-reset': () => { meta.settings.mm = {}; saveMeta(); renderBody(); },
   'fx-edit': t => {
     const fx = fixedCols(), i = +t.dataset.i;
     colorEditor(t, fx[i], { title: 'Colore fisso', onChange(hex) { fx[i] = hex; t.style.setProperty('--c', hex); saveMeta(); }, onDelete: () => { if (fx.length <= 1) return false; fx.splice(i, 1); saveMeta(); renderBody(); return true; } });
