@@ -568,6 +568,7 @@ input { font: inherit; color: inherit; }
 .drw .ib { color: #E7EBF0; }
 .drw .ib:active { background: rgba(255,255,255,.08); }
 .drw .seg-b, .drw .fmt-b { color: #C9CFD8; }
+.drw .seg-b { min-width: 0; }
 .drw .seg-b .ic, .drw .fmt-b b, .drw .fmt-b i, .drw .fmt-b u, .drw .fmt-b s, .drw .fnt span, .drw .sk { color: #E7EBF0; }
 .drw .seg-b.on, .drw .fmt-b.on, .drw .fnt.on, .drw .sk.on, .drw .sz.on { background: transparent; color: #fff; box-shadow: inset 0 0 0 1.5px rgba(231,235,240,.75); }
 .drw .sz i { background: #C9CFD8; }
@@ -955,7 +956,7 @@ const mmPx = mm => mm * 96 / 25.4;
 const penSizes = (t, k) => penMm(sizeKey(t, k)).map(mmPx);
 const fmtMmV = mm => String(Math.round(mm * 10) / 10).replace('.', ',');
 const ER_SIZES = [6, 10, 16, 24, 36, 52];
-const APP_VERSION = '0.14.1';
+const APP_VERSION = '0.14.2';
 const ZMIN = 0.1, ZMAX = 6;
 const ER_DECAY_MS = 600; // tempo con cui la gomma ingrandita torna piccola
 const SORT_LABEL = { created: 'Data di creazione', modified: 'Data di modifica', name: 'Nome' };
@@ -2327,9 +2328,9 @@ function tableMenu(anchor) {
   });
 }
 /* Stile delle forme: spessore, riempimento, linea */
-function shapeStyleHTML(o, withKinds) {
+function shapeStyleHTML(o, withKinds, noSizes) {
   return `${withKinds ? `<div class="sk-grid">${SHAPE_KINDS.map(([k, l]) => `<button class="sk ${o.k === k ? 'on' : ''}" data-k="${k}" aria-label="${l}" title="${l}">${ic('sh_' + k)}</button>`).join('')}</div>` : ''}
-    <div class="sizes">${[0, 1, 2, 3, 4, 5].map(i => `<button class="sz ${o.s === i ? 'on' : ''}" data-s="${i}" aria-label="Spessore ${i + 1}"><i style="width:${3 + i * 3}px;height:${3 + i * 3}px"></i></button>`).join('')}</div>
+    ${noSizes ? '' : `<div class="sizes">${[0, 1, 2, 3, 4, 5].map(i => `<button class="sz ${o.s === i ? 'on' : ''}" data-s="${i}" aria-label="Spessore ${i + 1}"><i style="width:${3 + i * 3}px;height:${3 + i * 3}px"></i></button>`).join('')}</div>`}
     <div class="seg">${[['none', 'Vuota'], ['light', 'Chiara'], ['solid', 'Piena']].map(([f, l]) => `<button class="seg-b ${o.fill === f ? 'on' : ''}" data-f="${f}"><span class="fillsw fs-${f}"></span><span>${l}</span></button>`).join('')}</div>
     <div class="seg">${[['solid', 'Continua'], ['dash', 'Tratteggiata'], ['dot', 'A puntini']].map(([d, l]) => `<button class="seg-b ${(o.ls || (o.dash ? 'dash' : 'solid')) === d ? 'on' : ''}" data-d="${d}"><span class="linesw ls-${d}"></span><span>${l}</span></button>`).join('')}</div>`;
 }
@@ -2346,8 +2347,12 @@ function shapePopover(anchor, styleOnly) {
   const o = sample ? { s: Math.max(0, SHAPE_SIZES.indexOf(sample.sw)), fill: sample.fill, ls: lineStyle(sample) } : T;
   if (sample && o.s < 0) o.s = 1;
   const box = h('div', 'pop ptool' + (styleOnly ? ' drw dk-pop' : ''));
-  const colR = styleOnly ? null : colorTray('shape', () => T.c, c => { T.c = c; saveMeta(); });
-  const render = () => { box.innerHTML = `<div class="pop-h">${styleOnly ? 'Stile delle forme' : 'Forme'}</div>${shapeStyleHTML(o, !styleOnly)}`; if (colR) box.append(colR); };
+  // nel cassetto Forme lo spessore sta nel vassoio, accanto ai colori, come per le penne
+  const szEl = h('div', 'dw-sz');
+  const renderSz = () => { szEl.innerHTML = SHAPE_SIZES.map((v, i) => { const d = 3 + i * 3; return `<button class="dsz ${o.s === i ? 'on' : ''}" data-s="${i}" aria-label="Spessore ${i + 1}"><i style="width:${d}px;height:${d}px;background:${esc(T.c)}${isLight(T.c) ? ';box-shadow:0 0 0 1px rgba(0,0,0,.28)' : ''}"></i></button>`; }).join(''); };
+  const colR = styleOnly ? null : colorTray('shape', () => T.c, c => { T.c = c; saveMeta(); renderSz(); });
+  if (colR) colR.prepend(szEl);
+  const render = () => { box.innerHTML = `<div class="pop-h">${styleOnly ? 'Stile delle forme' : 'Forme'}</div>${shapeStyleHTML(o, !styleOnly, !styleOnly)}`; if (colR) { renderSz(); box.append(colR); } };
   render();
   box.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
