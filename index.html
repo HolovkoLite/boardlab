@@ -262,7 +262,7 @@ input { font: inherit; color: inherit; }
 .fmt-b.on { background: var(--sel); color: var(--ink); }
 .ptxt { width: 380px; box-sizing: border-box; }
 .fonts { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
-.fnt { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 7px 10px; border-radius: 8px; text-align: left; min-width: 0; }
+.fnt { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 10px 10px; border-radius: 8px; text-align: left; min-width: 0; }
 .fnt span { font-size: 17px; color: #222; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .fnt small { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
 .fnt.on { background: var(--sel); }
@@ -585,7 +585,7 @@ const PATTERNS = [['none', 'Nessuno'], ['lines', 'Righe'], ['grid', 'Quadretti']
 const PEN_SIZES = [1.2, 2, 3, 4.5, 6.5, 9.5];
 const HL_SIZES = [8, 12, 17, 24, 32, 44];
 const ER_SIZES = [6, 10, 16, 24, 36, 52];
-const APP_VERSION = '0.11.1';
+const APP_VERSION = '0.11.2';
 const ZMIN = 0.1, ZMAX = 6;
 const ER_DECAY_MS = 600; // tempo con cui la gomma ingrandita torna piccola
 const SORT_LABEL = { created: 'Data di creazione', modified: 'Data di modifica', name: 'Nome' };
@@ -4159,7 +4159,7 @@ function textPopover(anchor) {
     const v = cur();
     box.innerHTML = `<div class="pop-h">Testo</div>
       <div class="lbl">Carattere</div>
-      <div class="fonts">${FONTS.map(([k, n, d]) => `<button class="fnt ${v.f === k ? 'on' : ''}" data-font="${k}"><span style="font-family:${fontFam(k).replace(/"/g, '&quot;')}, ${FONT_STACK.replace(/"/g, '&quot;')}">${n}</span><small>${d}</small></button>`).join('')}</div>
+      <div class="fonts">${FONTS.map(([k, n, d]) => `<button class="fnt ${v.f === k ? 'on' : ''}" data-font="${k}"><span style="font-family:${fontFam(k).replace(/"/g, '&quot;')}, ${FONT_STACK.replace(/"/g, '&quot;')}">${n}</span></button>`).join('')}</div>
       <div class="lbl">Dimensione</div>
       <div class="ptrow"><button class="ib sm" data-step="-1" aria-label="Più piccolo">${ic('minus')}</button><button class="ptv" data-ptin="1" aria-label="Scrivi la dimensione">${fmtPt(v.pt * PT)} pt</button><button class="ib sm" data-step="1" aria-label="Più grande">${ic('plus')}</button></div>
       <div class="lbl">Stile</div>
