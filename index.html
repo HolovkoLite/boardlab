@@ -22,7 +22,7 @@
   --white: #FFFFFF;
   --sel: #E9EDF2;
   --danger: #DC2626;
-  --shadow: 0 6px 24px rgba(20, 30, 40, .18);
+  --shadow: 0 6px 24px rgba(30, 36, 48, .18);
   --font: Roboto, "Segoe UI", system-ui, -apple-system, sans-serif;
   color-scheme: light;
 }
@@ -41,14 +41,17 @@ input { font: inherit; color: inherit; }
 .ic .f { fill: currentColor; stroke: none; }
 .ic .tip { fill: var(--tc, #000); stroke: none; }
 .ic .tipl { stroke: var(--tc, #FFD83B); stroke-width: 3.2; }
-.ib { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; color: #3A3D41; flex: none; }
+.ib { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; color: #3D4654; flex: none; }
 .ib:active { background: rgba(0,0,0,.06); }
 .ib.sm { width: 36px; height: 36px; }
 .ib.sm .ic { width: 20px; height: 20px; }
 .ib:disabled { opacity: .3; cursor: default; }
 .sp { flex: 1; }
 .link { color: var(--blue); font-weight: 500; letter-spacing: .02em; }
-.tbtn { color: var(--blue); font-weight: 500; letter-spacing: .04em; padding: 10px 12px; border-radius: 6px; }
+.tbtn { color: var(--blue); font-weight: 500; letter-spacing: 0; padding: 10px 12px; border-radius: 10px; }
+.tbtn.pri { background: var(--blue); color: #fff; border-radius: 20px; padding: 10px 20px; }
+.tbtn.pri:active { background: #1D4ED8; }
+.tbtn.pri.danger { background: var(--danger); color: #fff; }
 .tbtn:active { background: var(--blue-soft); }
 .tbtn.danger { color: var(--danger); }
 
@@ -57,10 +60,10 @@ input { font: inherit; color: inherit; }
 #drawer { width: 280px; flex: none; background: var(--white); display: flex; flex-direction: column; z-index: 5; }
 .dr-head { display: flex; align-items: center; gap: 4px; padding: 6px 6px 6px 8px; height: 56px; box-sizing: border-box; }
 .dr-head h2 { font-size: 20px; font-weight: 400; margin: 0 0 0 8px; flex: 1; }
-.dr-sync { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 16px 14px; font-size: 12.5px; white-space: nowrap; color: #55595E; border-bottom: 1px solid var(--line); }
+.dr-sync { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 16px 14px; font-size: 12.5px; white-space: nowrap; color: #3D4654; border-bottom: 1px solid var(--line); }
 .dr-sync .link { font-size: 14px; }
 .dr-list { flex: 1; overflow-y: auto; padding: 6px 6px 12px; }
-.coll { display: flex; align-items: center; gap: 10px; padding: 0 0 0 12px; height: 46px; color: #55595E; cursor: pointer; border-radius: 10px; }
+.coll { display: flex; align-items: center; gap: 10px; padding: 0 0 0 12px; height: 46px; color: #3D4654; cursor: pointer; border-radius: 10px; }
 .coll .ic { width: 22px; height: 22px; }
 .coll-n { flex: 1; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fold { display: flex; align-items: center; gap: 18px; padding: 0 14px 0 18px; height: 46px; border-radius: 10px; cursor: pointer; }
@@ -70,10 +73,10 @@ input { font: inherit; color: inherit; }
 .fold-c { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .empty-f { padding: 6px 18px 10px 50px; font-size: 13px; color: var(--muted); }
 .srow { display: flex; align-items: center; gap: 22px; width: 100%; padding: 0 16px; height: 50px; border-radius: 10px; text-align: left; font-size: 16px; }
-.srow .ic { color: #45494E; }
+.srow .ic { color: #3D4654; }
 .srow.sel { background: var(--blue-soft); }
 .dr-nav { display: flex; border-top: 1px solid var(--line); height: 60px; flex: none; }
-.dr-nav button { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #55595E; font-size: 12px; font-weight: 500; }
+.dr-nav button { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #3D4654; font-size: 12px; font-weight: 500; }
 .dr-nav button.on { color: var(--blue); }
 .dr-nav button span { display: none; }
 .dr-nav button.on span { display: block; }
@@ -84,34 +87,34 @@ input { font: inherit; color: inherit; }
 .srch { flex: 1; display: flex; align-items: center; gap: 8px; background: var(--white); border-radius: 22px; padding: 0 14px; height: 40px; color: var(--muted); }
 .srch input { flex: 1; border: 0; outline: 0; background: none; font-size: 15px; color: var(--ink); min-width: 0; }
 .mn-sub { display: flex; justify-content: flex-end; align-items: center; gap: 6px; padding: 0 12px 8px; flex: none; }
-.chip { display: flex; align-items: center; gap: 8px; background: #E0E5EA; border-radius: 20px; padding: 0 14px 0 10px; height: 36px; font-size: 14px; }
+.chip { display: flex; align-items: center; gap: 8px; background: #E9EDF2; border-radius: 20px; padding: 0 14px 0 10px; height: 36px; font-size: 14px; }
 .chip .ic { width: 20px; height: 20px; }
 .mn-body { flex: 1; overflow-y: auto; padding: 4px 20px 96px; }
 .blist { display: flex; flex-direction: column; gap: 4px; }
 .bcard { display: flex; align-items: center; gap: 16px; padding: 6px 4px 6px 4px; border-radius: 10px; cursor: pointer; }
 .bcard:active { background: rgba(0,0,0,.04); }
-.thumb { width: 64px; height: 48px; border-radius: 4px; border: 1px solid #DCE1E6; overflow: hidden; flex: none; display: grid; place-items: center; }
+.thumb { width: 64px; height: 48px; border-radius: 4px; border: 1px solid #E4E8EE; overflow: hidden; flex: none; display: grid; place-items: center; }
 .thumb img { width: 100%; height: 100%; object-fit: contain; display: block; pointer-events: none; -webkit-user-drag: none; }
 [data-ctx] { -webkit-touch-callout: none; touch-action: pan-y; }
 .pressing { background: rgba(0,0,0,.07) !important; }
 .bt { flex: 1; min-width: 0; }
 .bn { font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bd { font-size: 13.5px; color: #8A8F95; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bcard .ib { color: #8A8F95; }
+.bd { font-size: 13.5px; color: #5B6472; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bcard .ib { color: #5B6472; }
 .bgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 16px; }
 .bgrid .bcard { flex-direction: column; align-items: stretch; gap: 8px; padding: 8px; background: var(--white); position: relative; }
 .bgrid .thumb { width: 100%; height: auto; aspect-ratio: 4 / 3; }
 .bgrid .bt { padding: 0 32px 4px 4px; }
 .bgrid .bcard .ib { position: absolute; right: 2px; bottom: 4px; }
 .empty { text-align: center; color: var(--muted); padding: 64px 24px; font-size: 15px; line-height: 1.5; }
-.empty b { display: block; color: #4C5157; font-size: 17px; font-weight: 500; margin-bottom: 4px; }
-.fab { position: absolute; right: 24px; bottom: 24px; width: 60px; height: 60px; border-radius: 50%; background: var(--blue); color: #fff; display: grid; place-items: center; box-shadow: 0 4px 14px rgba(33,150,243,.45); }
+.empty b { display: block; color: #3D4654; font-size: 17px; font-weight: 500; margin-bottom: 4px; }
+.fab { position: absolute; right: 24px; bottom: 24px; width: 60px; height: 60px; border-radius: 50%; background: var(--blue); color: #fff; display: grid; place-items: center; box-shadow: 0 4px 14px rgba(37,99,235,.45); }
 .fab .ic { width: 28px; height: 28px; stroke-width: 2.2; }
 .trow-b { display: flex; align-items: center; gap: 16px; padding: 6px 4px; }
 .note { font-size: 13px; color: var(--muted); margin: 0 0 12px 4px; }
 .setp { max-width: 640px; display: flex; flex-direction: column; gap: 12px; }
-.setp p { margin: 0; color: #4C5157; line-height: 1.5; }
-.setp ul { margin: 0; padding-left: 20px; color: #4C5157; line-height: 1.6; }
+.setp p { margin: 0; color: #3D4654; line-height: 1.5; }
+.setp ul { margin: 0; padding-left: 20px; color: #3D4654; line-height: 1.6; }
 .trow { display: flex; align-items: center; gap: 16px; background: var(--white); border-radius: 12px; padding: 14px 16px; text-align: left; width: 100%; }
 .trow b { display: block; font-weight: 500; font-size: 15.5px; }
 .trow small { display: block; color: var(--muted); font-size: 13.5px; margin-top: 2px; }
@@ -121,14 +124,14 @@ input { font: inherit; color: inherit; }
 .seg.nums .seg-b { min-width: 0; padding: 10px 0; font-size: 16px; font-variant-numeric: tabular-nums; }
 .seg.nums { background: var(--pane); border-radius: 10px; padding: 4px; }
 .seg.nums .seg-b.on { background: var(--white); color: var(--blue); font-weight: 500; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
-.tg { width: 40px; height: 22px; border-radius: 11px; background: #C3C8CE; position: relative; flex: none; transition: background .15s; }
+.tg { width: 40px; height: 22px; border-radius: 11px; background: #C9CFD8; position: relative; flex: none; transition: background .15s; }
 .tg::after { content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: transform .15s; }
 .tg.on { background: var(--blue); }
 .tg.on::after { transform: translateX(18px); }
 .card { background: var(--white); border-radius: 12px; padding: 16px; }
 .help dl { margin: 0; display: grid; grid-template-columns: minmax(150px, 220px) 1fr; gap: 10px 20px; }
 .help dt { font-weight: 500; }
-.help dd { margin: 0; color: #4C5157; }
+.help dd { margin: 0; color: #3D4654; }
 
 /* ---------- Lavagna ---------- */
 #editor { position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--white); }
@@ -137,28 +140,28 @@ input { font: inherit; color: inherit; }
 #edTitle { font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 #edSub { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
 #edSub .dot { width: 10px; height: 10px; border-radius: 2px; }
-.ed-tools { display: flex; align-items: center; justify-content: center; gap: 2px; height: 48px; padding: 0 8px; border-bottom: 1px solid #E8E8E8; flex: none; overflow-x: auto; scrollbar-width: none; }
-.tb { width: 44px; height: 40px; border-radius: 20px; display: grid; place-items: center; color: #222; flex: none; }
+.ed-tools { display: flex; align-items: center; justify-content: center; gap: 2px; height: 48px; padding: 0 8px; border-bottom: 1px solid #E4E8EE; flex: none; overflow-x: auto; scrollbar-width: none; }
+.tb { width: 44px; height: 40px; border-radius: 20px; display: grid; place-items: center; color: #1E2430; flex: none; }
 .tb.on { background: var(--sel); }
 .tb .ic { width: 26px; height: 26px; }
-.tsep { width: 1px; height: 26px; background: #DADADA; margin: 0 10px; flex: none; }
+.tsep { width: 1px; height: 26px; background: #E4E8EE; margin: 0 10px; flex: none; }
 .sws { display: flex; gap: 4px; }
 .sw { width: 30px; height: 30px; border-radius: 50%; background: var(--c); display: grid; place-items: center; flex: none; box-shadow: inset 0 0 0 1px rgba(0,0,0,.1); color: #fff; }
 .sw .ic { width: 18px; height: 18px; stroke-width: 2.6; opacity: 0; }
 .sw.on .ic { opacity: 1; }
-.sw.lt { color: #222; }
-.sw.add { background: none; box-shadow: none; border: 1.5px dashed #9AA0A6; color: #6B7075; box-sizing: border-box; margin-left: 6px; }
+.sw.lt { color: #1E2430; }
+.sw.add { background: none; box-shadow: none; border: 1.5px dashed #A9B1BC; color: #5B6472; box-sizing: border-box; margin-left: 6px; }
 .sw.add .ic { opacity: 1; stroke-width: 2; }
 .sw.big { width: 36px; height: 36px; }
 #stage { flex: 1; position: relative; overflow: hidden; touch-action: none; }
 #stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .pgpill { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); background: var(--white); border-radius: 23px; box-shadow: 0 2px 10px rgba(0,0,0,.16); z-index: 2; }
-.pgpill button { height: 46px; padding: 0 20px; font-size: 15px; color: #3A3D41; white-space: nowrap; }
+.pgpill button { height: 46px; padding: 0 20px; font-size: 15px; color: #3D4654; white-space: nowrap; }
 .zpill { position: absolute; left: 16px; bottom: 16px; display: flex; background: var(--white); border-radius: 6px; box-shadow: 0 2px 10px rgba(0,0,0,.16); overflow: hidden; z-index: 2; }
 .zpill button { height: 46px; min-width: 52px; padding: 0 12px; display: grid; place-items: center; color: var(--blue); }
-.zpill button + button { border-left: 1px solid #EEE; }
+.zpill button + button { border-left: 1px solid #E4E8EE; }
 #zLabel { font-size: 15px; min-width: 64px; font-variant-numeric: tabular-nums; }
-#zLock { color: #8A8F95; }
+#zLock { color: #5B6472; }
 #zLock.on { color: var(--blue); }
 .zpill .ic { width: 22px; height: 22px; }
 
@@ -169,29 +172,29 @@ input { font: inherit; color: inherit; }
 .menu { min-width: 220px; padding: 8px 0; }
 .menu-i { display: flex; align-items: center; gap: 16px; width: 100%; padding: 0 20px; height: 48px; text-align: left; font-size: 16px; }
 .menu-i:active { background: rgba(0,0,0,.05); }
-.menu-i .ic { color: #45494E; width: 22px; height: 22px; }
+.menu-i .ic { color: #3D4654; width: 22px; height: 22px; }
 .menu-i span { flex: 1; }
 .menu-i small { font-size: 12px; color: var(--muted); }
-.menu-i.dis { color: #A5AAAF; }
-.menu-i.dis .ic { color: #BBC0C4; }
+.menu-i.dis { color: #A9B1BC; }
+.menu-i.dis .ic { color: #A9B1BC; }
 .menu-i.danger, .menu-i.danger .ic { color: var(--danger); }
 .menu-sep { height: 1px; background: var(--line); margin: 6px 0; }
 .pop { padding: 18px 20px 20px; }
 .pop-h { display: flex; align-items: center; gap: 4px; font-size: 19px; margin-bottom: 14px; }
 .lbl { font-size: 13px; color: var(--muted); margin: 12px 0 8px; }
 .seg { display: flex; gap: 6px; }
-.seg-b { flex: 1; min-width: 104px; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 8px; border-radius: 8px; font-size: 15px; color: #55595E; }
+.seg-b { flex: 1; min-width: 104px; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 8px; border-radius: 8px; font-size: 15px; color: #3D4654; }
 .seg-b.on { background: var(--sel); color: var(--ink); }
-.seg-b .ic { width: 26px; height: 26px; color: #222; }
-.abc { font-weight: 700; font-size: 17px; color: #222; padding: 0 3px; line-height: 26px; }
+.seg-b .ic { width: 26px; height: 26px; color: #1E2430; }
+.abc { font-weight: 700; font-size: 17px; color: #1E2430; padding: 0 3px; line-height: 26px; }
 .abc.free { background: linear-gradient(170deg, transparent 30%, rgba(160,160,160,.55) 30%, rgba(160,160,160,.55) 75%, transparent 75%); }
 .sizes { display: flex; justify-content: space-between; margin: 14px 4px 4px; }
 .sz { width: 50px; height: 50px; border-radius: 50%; display: grid; place-items: center; }
 .sz.on { background: var(--sel); }
-.sz i { display: block; border-radius: 50%; background: #5F6368; }
-.try { position: relative; margin-top: 14px; border: 1px solid #ECECEC; border-radius: 6px; overflow: hidden; }
+.sz i { display: block; border-radius: 50%; background: #5B6472; }
+.try { position: relative; margin-top: 14px; border: 1px solid #E4E8EE; border-radius: 6px; overflow: hidden; }
 .try canvas { display: block; touch-action: none; background: #fff; }
-.try-l { position: absolute; bottom: 8px; left: 0; right: 0; text-align: center; font-size: 12.5px; color: #8A8F95; pointer-events: none; }
+.try-l { position: absolute; bottom: 8px; left: 0; right: 0; text-align: center; font-size: 12.5px; color: #5B6472; pointer-events: none; }
 .cpick { width: 300px; box-sizing: border-box; }
 .ring { position: relative; width: 190px; height: 190px; margin: 4px auto 6px; touch-action: none; }
 .ring-g { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(#f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00); -webkit-mask: radial-gradient(circle, transparent 60%, #000 61%); mask: radial-gradient(circle, transparent 60%, #000 61%); }
@@ -202,7 +205,7 @@ input { font: inherit; color: inherit; }
 .rng::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--blue); border: 3px solid #fff; }
 .bgc { display: flex; flex-wrap: wrap; gap: 8px; max-width: 330px; }
 .pats { display: flex; gap: 8px; }
-.pat { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px; border-radius: 8px; font-size: 13.5px; color: #55595E; }
+.pat { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px; border-radius: 8px; font-size: 13.5px; color: #3D4654; }
 .pat.on { background: var(--sel); color: var(--ink); }
 .pv { width: 62px; height: 44px; border-radius: 4px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
 .pv-lines { background-image: linear-gradient(rgba(0,0,0,.18) 1px, transparent 1px); background-size: 100% 10px; }
@@ -210,8 +213,9 @@ input { font: inherit; color: inherit; }
 .pv-dots { background-image: radial-gradient(rgba(0,0,0,.35) 1px, transparent 1.4px); background-size: 8px 8px; }
 .dlg { background: var(--white); border-radius: 6px; box-shadow: var(--shadow); width: min(560px, 100%); padding: 22px 24px 12px; box-sizing: border-box; }
 .dlg-t { font-size: 17px; margin-bottom: 18px; }
-.dlg-p { margin: 0 0 8px; color: #4C5157; line-height: 1.5; }
-.dlg-in { width: 100%; box-sizing: border-box; border: 0; border-bottom: 2px solid var(--blue); outline: 0; padding: 8px 2px; font-size: 17px; background: none; }
+.dlg-p { margin: 0 0 8px; color: #3D4654; line-height: 1.5; }
+.dlg-in { width: 100%; box-sizing: border-box; border: 0; outline: 0; height: 46px; padding: 0 14px; font-size: 16px; background: #F1F4F8; border-radius: 12px; color: var(--ink); box-shadow: inset 0 0 0 1.5px transparent; }
+.dlg-in:focus { background: #fff; box-shadow: inset 0 0 0 1.5px var(--blue); }
 .dlg-b { display: flex; justify-content: flex-end; gap: 8px; margin-top: 22px; }
 .fcols { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 .fcol { width: 36px; height: 36px; border-radius: 50%; background: var(--c); display: grid; place-items: center; color: #fff; }
@@ -222,14 +226,14 @@ input { font: inherit; color: inherit; }
 .pick-f { display: flex; align-items: center; gap: 14px; width: 100%; padding: 0 12px; height: 44px; border-radius: 8px; text-align: left; font-size: 16px; }
 .pick-f.on { background: var(--blue-soft); }
 .pick-f .ic { color: var(--fc); }
-#toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); background: #2F3337; color: #fff; border-radius: 8px; padding: 12px 18px; display: flex; align-items: center; gap: 18px; font-size: 14.5px; z-index: 80; box-shadow: var(--shadow); max-width: calc(100% - 32px); box-sizing: border-box; }
-#toast .link { color: #82C4FF; }
-#txtEd { position: absolute; z-index: 3; margin: 0; padding: 0; border: 0; outline: 1.5px dashed rgba(33,150,243,.75); outline-offset: 4px; background: transparent; resize: none; overflow: hidden; white-space: pre; font-family: Roboto, "Segoe UI", system-ui, -apple-system, sans-serif; transform-origin: 0 0; box-sizing: content-box; caret-color: var(--blue); -webkit-user-select: text; user-select: text; }
-.selbar { position: absolute; z-index: 4; display: flex; gap: 2px; background: #ECEEF0; border-radius: 24px; box-shadow: 0 4px 16px rgba(20,30,40,.2); padding: 4px; white-space: nowrap; }
-.selbar button { height: 40px; padding: 0 14px; border-radius: 20px; font-size: 15px; color: #2B2E31; }
+#toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); background: #1E2430; color: #fff; border-radius: 8px; padding: 12px 18px; display: flex; align-items: center; gap: 18px; font-size: 14.5px; z-index: 80; box-shadow: var(--shadow); max-width: calc(100% - 32px); box-sizing: border-box; }
+#toast .link { color: #93B4F8; }
+#txtEd { position: absolute; z-index: 3; margin: 0; padding: 0; border: 0; outline: 1.5px dashed rgba(37,99,235,.75); outline-offset: 4px; background: transparent; resize: none; overflow: hidden; white-space: pre; font-family: Roboto, "Segoe UI", system-ui, -apple-system, sans-serif; transform-origin: 0 0; box-sizing: content-box; caret-color: var(--blue); -webkit-user-select: text; user-select: text; }
+.selbar { position: absolute; z-index: 4; display: flex; gap: 2px; background: #E4E8EE; border-radius: 24px; box-shadow: 0 4px 16px rgba(30,36,48,.2); padding: 4px; white-space: nowrap; }
+.selbar button { height: 40px; padding: 0 14px; border-radius: 20px; font-size: 15px; color: #3D4654; }
 .selbar button:active { background: rgba(0,0,0,.08); }
 .selbar .danger { color: var(--danger); }
-.findbar { position: absolute; z-index: 5; top: 10px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 2px; background: var(--white); border-radius: 24px; box-shadow: 0 4px 16px rgba(20,30,40,.2); padding: 2px 4px 2px 14px; width: min(520px, calc(100% - 24px)); box-sizing: border-box; color: var(--muted); }
+.findbar { position: absolute; z-index: 5; top: 10px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 2px; background: var(--white); border-radius: 24px; box-shadow: 0 4px 16px rgba(30,36,48,.2); padding: 2px 4px 2px 14px; width: min(520px, calc(100% - 24px)); box-sizing: border-box; color: var(--muted); }
 .findbar input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font-size: 16px; color: var(--ink); height: 40px; padding: 0 8px; }
 .findbar #findN { font-size: 13px; color: var(--muted); white-space: nowrap; padding: 0 6px; }
 .findbar #findN.none { color: var(--danger); }
@@ -250,32 +254,32 @@ input { font: inherit; color: inherit; }
 .snips { display: flex; flex-direction: column; gap: 2px; margin: -2px 0 10px 84px; }
 .snip { display: flex; align-items: center; gap: 10px; text-align: left; padding: 7px 10px; border-radius: 8px; font-size: 14px; color: #3C4146; line-height: 1.35; }
 .snip:active { background: rgba(0,0,0,.05); }
-.snip .ic { width: 18px; height: 18px; color: #8A8F95; flex: none; }
+.snip .ic { width: 18px; height: 18px; color: #5B6472; flex: none; }
 .snip span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .snip mark { background: #FFE082; color: inherit; border-radius: 3px; padding: 0 1px; }
 .snip.more { color: var(--blue); padding-left: 38px; }
-.szA span { font-weight: 500; color: #4A4E53; line-height: 1; }
+.szA span { font-weight: 500; color: #3D4654; line-height: 1; }
 .fmt { display: flex; gap: 8px; }
-.fmt-b { flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px; height: 46px; border-radius: 8px; font-size: 15px; color: #55595E; }
-.fmt-b b, .fmt-b i { font-size: 20px; color: #222; font-family: Georgia, serif; }
+.fmt-b { flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px; height: 46px; border-radius: 8px; font-size: 15px; color: #3D4654; }
+.fmt-b b, .fmt-b i { font-size: 20px; color: #1E2430; font-family: Georgia, serif; }
 .fmt-b.on { background: var(--sel); color: var(--ink); }
 .ptxt { width: 380px; box-sizing: border-box; }
 .fonts { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
 .fnt { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 10px 10px; border-radius: 8px; text-align: left; min-width: 0; }
-.fnt span { font-size: 17px; color: #222; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.fnt span { font-size: 17px; color: #1E2430; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .fnt small { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
 .fnt.on { background: var(--sel); }
 .ptrow { display: flex; align-items: center; justify-content: center; gap: 18px; }
 .ptv { font-size: 18px; min-width: 92px; height: 40px; border-radius: 8px; text-align: center; font-variant-numeric: tabular-nums; background: var(--pane); }
 .ptin { width: 92px; height: 40px; box-sizing: border-box; border: 0; border-bottom: 2px solid var(--blue); outline: 0; background: none; font: inherit; font-size: 18px; text-align: center; }
 .pts { display: grid; grid-template-columns: repeat(9, 1fr); gap: 3px; margin-top: 6px; }
-.ptc { height: 32px; border-radius: 6px; font-size: 13.5px; color: #4A4E53; font-variant-numeric: tabular-nums; }
+.ptc { height: 32px; border-radius: 6px; font-size: 13.5px; color: #3D4654; font-variant-numeric: tabular-nums; }
 .ptc.on { background: var(--sel); color: var(--ink); font-weight: 600; }
 .fmt4 .fmt-b { gap: 0; }
-.fmt-b u, .fmt-b s { font-size: 20px; color: #222; font-family: Georgia, serif; }
+.fmt-b u, .fmt-b s { font-size: 20px; color: #1E2430; font-family: Georgia, serif; }
 .seg-s { font-size: 12px; color: var(--muted); margin-top: -2px; }
 .exp-seg .seg-b { min-width: 0; padding: 11px 6px; font-size: 14.5px; }
-.exp-note { margin: 10px 0 4px; color: #4C5157; font-size: 14px; line-height: 1.5; }
+.exp-note { margin: 10px 0 4px; color: #3D4654; font-size: 14px; line-height: 1.5; }
 .exp-note.dim { color: var(--muted); font-size: 13px; }
 .expo .exp-l { font-size: 14px; color: var(--blue); margin: 16px 0 4px; }
 .expo .exp-l:first-child { margin-top: 0; }
@@ -298,7 +302,7 @@ input { font: inherit; color: inherit; }
 .drv-opt { display: flex; align-items: center; gap: 14px; width: 100%; padding: 10px 2px; text-align: left; }
 .drv-opt b { display: block; font-weight: 500; font-size: 15.5px; }
 .drv-opt small { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
-.drv-opt .rb { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #9AA0A6; box-sizing: border-box; flex: none; }
+.drv-opt .rb { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #A9B1BC; box-sizing: border-box; flex: none; }
 .drv-opt.on .rb { border-color: var(--blue); background: var(--blue); box-shadow: inset 0 0 0 3px #fff; }
 .drvd #drvLink { margin: 4px 0 6px 34px; width: calc(100% - 34px); }
 .drv-unl { display: block; margin-top: 14px; font-size: 14px; color: var(--danger); }
@@ -313,21 +317,21 @@ input { font: inherit; color: inherit; }
 .exp-prev { display: block; max-width: 100%; max-height: 42vh; margin: 0 auto 6px; border: 1px solid var(--line); border-radius: 4px; }
 .exp-file { display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--pane); border-radius: 8px; font-size: 15px; }
 .sk-grid { display: grid; grid-template-columns: repeat(6, 44px); justify-content: center; gap: 4px; margin-bottom: 4px; }
-.sk { width: 44px; height: 44px; border-radius: 8px; display: grid; place-items: center; color: #222; }
+.sk { width: 44px; height: 44px; border-radius: 8px; display: grid; place-items: center; color: #1E2430; }
 .sk.on { background: var(--sel); }
 .ptool .seg + .seg { margin-top: 8px; }
 .ptool .sizes + .seg { margin-top: 10px; }
-.fillsw { width: 26px; height: 18px; border: 2px solid #333; border-radius: 3px; box-sizing: border-box; }
+.fillsw { width: 26px; height: 18px; border: 2px solid #1E2430; border-radius: 3px; box-sizing: border-box; }
 .fillsw.fs-light { background: rgba(0,0,0,.18); }
-.fillsw.fs-solid { background: #333; }
-.linesw { width: 30px; height: 0; border-top: 2.5px solid #333; margin: 8px 0; }
+.fillsw.fs-solid { background: #1E2430; }
+.linesw { width: 30px; height: 0; border-top: 2.5px solid #1E2430; margin: 8px 0; }
 .linesw.ls-dash { border-top-style: dashed; }
-.linesw.ls-dot { border-top: 3.5px dotted #333; }
+.linesw.ls-dot { border-top: 3.5px dotted #1E2430; }
 .tpick { width: 300px; }
 .tp-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
 .tp-c { aspect-ratio: 1; border: 1.5px solid #C9CED4; border-radius: 3px; }
 .tp-c.on { background: var(--blue-soft); border-color: var(--blue); }
-.tp-size { text-align: center; margin: 10px 0 8px; font-size: 15px; color: #4C5157; font-variant-numeric: tabular-nums; }
+.tp-size { text-align: center; margin: 10px 0 8px; font-size: 15px; color: #3D4654; font-variant-numeric: tabular-nums; }
 .tp-h { padding: 10px 2px; background: none; }
 .tpick .dlg-b { margin-top: 6px; }
 .tedit { width: 300px; }
@@ -596,7 +600,7 @@ input { font: inherit; color: inherit; }
 .tc.on { box-shadow: 0 0 0 3px #F5F7FA, 0 0 0 5px #1E2430; }
 .tc.more { background: conic-gradient(#DC2626, #FACC15, #16A34A, #0EA5E9, #2563EB, #7C3AED, #DC2626); }
 .tc.big { width: 36px; height: 36px; }
-.tc.add { background: none; border: 1.5px dashed #9AA0A6; color: #6B7075; display: grid; place-items: center; box-sizing: border-box; box-shadow: none; }
+.tc.add { background: none; border: 1.5px dashed #A9B1BC; color: #5B6472; display: grid; place-items: center; box-sizing: border-box; box-shadow: none; }
 .tc.add .ic { width: 16px; height: 16px; }
 .shead-r { display: flex; align-items: center; justify-content: space-between; padding-right: 16px; }
 .shead-r .pill-b { text-transform: none; letter-spacing: 0; }
@@ -625,9 +629,9 @@ input { font: inherit; color: inherit; }
 .wh-i { position: absolute; display: grid; place-items: center; }
 .wh-c { width: 32px; height: 32px; border-radius: 50%; background: var(--c); box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
 .wh-c.on { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--c); }
-.wh-c.lt.on { box-shadow: 0 0 0 3px #fff, 0 0 0 5px #9AA0A6; }
+.wh-c.lt.on { box-shadow: 0 0 0 3px #fff, 0 0 0 5px #A9B1BC; }
 .wh-c.more { background: conic-gradient(#DC2626, #FACC15, #16A34A, #2563EB, #7C3AED, #DC2626); }
-.wh-c.more.on { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--c, #9AA0A6); }
+.wh-c.more.on { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--c, #A9B1BC); }
 .wh-s { width: 28px; height: 28px; border-radius: 50%; }
 .wh-s i { border-radius: 50%; display: block; }
 .wh-s.on { background: var(--blue-soft); box-shadow: inset 0 0 0 1.5px var(--blue); }
@@ -663,6 +667,32 @@ input { font: inherit; color: inherit; }
 .ad-b.rm { background: #fff; box-shadow: inset 0 0 0 1.5px #D3D9E1; color: #B91C1C; }
 .ad-b.ad { background: var(--blue); color: #fff; }
 .ad-foot { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 14px; margin-top: 18px; }
+
+/* Coerenza 0.14.1: selezione della lavagna scura con icone, colori con l'anello, finestre e campi nuovi */
+.selbar { background: #1E2430; border-radius: 18px; box-shadow: 0 12px 34px rgba(30,36,48,.32); padding: 6px; gap: 2px; align-items: center; }
+.selbar button { min-width: 60px; height: 56px; padding: 0 6px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11.5px; color: #E7EBF0; }
+.selbar button .ic { width: 22px; height: 22px; }
+.selbar button:active { background: #2C3440; }
+.selbar .danger { color: #FCA5A5; }
+.selbar .sb-sep { width: 1px; height: 32px; background: #39414D; margin: 0 4px; flex: none; }
+.ic-ph { width: 22px; height: 22px; flex: none; display: inline-block; }
+.lt-tab.chk { color: #1D4ED8; }
+.lt-tab .fck { width: 18px; height: 18px; border-radius: 50%; background: var(--blue); color: #fff; display: grid; place-items: center; margin-right: 4px; }
+.lt-tab .fck .ic { width: 12px; height: 12px; stroke-width: 3; }
+.sw:not(.add) .ic, .fcol .ic { display: none; }
+.sw.on, .fcol.on { box-shadow: inset 0 0 0 1px rgba(0,0,0,.12), 0 0 0 2px #fff, 0 0 0 3.5px #1E2430; }
+.tc.on { box-shadow: 0 0 0 2px #F5F7FA, 0 0 0 3.5px #1E2430; }
+.palpop, .cpick { background: #1E2430; color: #E7EBF0; border-radius: 20px; }
+.palpop .sw.on { box-shadow: 0 0 0 2px #1E2430, 0 0 0 3.5px #E7EBF0; }
+.palpop .sw, .cpick .sw { box-shadow: inset 0 0 0 1px rgba(255,255,255,.18); }
+.palpop .sw.add { border-color: #6B7480; color: #A9B1BC; box-shadow: none; }
+.cpick .pop-h, .cpick .lbl { color: #E7EBF0; }
+.cpick .lbl { color: #A9B1BC; }
+.cpick .ib { color: #E7EBF0; }
+.cpick .ring-c { box-shadow: inset 0 0 0 1px rgba(255,255,255,.2); }
+.fmtseg { width: 100%; }
+.fmtseg button { flex: 1; }
+.pop.drw.dk-pop { width: 380px; padding: 16px 20px 18px; }
 #updBar { position: fixed; left: 50%; top: 12px; transform: translateX(-50%); z-index: 90; background: #2F3337; color: #fff; border-radius: 8px; padding: 10px 12px 10px 18px; display: flex; align-items: center; gap: 16px; font-size: 14.5px; box-shadow: var(--shadow); max-width: calc(100% - 32px); box-sizing: border-box; }
 #updBar button { color: #82C4FF; font-weight: 500; padding: 6px 8px; }
 </style>
@@ -732,6 +762,9 @@ const I = {
   menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
   close: '<path d="M6 6l12 12M18 6L6 18"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
+  cut: '<circle cx="6" cy="17" r="2.5"/><circle cx="6" cy="7" r="2.5"/><path d="M8.2 8.4L20 18M8.2 15.6L20 6"/>',
+  paste: '<rect x="5.5" y="5" width="13" height="15.5" rx="2"/><path d="M9 5V3.5h6V5"/>',
+  dup: '<rect x="8.5" y="8.5" width="12" height="12" rx="2"/><path d="M15.5 8.5V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7.5a2 2 0 002 2h2.5M14.5 11.5v6M11.5 14.5h6"/>',
   clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
   plusCircle: '<circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/>',
   more: '<circle cx="12" cy="5.5" r="1.7" class="f"/><circle cx="12" cy="12" r="1.7" class="f"/><circle cx="12" cy="18.5" r="1.7" class="f"/>',
@@ -748,7 +781,7 @@ const I = {
   folderPlus: '<path d="M3 6.8C3 5.8 3.8 5 4.8 5h4.4l2 2h8C20.2 7 21 7.8 21 8.8v8.4c0 1-.8 1.8-1.8 1.8H4.8c-1 0-1.8-.8-1.8-1.8z"/><path d="M12 10v6M9 13h6"/>',
   books: '<path d="M5 4.5v15M9.5 4.5v15M13.5 5.5l4.5 14" stroke-width="2.3"/>',
   trash: '<path d="M5 7h14M10 7V4.5h4V7M7 7l.9 13h8.2L17 7"/>',
-  gear: '<path class="f" fill-rule="evenodd" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96a7 7 0 00-1.62-.94l-.36-2.54a.48.48 0 00-.48-.41h-3.84a.48.48 0 00-.47.41l-.36 2.54a7.4 7.4 0 00-1.62.94l-2.39-.96a.48.48 0 00-.59.22L2.74 8.87a.47.47 0 00.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54a7 7 0 001.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.47.47 0 00-.12-.61zM12 15.6a3.6 3.6 0 110-7.2 3.6 3.6 0 010 7.2z"/>',
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/>',
   help: '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 114.2 1.8c-.9.7-1.8 1.2-1.8 2.6"/><circle cx="12" cy="17" r="1" class="f"/>',
   chevD: '<path d="M6 9l6 6 6-6"/>',
   chevU: '<path d="M6 15l6-6 6 6"/>',
@@ -908,7 +941,8 @@ async function gcImages() {
 }
 
 /* ================= Stato ================= */
-const FOLDER_COLORS = ['#F2D600', '#FFA21A', '#F44336', '#E91E63', '#A33AF5', '#5C6BC0', '#2196F3', '#26A69A', '#43A047', '#8D6E63', '#90A4AE'];
+const FOLDER_COLORS = ['#EAB308', '#F97316', '#EF4444', '#EC4899', '#A855F7', '#6366F1', '#3B82F6', '#14B8A6', '#22C55E', '#A47148', '#64748B'];
+const FOLDER_OLD = ['#f2d600', '#ffa21a', '#f44336', '#e91e63', '#a33af5', '#5c6bc0', '#2196f3', '#26a69a', '#43a047', '#8d6e63', '#90a4ae'];
 const DEFAULT_PALETTE = ['#000000', '#808080', '#D3D3D3', '#FFFFFF', '#1E88F5', '#F0163A', '#22D45E', '#FFD83B', '#6C7FE0', '#2EA80A', '#8B5A0B', '#FF7F0F', '#0B52E0'];
 const BG_COLORS = ['#FFFFFF', '#FFFBEA', '#F4F4F4', '#EAF3FC', '#EAF6EC', '#FDECEC', '#2B3A42', '#1F3A2E', '#111111'];
 const PATTERNS = [['none', 'Nessuno'], ['lines', 'Righe'], ['grid', 'Quadretti'], ['dots', 'Puntini']];
@@ -921,7 +955,7 @@ const mmPx = mm => mm * 96 / 25.4;
 const penSizes = (t, k) => penMm(sizeKey(t, k)).map(mmPx);
 const fmtMmV = mm => String(Math.round(mm * 10) / 10).replace('.', ',');
 const ER_SIZES = [6, 10, 16, 24, 36, 52];
-const APP_VERSION = '0.14.0';
+const APP_VERSION = '0.14.1';
 const ZMIN = 0.1, ZMAX = 6;
 const ER_DECAY_MS = 600; // tempo con cui la gomma ingrandita torna piccola
 const SORT_LABEL = { created: 'Data di creazione', modified: 'Data di modifica', name: 'Nome' };
@@ -976,15 +1010,15 @@ function place(el, anchor, mode) {
   el.style.left = x + 'px'; el.style.top = y + 'px';
 }
 function menu(anchor, items) {
-  const L = layer(false), m = h('div', 'menu');
+  const L = layer(false), m = h('div', 'menu'), anyIc = items.some(it => it.icon);
   for (const it of items) {
     if (it.sep) { m.append(h('div', 'menu-sep')); continue; }
     const b = h('button', 'menu-i' + (it.disabled ? ' dis' : '') + (it.danger ? ' danger' : ''));
-    b.innerHTML = (it.icon ? ic(it.icon) : '') + `<span>${esc(it.label)}</span>` + (it.note ? `<small>${esc(it.note)}</small>` : '');
+    b.innerHTML = (it.icon ? ic(it.icon) : anyIc ? '<i class="ic-ph"></i>' : '') + `<span>${esc(it.label)}</span>` + (it.note ? `<small>${esc(it.note)}</small>` : '');
     b.onclick = () => { if (it.disabled) { if (it.note) toast(it.label + ': ' + it.note.toLowerCase()); return; } closeLayer(L); if (it.fn) it.fn(); };
     m.append(b);
   }
-  L.append(m); place(m, anchor, 'auto');
+  L.append(m); place(m, anchor, anchor && anchor.closest && anchor.closest('#ast') ? 'side' : 'auto');
   return L;
 }
 function popover(anchor, content, mode = 'center') {
@@ -1002,7 +1036,7 @@ function dialog(o) {
     let inp = null;
     if (o.input !== undefined) { inp = h('input', 'dlg-in'); inp.id = 'dlgIn'; inp.value = o.input;  inp.setAttribute('autocomplete', 'off'); box.append(inp); }
     if (o.body) box.append(o.body);
-    const btns = h('div', 'dlg-b'), cancel = h('button', 'tbtn', 'ANNULLA'), ok = h('button', 'tbtn' + (o.danger ? ' danger' : ''), esc(o.ok || 'OK'));
+    const btns = h('div', 'dlg-b'), cancel = h('button', 'tbtn', 'Annulla'), ok = h('button', 'tbtn pri' + (o.danger ? ' danger' : ''), esc(o.ok || 'OK'));
     if (o.noCancel) btns.append(ok); else btns.append(cancel, ok); box.append(btns); L.append(box);
     cancel.onclick = () => finish(null);
     ok.onclick = () => { if (inp) { const v = inp.value.trim(); if (!v) { inp.focus(); return; } finish(v); } else finish(true); };
@@ -1039,7 +1073,7 @@ function pickFolder(title, current) {
   };
   body.addEventListener('click', e => { const b = e.target.closest('[data-id]'); if (b) { sel = b.dataset.id; draw(); } });
   draw();
-  return dialog({ title, body, ok: 'SPOSTA' }).then(ok => ok ? sel : null);
+  return dialog({ title, body, ok: 'Sposta' }).then(ok => ok ? sel : null);
 }
 
 /* ================= Libreria ================= */
@@ -1073,7 +1107,7 @@ function renderTop() {
   const side = `<button class="ib" data-act="nav" data-v="trash" aria-label="Cestino">${ic('trash')}</button><button class="ib" data-act="nav" data-v="settings" aria-label="Impostazioni">${ic('gear')}</button>`;
   if (libMode === 'trash' || libMode === 'settings') {
     el.className = 'lt-bar page';
-    el.innerHTML = `<button class="ib" data-act="nav" data-v="lib" aria-label="Torna alla libreria">${ic('back')}</button><span class="lt-title">${libMode === 'trash' ? 'Cestino' : 'Impostazioni'}</span><span class="sp"></span>${libMode === 'trash' && meta.boards.some(b => b.deleted) ? '<button class="tbtn" data-act="trash-empty">SVUOTA CESTINO</button>' : ''}`;
+    el.innerHTML = `<button class="ib" data-act="nav" data-v="lib" aria-label="Torna alla libreria">${ic('back')}</button><span class="lt-title">${libMode === 'trash' ? 'Cestino' : 'Impostazioni'}</span><span class="sp"></span>${libMode === 'trash' && meta.boards.some(b => b.deleted) ? '<button class="tbtn" data-act="trash-empty">Svuota cestino</button>' : ''}`;
     return;
   }
   el.className = 'lt-bar';
@@ -1082,7 +1116,7 @@ function renderTop() {
     return;
   }
   const col = curCol();
-  el.innerHTML = `<div class="lt-tabs">${meta.collections.map(c => `<button class="lt-tab ${col && c.id === col.id ? 'on' : ''}" data-act="open-col" data-ctx="col" data-id="${c.id}">${esc(c.name)}</button>`).join('')}<button class="lt-tab add" data-act="new-col" aria-label="Nuova raccolta"><span class="rnd">${ic('plus')}</span></button></div>
+  el.innerHTML = `<div class="lt-tabs">${meta.collections.map(c => { const chk = !!(lsel && lsel.kind === 'col' && lsel.ids.has(c.id)); return `<button class="lt-tab ${col && c.id === col.id ? 'on' : ''} ${chk ? 'chk' : ''}" data-act="open-col" data-ctx="col" data-id="${c.id}">${chk ? `<span class="fck">${ic('check')}</span>` : ''}${esc(c.name)}</button>`; }).join('')}<button class="lt-tab add" data-act="new-col" aria-label="Nuova raccolta"><span class="rnd">${ic('plus')}</span></button></div>
     <div class="lt-icons"><button class="ib" data-act="search" aria-label="Cerca">${ic('search')}</button>${side}</div>`;
 }
 function renderFolderTabs() {
@@ -1153,7 +1187,7 @@ function renderBody() {
       ? `<div class="tlist">${del.map(b => `<div class="trow-b">
           <div class="thumb" style="background:${b.bg || '#FFFFFF'}">${thumbImg(b.id)}</div>
           <div class="bt"><div class="bn">${esc(b.name)}</div><div class="bd">Eliminata il ${fmtDate(b.deleted)}</div></div>
-          <button class="tbtn" data-act="trash-restore" data-id="${b.id}">RIPRISTINA</button>
+          <button class="tbtn" data-act="trash-restore" data-id="${b.id}">Ripristina</button>
           <button class="ib sm" data-act="trash-del" data-id="${b.id}" aria-label="Elimina definitivamente">${ic('trash')}</button></div>`).join('')}</div>`
       : `<div class="empty"><b>Il cestino è vuoto</b></div>`;
     return;
@@ -1178,16 +1212,23 @@ function renderSelPanel() {
   if (!lsel || libMode !== 'folder' || searching) { el.hidden = true; return; }
   const n = lsel.ids.size, one = n === 1;
   const A = (act, icon, label, cls = '') => `<button class="sa ${cls}" data-act="${act}">${ic(icon)}<span>${label}</span></button>`;
-  const acts = lsel.kind === 'board'
-    ? (one ? A('ls-rename', 'rename', 'Rinomina') : '') + A('ls-dup', 'copy', 'Duplica') + A('ls-move', 'move', 'Sposta') + A('ls-export', 'export', 'Esporta') + (drvOn() ? A('ls-drive', 'cloudUp', 'Invia a Drive') : '') + A('ls-del', 'trash', 'Elimina', 'danger')
+  const acts = lsel.kind === 'col'
+    ? (one ? A('ls-rename', 'rename', 'Rinomina') : '') + A('ls-del', 'trash', 'Elimina', 'danger')
+    : lsel.kind === 'board'
+    ? (one ? A('ls-rename', 'rename', 'Rinomina') : '') + A('ls-dup', 'dup', 'Duplica') + A('ls-move', 'move', 'Sposta') + A('ls-export', 'export', 'Esporta') + (drvOn() ? A('ls-drive', 'cloudUp', 'Invia a Drive') : '') + A('ls-del', 'trash', 'Elimina', 'danger')
     : (one ? A('ls-rename', 'rename', 'Rinomina') : '') + A('ls-color', 'palette', 'Colore') + (meta.collections.length > 1 ? A('ls-move', 'move', 'Sposta') : '') + (one && drvOn() ? A('ls-drive', 'cloud', 'Drive') : '') + A('ls-del', 'trash', 'Elimina', 'danger');
-  el.innerHTML = `<button class="ib sm sx" data-act="ls-clear" aria-label="Annulla la selezione">${ic('close')}</button><span class="sp-n">${lsel.kind === 'board' ? (one ? '1 lavagna' : n + ' lavagne') : (one ? '1 cartella' : n + ' cartelle')}</span><span class="sp-sep"></span>${acts}`;
+  el.innerHTML = `<button class="ib sm sx" data-act="ls-clear" aria-label="Annulla la selezione">${ic('close')}</button><span class="sp-n">${lsel.kind === 'board' ? (one ? '1 lavagna' : n + ' lavagne') : lsel.kind === 'col' ? (one ? '1 raccolta' : n + ' raccolte') : (one ? '1 cartella' : n + ' cartelle')}</span><span class="sp-sep"></span>${acts}`;
   el.hidden = false;
 }
 async function lsAction(act) {
   if (!lsel) return;
   const kind = lsel.kind, ids = [...lsel.ids], one = ids.length === 1;
   const done = () => { lsel = null; renderLibrary(); };
+  if (kind === 'col') {
+    if (act === 'ls-rename' && one) { done(); renameCollection(ids[0]); }
+    else if (act === 'ls-del') { const ok = await deleteCollections(ids); if (ok) done(); }
+    return;
+  }
   if (kind === 'board') {
     const bs = ids.map(id => meta.boards.find(b => b.id === id)).filter(Boolean);
     if (act === 'ls-rename' && one) { done(); renameBoard(ids[0]); }
@@ -1201,7 +1242,7 @@ async function lsAction(act) {
     else if (act === 'ls-drive') { done(); drvSendBoards(ids); }
     else if (act === 'ls-del') {
       const now = Date.now(); bs.forEach(b => { b.deleted = now; }); saveMeta(); done();
-      toast(one ? 'Lavagna spostata nel cestino' : `${bs.length} lavagne spostate nel cestino`, 'ANNULLA', () => { bs.forEach(b => { b.deleted = 0; }); saveMeta(); renderLibrary(); });
+      toast(one ? 'Lavagna spostata nel cestino' : `${bs.length} lavagne spostate nel cestino`, 'Annulla', () => { bs.forEach(b => { b.deleted = 0; }); saveMeta(); renderLibrary(); });
     }
     return;
   }
@@ -1218,13 +1259,13 @@ async function lsAction(act) {
     const draw = () => { body.innerHTML = meta.collections.map(c => `<button class="pick-f ${c.id === to ? 'on' : ''}" data-id="${c.id}" style="--fc:#5B6472">${ic('books')}<span>${esc(c.name)}</span></button>`).join(''); };
     body.addEventListener('click', e => { const b = e.target.closest('[data-id]'); if (b) { to = b.dataset.id; draw(); } });
     draw();
-    const ok = await dialog({ title: one ? 'Sposta la cartella in…' : `Sposta ${fs.length} cartelle in…`, body, ok: 'SPOSTA' }); if (!ok) return;
+    const ok = await dialog({ title: one ? 'Sposta la cartella in…' : `Sposta ${fs.length} cartelle in…`, body, ok: 'Sposta' }); if (!ok) return;
     fs.forEach(f => { f.col = to; }); saveMeta(); done();
   }
   else if (act === 'ls-drive' && one) { done(); drvFolderDialog(ids[0]); }
   else if (act === 'ls-del') {
     const bs = meta.boards.filter(b => ids.includes(b.folder) && !b.deleted);
-    const ok = await dialog({ title: one ? `Eliminare la cartella "${fs[0].name}"?` : `Eliminare ${fs.length} cartelle?`, text: bs.length ? (bs.length === 1 ? '1 lavagna finirà nel cestino.' : `${bs.length} lavagne finiranno nel cestino.`) : '', ok: 'ELIMINA', danger: true });
+    const ok = await dialog({ title: one ? `Eliminare la cartella "${fs[0].name}"?` : `Eliminare ${fs.length} cartelle?`, text: bs.length ? (bs.length === 1 ? '1 lavagna finirà nel cestino.' : `${bs.length} lavagne finiranno nel cestino.`) : '', ok: 'Elimina', danger: true });
     if (!ok) return;
     const now = Date.now(); bs.forEach(b => { b.deleted = now; });
     meta.folders = meta.folders.filter(f => !ids.includes(f.id));
@@ -1255,9 +1296,10 @@ async function exportMany(ids) {
   const S = meta.settings.exp || (meta.settings.exp = { fmt: 'pdf', col: true, pat: true });
   const st = { fmt: S.fmt || 'pdf' };
   const body = h('div', 'expo');
-  body.innerHTML = `<div class="exp-l">Formato</div><div class="exp-sel"><select id="expFmtM">${[['png', 'PNG'], ['pdf', 'PDF'], ['boardlab', 'BoardLab']].map(([v, l]) => `<option value="${v}"${st.fmt === v ? ' selected' : ''}>${l}</option>`).join('')}</select>${ic('chevD')}</div>`;
-  $('#expFmtM', body).addEventListener('change', e => { st.fmt = e.target.value; });
-  const ok = await dialog({ title: ids.length === 1 ? 'Esporta la lavagna' : `Esporta ${ids.length} lavagne`, body, ok: 'ESPORTA' });
+  const drawF = () => { body.innerHTML = `<div class="exp-l">Formato</div><div class="seg2 fmtseg" id="expFmtM">${[['png', 'PNG'], ['pdf', 'PDF'], ['boardlab', 'BoardLab']].map(([v, l]) => `<button class="${st.fmt === v ? 'on' : ''}" data-fmt="${v}">${l}</button>`).join('')}</div>`; };
+  drawF();
+  body.addEventListener('click', e => { const f = e.target.closest('[data-fmt]'); if (f) { st.fmt = f.dataset.fmt; drawF(); } });
+  const ok = await dialog({ title: ids.length === 1 ? 'Esporta la lavagna' : `Esporta ${ids.length} lavagne`, body, ok: 'Esporta' });
   if (!ok) return;
   S.fmt = st.fmt; saveMeta();
   toast('Preparo i file…');
@@ -1280,7 +1322,7 @@ async function deliverFiles(list) {
   if (fs.every(Boolean) && navigator.canShare && navigator.canShare({ files: fs })) {
     const share = async () => { try { await navigator.share({ files: fs }); return true; } catch (e) { return e && e.name === 'AbortError' ? true : e && e.name === 'NotAllowedError' ? null : false; } };
     let r = await share();
-    if (r === null) { const ok = await dialog({ title: 'I file sono pronti', text: list.length + ' file', ok: 'CONDIVIDI' }); if (!ok) return; r = await share(); }
+    if (r === null) { const ok = await dialog({ title: 'I file sono pronti', text: list.length + ' file', ok: 'Condividi' }); if (!ok) return; r = await share(); }
     if (r === true) return;
   }
   for (const x of list) await downloadBlob(x.blob, x.name);
@@ -1391,9 +1433,9 @@ function drvSettingsHTML() {
   const rows = meta.folders.map(f => {
     const n = drvPending(f).length;
     const sub = f.drive ? `${esc(f.drive.name)} · ${drvFmts(f).map(k => DRV_FMTS.find(x => x[0] === k)[1]).join(', ')} · ${n ? (n === 1 ? '1 da inviare' : n + ' da inviare') : 'aggiornata'}` : 'Non collegata';
-    return `<div class="drv-row" style="--fc:${f.color}"><span class="dot"></span><span><b>${esc(f.name)}</b><small>${sub}</small></span><button class="tbtn" data-act="drv-folder" data-id="${f.id}">${f.drive ? 'MODIFICA' : 'COLLEGA'}</button>${f.drive && n ? `<button class="tbtn" data-act="drv-sync" data-id="${f.id}">INVIA</button>` : ''}</div>`;
+    return `<div class="drv-row" style="--fc:${f.color}"><span class="dot"></span><span><b>${esc(f.name)}</b><small>${sub}</small></span><button class="tbtn" data-act="drv-folder" data-id="${f.id}">${f.drive ? 'Modifica' : 'Collega'}</button>${f.drive && n ? `<button class="tbtn" data-act="drv-sync" data-id="${f.id}">Invia</button>` : ''}</div>`;
   }).join('');
-  return `<div class="scard"><div class="srow2">${ic('cloudOk')}<span>${c.email ? esc(c.email) : 'Collegato'}</span><button class="tbtn danger" data-act="drv-disconnect">SCOLLEGA</button></div></div>
+  return `<div class="scard"><div class="srow2">${ic('cloudOk')}<span>${c.email ? esc(c.email) : 'Collegato'}</span><button class="tbtn danger" data-act="drv-disconnect">Scollega</button></div></div>
     <div class="scard drv-list"><div class="shead">Cartelle</div>${rows}</div>`;
 }
 
@@ -1432,7 +1474,7 @@ async function moveBoard(id) {
 function trashBoard(id) {
   const b = meta.boards.find(x => x.id === id); if (!b) return;
   b.deleted = Date.now(); saveMeta(); renderLibrary();
-  toast('Lavagna spostata nel cestino', 'ANNULLA', () => { b.deleted = 0; saveMeta(); renderLibrary(); });
+  toast('Lavagna spostata nel cestino', 'Annulla', () => { b.deleted = 0; saveMeta(); renderLibrary(); });
 }
 function boardMenu(anchor, id) {
   menu(anchor, [
@@ -1479,7 +1521,7 @@ async function moveFolder(id) {
   const draw = () => { body.innerHTML = meta.collections.map(c => `<button class="pick-f ${c.id === sel ? 'on' : ''}" data-id="${c.id}" style="--fc:#7A7F85">${ic('books')}<span>${esc(c.name)}</span></button>`).join(''); };
   body.addEventListener('click', e => { const b = e.target.closest('[data-id]'); if (b) { sel = b.dataset.id; draw(); } });
   draw();
-  const ok = await dialog({ title: 'Sposta la cartella in…', body, ok: 'SPOSTA' });
+  const ok = await dialog({ title: 'Sposta la cartella in…', body, ok: 'Sposta' });
   if (!ok || sel === f.col) return;
   f.col = sel; const c = meta.collections.find(x => x.id === sel); if (c) c.open = true;
   saveMeta(); renderLibrary();
@@ -1487,7 +1529,7 @@ async function moveFolder(id) {
 async function deleteFolder(id) {
   const f = meta.folders.find(x => x.id === id); if (!f) return;
   const bs = meta.boards.filter(b => b.folder === id && !b.deleted);
-  const ok = await dialog({ title: 'Eliminare la cartella "' + f.name + '"?', text: bs.length ? `Le ${bs.length} lavagne che contiene finiranno nel cestino.` : 'La cartella è vuota.', ok: 'ELIMINA', danger: true });
+  const ok = await dialog({ title: 'Eliminare la cartella "' + f.name + '"?', text: bs.length ? `Le ${bs.length} lavagne che contiene finiranno nel cestino.` : 'La cartella è vuota.', ok: 'Elimina', danger: true });
   if (!ok) return;
   const now = Date.now(); bs.forEach(b => { b.deleted = now; });
   meta.folders = meta.folders.filter(x => x.id !== id);
@@ -1501,7 +1543,7 @@ function folderMenu(anchor, id) {
   ];
   if (meta.collections.length > 1) items.push({ label: 'Sposta in un\'altra raccolta', icon: 'move', fn: () => moveFolder(id) });
   items.push({ label: 'Google Drive…', icon: 'cloud', fn: () => drvFolderDialog(id) });
-  items.push({ sep: true }, { label: 'Elimina cartella', icon: 'trash', danger: true, fn: () => deleteFolder(id) });
+  items.push({ sep: true }, { label: 'Elimina', icon: 'trash', danger: true, fn: () => deleteFolder(id) });
   menu(anchor, items);
 }
 async function renameCollection(id) {
@@ -1509,24 +1551,29 @@ async function renameCollection(id) {
   const name = await dialog({ title: 'Rinomina raccolta', input: c.name });
   if (!name) return; c.name = name; saveMeta(); renderLibrary();
 }
-async function deleteCollection(id) {
-  const c = meta.collections.find(x => x.id === id); if (!c) return;
-  const fids = meta.folders.filter(f => f.col === id).map(f => f.id);
+async function deleteCollections(ids) {
+  const cs = meta.collections.filter(c => ids.includes(c.id)); if (!cs.length) return false;
+  const fids = meta.folders.filter(f => ids.includes(f.col)).map(f => f.id);
   const bs = meta.boards.filter(b => fids.includes(b.folder) && !b.deleted);
-  const ok = await dialog({ title: 'Eliminare la raccolta "' + c.name + '"?', text: `Verranno eliminate ${fids.length} cartelle.` + (bs.length ? ` Le ${bs.length} lavagne finiranno nel cestino.` : ''), ok: 'ELIMINA', danger: true });
-  if (!ok) return;
+  const parts = [];
+  if (fids.length) parts.push(fids.length === 1 ? '1 cartella verrà eliminata.' : `${fids.length} cartelle verranno eliminate.`);
+  if (bs.length) parts.push(bs.length === 1 ? '1 lavagna finirà nel cestino.' : `${bs.length} lavagne finiranno nel cestino.`);
+  const ok = await dialog({ title: cs.length === 1 ? `Eliminare la raccolta "${cs[0].name}"?` : `Eliminare ${cs.length} raccolte?`, text: parts.join(' '), ok: 'Elimina', danger: true });
+  if (!ok) return false;
   const now = Date.now(); bs.forEach(b => { b.deleted = now; });
-  meta.folders = meta.folders.filter(f => f.col !== id);
-  meta.collections = meta.collections.filter(x => x.id !== id);
-  if (!meta.folders.some(f => f.id === meta.ui.folder)) meta.ui.folder = (meta.folders[0] || {}).id || null;
-  saveMeta(); renderLibrary();
+  meta.folders = meta.folders.filter(f => !ids.includes(f.col));
+  meta.collections = meta.collections.filter(c => !ids.includes(c.id));
+  if (!meta.collections.some(c => c.id === meta.ui.col)) meta.ui.col = (meta.collections[0] || {}).id || null;
+  if (!meta.folders.some(f => f.id === meta.ui.folder)) meta.ui.folder = (meta.folders.find(f => f.col === meta.ui.col) || {}).id || null;
+  saveMeta(); renderLibrary(); return true;
 }
+const deleteCollection = id => deleteCollections([id]);
 function collMenu(anchor, id) {
   menu(anchor, [
     { label: 'Rinomina', icon: 'rename', fn: () => renameCollection(id) },
     { label: 'Nuova cartella', icon: 'folderPlus', fn: () => newFolder(id) },
     { sep: true },
-    { label: 'Elimina raccolta', icon: 'trash', danger: true, fn: () => deleteCollection(id) }
+    { label: 'Elimina', icon: 'trash', danger: true, fn: () => deleteCollections([id]) }
   ]);
 }
 async function restoreBoard(id) {
@@ -1537,7 +1584,7 @@ async function restoreBoard(id) {
     if (!f) {
       let c = meta.collections[0];
       if (!c) { c = { id: uid(), name: 'Lavagne', open: true }; meta.collections.push(c); }
-      f = { id: uid(), col: c.id, name: 'Ripristinate', color: '#90A4AE', created: Date.now() }; meta.folders.push(f);
+      f = { id: uid(), col: c.id, name: 'Ripristinate', color: '#64748B', created: Date.now() }; meta.folders.push(f);
     }
     b.folder = f.id;
   }
@@ -1545,14 +1592,14 @@ async function restoreBoard(id) {
 }
 async function purgeBoard(id) {
   const b = meta.boards.find(x => x.id === id); if (!b) return;
-  const ok = await dialog({ title: 'Eliminare definitivamente?', text: `"${b.name}" verrà eliminata per sempre. Non si potrà recuperare.`, ok: 'ELIMINA', danger: true });
+  const ok = await dialog({ title: 'Eliminare definitivamente?', text: `"${b.name}" verrà eliminata per sempre. Non si potrà recuperare.`, ok: 'Elimina', danger: true });
   if (!ok) return;
   meta.boards = meta.boards.filter(x => x.id !== id); await DB.del('b:' + id); dropThumb(id); saveMeta(); renderLibrary();
   gcImages();
 }
 async function emptyTrash() {
   const del = meta.boards.filter(b => b.deleted); if (!del.length) return;
-  const ok = await dialog({ title: 'Svuotare il cestino?', text: `${del.length} lavagne verranno eliminate per sempre.`, ok: 'SVUOTA', danger: true });
+  const ok = await dialog({ title: 'Svuotare il cestino?', text: `${del.length} lavagne verranno eliminate per sempre.`, ok: 'Svuota', danger: true });
   if (!ok) return;
   for (const b of del) { await DB.del('b:' + b.id); dropThumb(b.id); }
   meta.boards = meta.boards.filter(b => !b.deleted); saveMeta(); renderLibrary();
@@ -2231,7 +2278,7 @@ function tablePicker(anchor) {
       <div class="tp-grid">${cells}</div>
       <div class="tp-size">${st.r} ${st.r === 1 ? 'riga' : 'righe'} × ${st.c} ${st.c === 1 ? 'colonna' : 'colonne'}</div>
       <button class="trow tp-h" data-h="1"><span><b>Prima riga di intestazione</b></span><span class="tg ${st.header ? 'on' : ''}"></span></button>
-      <div class="dlg-b"><button class="tbtn" data-ins="1">INSERISCI</button></div>`;
+      <div class="dlg-b"><button class="tbtn" data-ins="1">Inserisci</button></div>`;
   };
   render();
   const L = popover(anchor, box, 'auto');
@@ -2298,7 +2345,7 @@ function shapePopover(anchor, styleOnly) {
   const sample = styleOnly ? selItemsList().find(x => x.t === 'shape' || x.t === 'conn') : null;
   const o = sample ? { s: Math.max(0, SHAPE_SIZES.indexOf(sample.sw)), fill: sample.fill, ls: lineStyle(sample) } : T;
   if (sample && o.s < 0) o.s = 1;
-  const box = h('div', 'pop ptool');
+  const box = h('div', 'pop ptool' + (styleOnly ? ' drw dk-pop' : ''));
   const colR = styleOnly ? null : colorTray('shape', () => T.c, c => { T.c = c; saveMeta(); });
   const render = () => { box.innerHTML = `<div class="pop-h">${styleOnly ? 'Stile delle forme' : 'Forme'}</div>${shapeStyleHTML(o, !styleOnly)}`; if (colR) box.append(colR); };
   render();
@@ -2509,11 +2556,11 @@ function removeLastBlankPage() {
   const pages = pageList(), last = pages[pages.length - 1]; if (!last || !last.blank) return;
   commitText(); clearSel();
   const before = ed.items.slice(); ed.items = ed.items.filter(i => i !== last); pushHist(before); renderInk();
-  toast('Pagina bianca eliminata', 'ANNULLA', () => undo());
+  toast('Pagina bianca eliminata', 'Annulla', () => undo());
 }
 async function askGoToPage() {
   const pages = pageList(); if (!pages.length) return;
-  const v = await dialog({ title: 'Vai alla pagina', text: `Scrivi un numero da 1 a ${pages.length}.`, input: String(currentPageIndex(pages) + 1), ok: 'VAI' });
+  const v = await dialog({ title: 'Vai alla pagina', text: `Scrivi un numero da 1 a ${pages.length}.`, input: String(currentPageIndex(pages) + 1), ok: 'Vai' });
   if (v == null) return;
   const n = parseInt(v, 10);
   if (!(n >= 1 && n <= pages.length)) { toast(`Scrivi un numero da 1 a ${pages.length}`); return; }
@@ -2644,8 +2691,8 @@ function drawLive() {
   if (drawing && drawing.kind === 'lasso' && drawing.pts.length > 3) {
     const p = drawing.pts;
     c.beginPath(); c.moveTo(p[0], p[1]); for (let i = 2; i < p.length; i += 2) c.lineTo(p[i], p[i + 1]);
-    c.fillStyle = 'rgba(33,150,243,0.07)'; c.fill();
-    c.setLineDash([6 / cam.z, 5 / cam.z]); c.lineWidth = 1.6 / cam.z; c.strokeStyle = '#2196F3'; c.stroke(); c.setLineDash([]);
+    c.fillStyle = 'rgba(37,99,235,0.07)'; c.fill();
+    c.setLineDash([6 / cam.z, 5 / cam.z]); c.lineWidth = 1.6 / cam.z; c.strokeStyle = '#2563EB'; c.stroke(); c.setLineDash([]);
   }
   if (laser.pts.length) drawLaser(c, performance.now());
   c.setTransform(DPR, 0, 0, DPR, 0, 0);
@@ -2772,8 +2819,8 @@ function highlightTarget(c, t) {
   const hh = t.t === 'shape' ? Math.abs(t.h) / 2 : t.t === 'table' ? g.H / 2 : t.t === 'image' ? t.h / 2 : g.hh;
   const m = 6 / cam.z, P = [[-hw - m, -hh - m], [hw + m, -hh - m], [hw + m, hh + m], [-hw - m, hh + m]].map(([a, b]) => tf(a, b));
   c.beginPath(); P.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.closePath();
-  c.fillStyle = 'rgba(33,150,243,0.06)'; c.fill();
-  c.setLineDash([5 / cam.z, 4 / cam.z]); c.lineWidth = 1.5 / cam.z; c.strokeStyle = '#2196F3'; c.stroke(); c.setLineDash([]);
+  c.fillStyle = 'rgba(37,99,235,0.06)'; c.fill();
+  c.setLineDash([5 / cam.z, 4 / cam.z]); c.lineWidth = 1.5 / cam.z; c.strokeStyle = '#2563EB'; c.stroke(); c.setLineDash([]);
 }
 function drawConnTargets(c, d) {
   if (!LINE_KINDS.has(meta.tool.shape.k)) return;
@@ -2811,9 +2858,9 @@ function drawLineHandles(c) {
   const it = (sel.drag && sel.drag.result) || selItemsList()[0]; if (!it) return;
   for (const [k, e] of lineEnds(it).entries()) {
     const s = toScreen(e.x, e.y), on = it.t === 'conn' && !!it[k ? 'b' : 'a'].id;
-    c.beginPath(); c.arc(s.x, s.y, 8, 0, Math.PI * 2); c.fillStyle = on ? '#2196F3' : '#FFFFFF'; c.fill();
-    c.lineWidth = 2; c.strokeStyle = on ? '#FFFFFF' : '#2196F3'; c.stroke();
-    if (on) { c.beginPath(); c.arc(s.x, s.y, 9.5, 0, Math.PI * 2); c.lineWidth = 1.5; c.strokeStyle = '#2196F3'; c.stroke(); }
+    c.beginPath(); c.arc(s.x, s.y, 8, 0, Math.PI * 2); c.fillStyle = on ? '#2563EB' : '#FFFFFF'; c.fill();
+    c.lineWidth = 2; c.strokeStyle = on ? '#FFFFFF' : '#2563EB'; c.stroke();
+    if (on) { c.beginPath(); c.arc(s.x, s.y, 9.5, 0, Math.PI * 2); c.lineWidth = 1.5; c.strokeStyle = '#2563EB'; c.stroke(); }
   }
 }
 function lineSelHit(s) {
@@ -2832,7 +2879,7 @@ const myTpls = () => meta.tpls || (meta.tpls = []);
 async function saveSelAsTemplate() {
   const items = selItemsList(); if (!items.length) return;
   commitText();
-  const name = await dialog({ title: 'Salva come modello', text: 'Lo ritroverai in + → Modelli, pronto da inserire in qualsiasi lavagna.', input: `Modello ${myTpls().length + 1}`, ok: 'SALVA' });
+  const name = await dialog({ title: 'Salva come modello', text: 'Lo ritroverai in + → Modelli, pronto da inserire in qualsiasi lavagna.', input: `Modello ${myTpls().length + 1}`, ok: 'Salva' });
   if (!name) return;
   const b = boundsOf(items), cx = (b.x0 + b.x1) / 2, cy = (b.y0 + b.y1) / 2;
   const copy = cloneGroup(items).map(it => transformItem(it, mTrans(-cx, -cy), 1, 0));
@@ -2855,7 +2902,7 @@ function tplOptions(anchor, id, refresh) {
   menu(anchor, [
     { label: 'Rinomina', icon: 'rename', fn: async () => { const n = await dialog({ title: 'Rinomina il modello', input: t.name, ok: 'OK' }); if (n) { t.name = n.slice(0, 80); saveMeta(); refresh(); } } },
     { label: 'Elimina', icon: 'trash', danger: true, fn: async () => {
-      const ok = await dialog({ title: 'Eliminare il modello?', text: `"${t.name}" non sarà più tra i tuoi modelli. Le lavagne in cui l'hai già inserito non cambiano.`, ok: 'ELIMINA', danger: true });
+      const ok = await dialog({ title: 'Eliminare il modello?', text: `"${t.name}" non sarà più tra i tuoi modelli. Le lavagne in cui l'hai già inserito non cambiano.`, ok: 'Elimina', danger: true });
       if (ok) { meta.tpls = myTpls().filter(x => x.id !== id); await DB.del('tpl:' + id); dropThumb(id); saveMeta(); refresh(); gcImages(); }
     } }
   ]);
@@ -3652,7 +3699,7 @@ function guideDragStart(hit, w, pid) {
 function drawKnob(c, x, y, kind) {
   const r = knobR();
   c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2);
-  c.fillStyle = kind === 'rot' ? '#2196F3' : '#FFFFFF'; c.fill();
+  c.fillStyle = kind === 'rot' ? '#2563EB' : '#FFFFFF'; c.fill();
   if (kind !== 'rot') { c.lineWidth = 1.5 / cam.z; c.strokeStyle = '#7A858F'; c.stroke(); }
   c.lineCap = 'round'; c.lineJoin = 'round';
   if (kind === 'rot') {
@@ -3715,7 +3762,7 @@ function drawProt(c, g) {
 }
 function drawPill(c, text, x, y) {
   c.font = `600 13px ${FONT_STACK}`; const tw = c.measureText(text).width + 16;
-  c.fillStyle = '#2196F3'; c.beginPath(); c.roundRect ? c.roundRect(x - tw / 2, y - 12, tw, 24, 12) : c.rect(x - tw / 2, y - 12, tw, 24); c.fill();
+  c.fillStyle = '#2563EB'; c.beginPath(); c.roundRect ? c.roundRect(x - tw / 2, y - 12, tw, 24, 12) : c.rect(x - tw / 2, y - 12, tw, 24); c.fill();
   c.fillStyle = '#FFFFFF'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(text, x, y + 0.5); c.textAlign = 'start';
 }
 
@@ -3921,7 +3968,7 @@ function selGeomScreen() {
 function drawSelBox(c) {
   if (sel.line) { drawLineHandles(c); return; }
   const g = selGeomScreen();
-  c.lineWidth = 1.5; c.strokeStyle = '#2196F3'; c.setLineDash([6, 4]);
+  c.lineWidth = 1.5; c.strokeStyle = '#2563EB'; c.setLineDash([6, 4]);
   c.beginPath(); g.P.forEach((p, i) => i ? c.lineTo(p.x, p.y) : c.moveTo(p.x, p.y)); c.closePath(); c.stroke();
   c.setLineDash([]);
   c.beginPath(); c.moveTo(g.tm.x, g.tm.y); c.lineTo(g.R.x, g.R.y); c.stroke();
@@ -3929,20 +3976,20 @@ function drawSelBox(c) {
   if (sel.tableLines && !sel.drag) {
     const t = selItemsList()[0];
     if (t) {
-      const tf = localToWorld(t), tg = geom(t), W = tg.W, H = tg.H, mk = (lx, ly) => { const [x, y] = tf(lx, ly), p = toScreen(x, y); c.beginPath(); c.arc(p.x, p.y, 4, 0, Math.PI * 2); c.fillStyle = '#2196F3'; c.fill(); };
+      const tf = localToWorld(t), tg = geom(t), W = tg.W, H = tg.H, mk = (lx, ly) => { const [x, y] = tf(lx, ly), p = toScreen(x, y); c.beginPath(); c.arc(p.x, p.y, 4, 0, Math.PI * 2); c.fillStyle = '#2563EB'; c.fill(); };
       let x = -W / 2; for (let i = 0; i < t.cols.length - 1; i++) { x += t.cols[i]; mk(x, -H / 2); mk(x, H / 2); }
       let y = -H / 2; for (let i = 0; i < tg.rows.length - 1; i++) { y += tg.rows[i]; mk(-W / 2, y); mk(W / 2, y); }
     }
   }
-  if (sel.sides) for (const p of g.M) { c.beginPath(); c.arc(p.x, p.y, 5.5, 0, Math.PI * 2); c.fillStyle = '#2196F3'; c.fill(); c.lineWidth = 2; c.strokeStyle = '#fff'; c.stroke(); c.strokeStyle = '#2196F3'; }
-  c.beginPath(); c.arc(g.R.x, g.R.y, 13, 0, Math.PI * 2); c.fillStyle = '#2196F3'; c.fill();
+  if (sel.sides) for (const p of g.M) { c.beginPath(); c.arc(p.x, p.y, 5.5, 0, Math.PI * 2); c.fillStyle = '#2563EB'; c.fill(); c.lineWidth = 2; c.strokeStyle = '#fff'; c.stroke(); c.strokeStyle = '#2563EB'; }
+  c.beginPath(); c.arc(g.R.x, g.R.y, 13, 0, Math.PI * 2); c.fillStyle = '#2563EB'; c.fill();
   drawRotIcon(c, g.R.x, g.R.y, 5.4, 1.7);
   const bb = selBubble();
   if (bb) { const it = sel.drag && sel.drag.type === 'tail' && sel.drag.result ? sel.drag.result : bb, q = bubbleTipScreen(it); c.beginPath(); c.arc(q.x, q.y, 7.5, 0, Math.PI * 2); c.fillStyle = '#FF9800'; c.fill(); c.lineWidth = 2.5; c.strokeStyle = '#fff'; c.stroke(); }
   if (sel.drag && sel.drag.type === 'rot') {
     const deg = Math.round((((sel.rot * 180 / Math.PI) % 360) + 360) % 360) + '°';
     c.font = `600 13px ${FONT_STACK}`; const tw = c.measureText(deg).width + 16, x = g.R.x - tw / 2, y = g.R.y - 44;
-    c.fillStyle = '#2196F3'; c.beginPath(); c.roundRect ? c.roundRect(x, y, tw, 24, 12) : c.rect(x, y, tw, 24); c.fill();
+    c.fillStyle = '#2563EB'; c.beginPath(); c.roundRect ? c.roundRect(x, y, tw, 24, 12) : c.rect(x, y, tw, 24); c.fill();
     c.fillStyle = '#fff'; c.textBaseline = 'middle'; c.fillText(deg, x + 8, y + 12.5);
   }
 }
@@ -4043,10 +4090,13 @@ function tapSelect(w, finger) {
 }
 function showSelBar() {
   if (!sel) { if (!pasteAt) selBar.hidden = true; return; }
-  selBar.innerHTML = `<button data-sa="cut">Taglia</button><button data-sa="copy">Copia</button>${clip && clip.length ? '<button data-sa="paste">Incolla</button>' : ''}<button data-sa="dup">Duplica</button><button data-sa="color">Colore</button>${selItemsList().some(x => (x.t === 'shape' && x.k !== 'blob') || x.t === 'conn') ? '<button data-sa="style">Stile</button>' : ''}${selItemsList().filter(x => x.t === 'table').length === 1 ? '<button data-sa="table">Tabella</button>' : ''}<button data-sa="tpl">Modello</button><button data-sa="del" class="danger">Elimina</button>`;
+  const B = (a, icn, l, cls = '') => `<button data-sa="${a}" class="${cls}">${ic(icn)}<span>${l}</span></button>`;
+  selBar.innerHTML = B('cut', 'cut', 'Taglia') + B('copy', 'copy', 'Copia') + (clip && clip.length ? B('paste', 'paste', 'Incolla') : '') + B('dup', 'dup', 'Duplica') + B('color', 'palette', 'Colore') +
+    (selItemsList().some(x => (x.t === 'shape' && x.k !== 'blob') || x.t === 'conn') ? B('style', 'shapes', 'Stile') : '') + (selItemsList().filter(x => x.t === 'table').length === 1 ? B('table', 'table', 'Tabella') : '') +
+    B('tpl', 'template', 'Modello') + '<span class="sb-sep"></span>' + B('del', 'trash', 'Elimina', 'danger');
   selBar.hidden = false; positionSelBar();
 }
-function showPasteBar(w) { pasteAt = w; selBar.innerHTML = '<button data-sa="paste">Incolla</button>'; selBar.hidden = false; positionSelBar(); }
+function showPasteBar(w) { pasteAt = w; selBar.innerHTML = `<button data-sa="paste">${ic('paste')}<span>Incolla</span></button>`; selBar.hidden = false; positionSelBar(); }
 function hidePasteBar() { if (!pasteAt) return; pasteAt = null; if (!sel) selBar.hidden = true; }
 function positionSelBar() {
   if (selBar.hidden) return;
@@ -5256,7 +5306,7 @@ async function clearAll() {
   commitText();
   const hasPages = ed.items.some(i => i.t === 'page');
   if (!ed.items.some(i => i.t !== 'page')) { toast('La lavagna è già vuota'); return; }
-  const ok = await dialog({ title: 'Cancellare tutto?', text: (hasPages ? 'Tutto ciò che hai scritto verrà cancellato; le pagine del PDF restano.' : 'Tutto il contenuto della lavagna verrà cancellato.') + ' Potrai recuperarlo con Annulla.', ok: 'CANCELLA', danger: true });
+  const ok = await dialog({ title: 'Cancellare tutto?', text: (hasPages ? 'Tutto ciò che hai scritto verrà cancellato; le pagine del PDF restano.' : 'Tutto il contenuto della lavagna verrà cancellato.') + ' Potrai recuperarlo con Annulla.', ok: 'Cancella', danger: true });
   if (!ok) return;
   clearSel();
   const before = ed.items.slice(); ed.items = ed.items.filter(i => i.t === 'page'); pushHist(before); renderInk();
@@ -5340,7 +5390,7 @@ function exportDialog() {
   const render = () => {
     const pagesPdf = st.fmt === 'pdf' && hasPages && !(sel && st.selOnly), bgOpts = st.fmt !== 'boardlab' && !pagesPdf;
     body.innerHTML = `<div class="exp-l">Formato</div>
-      <div class="exp-sel"><select id="expFmt">${[['png', 'PNG'], ['pdf', 'PDF'], ['boardlab', 'BoardLab']].map(([v, l]) => `<option value="${v}"${st.fmt === v ? ' selected' : ''}>${l}</option>`).join('')}</select>${ic('chevD')}</div>
+      <div class="seg2 fmtseg" id="expFmt">${[['png', 'PNG'], ['pdf', 'PDF'], ['boardlab', 'BoardLab']].map(([v, l]) => `<button class="${st.fmt === v ? 'on' : ''}" data-fmt="${v}">${l}</button>`).join('')}</div>
       <div class="exp-rows">${sel ? row('selOnly', 'Solo la selezione') : ''}${bgOpts && !white ? row('col', 'Colore sfondo') : ''}${bgOpts && ed.bg.pattern !== 'none' ? row('pat', 'Motivo di sfondo') : ''}</div>
       <div class="exp-l">Nome file</div>
       <input class="dlg-in" id="expName" autocomplete="off" spellcheck="false">
@@ -5348,11 +5398,10 @@ function exportDialog() {
     const inp = $('#expName', body); inp.value = st.name;
     inp.addEventListener('input', () => { st.name = inp.value; $('.exp-out span', body).textContent = fname(); });
     $('.exp-out span', body).textContent = fname();
-    $('#expFmt', body).addEventListener('change', e => { st.fmt = e.target.value; render(); });
   };
-  body.addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (b) { st[b.dataset.t] = !st[b.dataset.t]; render(); } });
+  body.addEventListener('click', e => { const f = e.target.closest('[data-fmt]'); if (f) { st.fmt = f.dataset.fmt; render(); return; } const b = e.target.closest('[data-t]'); if (b) { st[b.dataset.t] = !st[b.dataset.t]; render(); } });
   render();
-  dialog({ title: `Esporta "${ed.b.name}"`, body, ok: 'ESPORTA' }).then(ok => {
+  dialog({ title: `Esporta "${ed.b.name}"`, body, ok: 'Esporta' }).then(ok => {
     if (!ok) return;
     S.fmt = st.fmt; S.col = st.col; S.pat = st.pat; saveMeta();
     doExport({ fmt: st.fmt, what: sel && st.selOnly ? 'sel' : 'all', col: st.col || white, pat: st.pat, name: st.name.trim() || ed.b.name });
@@ -5572,7 +5621,7 @@ async function deliverFile(blob, name) {
   const share = async () => { try { await navigator.share({ files: [f], title: name }); return true; } catch (e) { return e && e.name === 'AbortError' ? true : e && e.name === 'NotAllowedError' ? null : false; } };
   let r = await share();
   if (r === null) { // il file ha richiesto qualche secondo e Android vuole un nuovo tocco prima di aprire il menu
-    const ok = await dialog({ title: 'Il file è pronto', text: name, ok: 'CONDIVIDI' });
+    const ok = await dialog({ title: 'Il file è pronto', text: name, ok: 'Condividi' });
     if (!ok) return;
     r = await share();
   }
@@ -5674,7 +5723,7 @@ async function drvConnect() {
   } catch (e) { $('#toast').hidden = true; drvAlert(drvMsg(e)); }
 }
 async function drvDisconnect() {
-  const ok = await dialog({ title: 'Scollegare Google Drive?', text: 'Quello che hai già inviato resta su Drive. Potrai ricollegare lo stesso script in qualsiasi momento.', ok: 'SCOLLEGA', danger: true });
+  const ok = await dialog({ title: 'Scollegare Google Drive?', text: 'Quello che hai già inviato resta su Drive. Potrai ricollegare lo stesso script in qualsiasi momento.', ok: 'Scollega', danger: true });
   if (!ok) return;
   meta.settings.drive = null; saveMeta(); renderLibrary();
 }
@@ -5683,7 +5732,7 @@ async function drvDisconnect() {
 async function drvFolderDialog(fid) {
   const f = meta.folders.find(x => x.id === fid); if (!f) return;
   if (!drvOn()) {
-    if (await dialog({ title: 'Google Drive', text: 'Prima collega BoardLab a Google Drive, in Impostazioni → Google Drive.', ok: 'VAI' })) drvGoSettings();
+    if (await dialog({ title: 'Google Drive', text: 'Prima collega BoardLab a Google Drive, in Impostazioni → Google Drive.', ok: 'Vai' })) drvGoSettings();
     return;
   }
   const st = { mode: f.drive ? 'keep' : 'auto', link: '', fmts: new Set(f.drive ? drvFmts(f) : ['pdf', 'boardlab']), unlink: false };
@@ -5710,7 +5759,7 @@ async function drvFolderDialog(fid) {
     } else if (u) { st.unlink = true; const c = body.closest('.dlg'); if (c) c.querySelector('.dlg-b .tbtn:last-child').click(); }
   });
   render();
-  const ok = await dialog({ title: 'Google Drive · ' + f.name, body, ok: 'SALVA' });
+  const ok = await dialog({ title: 'Google Drive · ' + f.name, body, ok: 'Salva' });
   if (!ok) return;
   if (st.unlink) { f.drive = null; saveMeta(); renderLibrary(); toast('Cartella scollegata da Drive'); return; }
   const fmts = DRV_FMTS.map(x => x[0]).filter(k => st.fmts.has(k));
@@ -5721,7 +5770,7 @@ async function drvFolderDialog(fid) {
     const j = await drvCall(st.mode === 'link' ? { a: 'folder', link: st.link } : { a: 'folder', name: f.name });
     f.drive = { id: j.id, name: j.name, url: j.url, fmts }; saveMeta(); renderLibrary();
     const n = drvPending(f).length;
-    if (n) toast(`Collegata a ${j.name}`, `INVIA ${n === 1 ? 'LA LAVAGNA' : n + ' LAVAGNE'}`, () => drvSync(f.id));
+    if (n) toast(`Collegata a ${j.name}`, `Invia ${n === 1 ? 'la lavagna' : n + ' lavagne'}`, () => drvSync(f.id));
     else toast('Collegata a ' + j.name);
   } catch (e) { $('#toast').hidden = true; drvAlert(drvMsg(e)); }
 }
@@ -5758,7 +5807,7 @@ async function drvSync(fid, onlyIds) {
   if (!navigator.onLine) { drvAlert(drvMsg(new DrvError('offline'))); return; }
   drvBusy = true;
   const L = h('div', 'layer dim'), box = h('div', 'dlg drv-prog');
-  box.innerHTML = `<div class="dlg-t">Invio a Google Drive</div><p class="dlg-p" id="drvP"></p><div class="drv-bar"><i></i></div><div class="dlg-b"><button class="tbtn">INTERROMPI</button></div>`;
+  box.innerHTML = `<div class="dlg-t">Invio a Google Drive</div><p class="dlg-p" id="drvP"></p><div class="drv-bar"><i></i></div><div class="dlg-b"><button class="tbtn">Interrompi</button></div>`;
   L.append(box); $('#layers').append(L);
   let stop = false; const sb = $('.tbtn', box), P = $('#drvP', box), bar = $('.drv-bar i', box);
   sb.onclick = () => { stop = true; sb.disabled = true; sb.textContent = 'MI FERMO DOPO QUESTA LAVAGNA'; };
@@ -5798,7 +5847,7 @@ const ACT = {
   'coll-menu': t => collMenu(t, t.dataset.id),
   'new-folder': t => newFolder(t.dataset.id || (curCol() || {}).id),
   'open-folder': t => { if (lsel && lsel.kind === 'folder') { libToggle(t.dataset.id); return; } if (lsel) return; openFolder(t.dataset.id); },
-  'open-col': t => openCollection(t.dataset.id),
+  'open-col': t => { if (lsel && lsel.kind === 'col') { libToggle(t.dataset.id); return; } if (lsel) return; openCollection(t.dataset.id); },
   'new-col': () => newCollection(),
   'view-set': t => { meta.settings.view = t.dataset.v; saveMeta(); renderMain(); },
   'ls-clear': () => libClear(),
@@ -5911,7 +5960,7 @@ document.addEventListener('keydown', e => {
 function ctxOpen(t) {
   if (t.dataset.ctx === 'board') libSelect('board', t.dataset.id);
   else if (t.dataset.ctx === 'folder') libSelect('folder', t.dataset.id);
-  else if (t.dataset.ctx === 'col') collMenu(t, t.dataset.id);
+  else if (t.dataset.ctx === 'col') libSelect('col', t.dataset.id);
   else if (t.dataset.ctx === 'pen') penMenu(t, t.dataset.id);
   else if (t.dataset.ctx === 'sw') editSwatch(+t.dataset.i, t);
 }
@@ -5982,6 +6031,7 @@ window.addEventListener('keydown', e => {
   for (const x of (m.boards || []).concat(m.tpls || [])) if ('thumb' in x) { if (x.thumb) { await DB.set('th:' + x.id, x.thumb); THUMBS.set(x.id, x.thumb); } delete x.thumb; moved = true; }
   if (moved) await DB.set('meta', m);
   meta = m;
+  for (const f of meta.folders) { const i = FOLDER_OLD.indexOf(String(f.color).toLowerCase()); if (i >= 0) f.color = FOLDER_COLORS[i]; }
   astInit();
   if (!meta.ui.col) { const f0 = meta.folders.find(f => f.id === meta.ui.folder); meta.ui.col = f0 ? f0.col : (meta.collections[0] || {}).id; }
   if (meta.ui.view === undefined && meta.settings.view === 'list') meta.settings.view = 'list';
