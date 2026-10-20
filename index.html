@@ -13,15 +13,15 @@
 <style>
 /* Layout: app a schermo intero in stile Nebo — libreria (pannello laterale + elenco) e lavagna (barra titolo, barra strumenti, foglio infinito). Tema unico chiaro, scelto di proposito. */
 :root {
-  --blue: #2196F3;
-  --blue-soft: #E3F2FD;
-  --ink: #1F2124;
-  --muted: #7A7F85;
-  --line: #E4E7EA;
-  --pane: #EAEEF2;
+  --blue: #2563EB;
+  --blue-soft: #EAF1FE;
+  --ink: #1E2430;
+  --muted: #5B6472;
+  --line: #E4E8EE;
+  --pane: #F5F7FA;
   --white: #FFFFFF;
-  --sel: #E4E4E4;
-  --danger: #E53935;
+  --sel: #E9EDF2;
+  --danger: #DC2626;
   --shadow: 0 6px 24px rgba(20, 30, 40, .18);
   --font: Roboto, "Segoe UI", system-ui, -apple-system, sans-serif;
   color-scheme: light;
@@ -341,6 +341,273 @@ input { font: inherit; color: inherit; }
   #drawer { position: absolute; left: 0; top: 0; bottom: 0; box-shadow: var(--shadow); }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+/* ================= Interfaccia 0.12: libreria a linguette, lavagna con l'astuccio ================= */
+.menu, .pop { border-radius: 16px; box-shadow: 0 12px 36px rgba(30,36,48,.18), 0 1px 3px rgba(30,36,48,.12); }
+.menu { padding: 8px; min-width: 240px; }
+.menu-i { border-radius: 10px; padding: 0 12px; gap: 14px; font-size: 15px; }
+.menu-i .ic { color: #3D4654; }
+.dlg { border-radius: 20px; }
+.pbtn { height: 40px; padding: 0 22px; border-radius: 20px; background: var(--blue); color: #fff; font-size: 14.5px; font-weight: 500; }
+.tbtn.gray { color: var(--muted); letter-spacing: 0; font-weight: 400; }
+.chip { background: #F1F4F8; font-size: 13px; color: #3D4654; padding: 0 12px 0 10px; }
+.vsep { width: 1px; height: 24px; background: var(--line); flex: none; }
+
+/* Libreria */
+#lib { flex-direction: column; background: var(--pane); }
+#drawer { display: none; }
+.lt-bar { height: 56px; background: var(--white); border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 12px; padding: 0 12px 0 24px; flex: none; }
+.lt-bar.page { padding-left: 12px; gap: 8px; }
+.lt-title { font-size: 20px; font-weight: 500; }
+.lt-tabs { display: flex; align-items: center; gap: 26px; min-width: 0; overflow-x: auto; scrollbar-width: none; flex: 1; }
+.lt-tabs::-webkit-scrollbar { display: none; }
+.lt-tab { height: 56px; font-size: 15px; color: var(--muted); border-top: 3px solid transparent; border-bottom: 3px solid transparent; box-sizing: border-box; white-space: nowrap; display: flex; align-items: center; gap: 4px; flex: none; }
+.lt-tab.on { color: #1D4ED8; font-weight: 500; border-bottom-color: var(--blue); }
+.lt-tab.add { color: var(--blue); }
+.lt-tab.add .rnd { width: 34px; height: 34px; border-radius: 50%; background: var(--blue-soft); display: grid; place-items: center; }
+.lt-tab.add .ic { width: 18px; height: 18px; stroke-width: 2; }
+.lt-icons { display: flex; align-items: center; gap: 4px; flex: none; margin-left: auto; }
+.lt-icons .ib, .lt-bar .ib { color: #3D4654; }
+.lt-search { flex: 1; height: 42px; background: #F1F4F8; border-radius: 21px; display: flex; align-items: center; gap: 10px; padding: 0 16px; box-sizing: border-box; box-shadow: inset 0 0 0 2px var(--blue); color: var(--muted); }
+.lt-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font-size: 15px; color: var(--ink); }
+#libFolders { display: flex; align-items: flex-end; gap: 4px; padding: 16px 24px 0; flex: none; overflow-x: auto; scrollbar-width: none; }
+#libFolders::-webkit-scrollbar { display: none; }
+.ftab { height: 40px; padding: 0 16px; border-radius: 10px 10px 0 0; background: #E9EDF2; font-size: 14px; color: #3D4654; display: flex; align-items: center; gap: 8px; flex: none; white-space: nowrap; }
+.ftab.on { height: 46px; padding: 0 20px; background: var(--white); font-size: 15px; font-weight: 500; color: var(--ink); box-shadow: inset 0 3px 0 var(--fc); }
+.ftab .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--fc); flex: none; }
+.ftab .n { font-size: 12px; color: #6B7480; font-weight: 400; font-variant-numeric: tabular-nums; }
+.ftab.chk { background: var(--blue-soft); color: #1D4ED8; box-shadow: inset 0 0 0 2px var(--blue); }
+.ftab .fck { width: 16px; height: 16px; border-radius: 50%; background: var(--blue); color: #fff; display: grid; place-items: center; }
+.ftab .fck .ic { width: 12px; height: 12px; stroke-width: 3; }
+.ftab.add { background: var(--blue-soft); color: var(--blue); width: 34px; height: 34px; padding: 0; justify-content: center; border-radius: 50%; align-self: center; margin-left: 4px; }
+#main { flex: 1; min-height: 0; display: flex; flex-direction: column; position: relative; }
+#main.m-folder { background: var(--white); margin: 0 24px; border-radius: 0 14px 0 0; }
+#main.m-page { background: var(--pane); }
+.mn-head { height: 68px; padding: 0 24px; gap: 12px; }
+.mn-head h1 { font-size: 22px; font-weight: 500; }
+.mn-count { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.vseg { display: flex; background: #F1F4F8; border-radius: 18px; padding: 3px; flex: none; }
+.vseg button { width: 40px; height: 30px; border-radius: 15px; display: grid; place-items: center; color: var(--muted); }
+.vseg button .ic { width: 18px; height: 18px; }
+.vseg button.on { background: var(--white); box-shadow: 0 1px 2px rgba(30,36,48,.15); color: #1D4ED8; }
+.drvpill { height: 36px; padding: 0 12px 0 10px; border-radius: 18px; background: var(--blue-soft); color: #1D4ED8; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; flex: none; }
+.drvpill .ic { width: 20px; height: 20px; }
+.drvpill.off { background: #F1F4F8; color: var(--muted); }
+.drvpill.ok { background: #E8F6EE; color: #15803D; padding: 0 9px; }
+.mn-body { padding: 4px 24px 120px; }
+#main.m-page .mn-body { padding: 24px; }
+.bgrid { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 20px 22px; }
+.bgrid .bcard { padding: 0; gap: 10px; background: none; }
+.bgrid .thumb { border-radius: 12px; border: 1px solid var(--line); position: relative; }
+.bgrid .bt { padding: 0 34px 0 2px; }
+.bgrid .bcard .ib { right: -4px; bottom: 0; }
+.bn { font-size: 14.5px; font-weight: 500; }
+.bd { font-size: 12.5px; color: var(--muted); }
+.thumb { position: relative; }
+.pdfb { position: absolute; left: 8px; bottom: 8px; height: 20px; padding: 0 7px; border-radius: 5px; background: #FDECEC; color: #B91C1C; font-size: 11px; font-weight: 700; display: flex; align-items: center; }
+.ck { position: absolute; left: 8px; top: 8px; width: 24px; height: 24px; border-radius: 50%; background: var(--blue); color: #fff; display: grid; place-items: center; box-shadow: 0 0 0 2px #fff; }
+.ck .ic { width: 16px; height: 16px; stroke-width: 3; }
+.bcard.chk .thumb, .brow.chk .thumb { box-shadow: 0 0 0 3px var(--blue); }
+.blist2 { display: flex; flex-direction: column; }
+.brow { display: grid; grid-template-columns: 84px minmax(0, 1fr) 170px 130px 44px; align-items: center; min-height: 68px; border-bottom: 1px solid #F0F2F6; cursor: pointer; }
+.brow.head { min-height: 36px; font-size: 12.5px; color: var(--muted); border-bottom-color: var(--line); cursor: default; }
+.brow .thumb { width: 64px; height: 48px; border-radius: 6px; border: 1px solid var(--line); }
+.brow .pdfb { left: 3px; bottom: 3px; height: 14px; font-size: 8.5px; padding: 0 4px; }
+.brow .ck { width: 18px; height: 18px; left: 4px; top: 4px; }
+.brow .ck .ic { width: 12px; height: 12px; }
+.brow .bn { font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: 12px; }
+.bdt { font-size: 13.5px; color: #3D4654; }
+.brow .ib { color: var(--muted); }
+.brow.chk { background: #F5F9FF; }
+.dst { font-size: 13px; display: flex; align-items: center; gap: 6px; }
+.dst i { width: 8px; height: 8px; border-radius: 50%; }
+.dst.wait { color: #B45309; } .dst.wait i { background: #F59E0B; }
+.dst.ok { color: #15803D; } .dst.ok i { background: #22C55E; }
+.tlist { display: flex; flex-direction: column; gap: 4px; max-width: 900px; }
+.tlist .trow-b { background: var(--white); border-radius: 12px; padding: 8px 12px; }
+.empty { padding: 72px 24px; }
+.empty .tbtn { margin-top: 10px; }
+.fab { right: 44px; bottom: 28px; width: 56px; height: 56px; background: var(--blue); box-shadow: 0 8px 22px rgba(37,99,235,.35); }
+.fab .ic { width: 26px; height: 26px; }
+.selpanel { position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 20; background: #1E2430; color: #fff; border-radius: 18px; box-shadow: 0 12px 34px rgba(30,36,48,.32); display: flex; align-items: center; gap: 4px; padding: 6px 8px; max-width: calc(100% - 32px); box-sizing: border-box; overflow-x: auto; scrollbar-width: none; }
+.selpanel .sx { color: #C9D0D8; }
+.selpanel .sp-n { font-size: 14.5px; font-weight: 500; white-space: nowrap; padding: 0 8px 0 2px; }
+.selpanel .sp-sep { width: 1px; height: 32px; background: #39414D; margin: 0 6px; flex: none; }
+.selpanel .sa { min-width: 70px; height: 58px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11.5px; color: #E7EBF0; flex: none; padding: 0 6px; }
+.selpanel .sa .ic { width: 22px; height: 22px; }
+.selpanel .sa:active { background: #2C3440; }
+.selpanel .sa.danger { color: #FCA5A5; }
+
+/* Impostazioni */
+.set-wrap { display: flex; gap: 24px; align-items: flex-start; max-width: 1180px; }
+.set-nav { width: 280px; flex: none; background: var(--white); border-radius: 14px; padding: 8px; box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; position: sticky; top: 0; }
+.set-i { height: 48px; border-radius: 10px; display: flex; align-items: center; gap: 14px; padding: 0 14px; font-size: 15px; color: #3D4654; text-align: left; }
+.set-i.on { background: var(--blue-soft); color: #1D4ED8; font-weight: 500; }
+.set-sep { height: 1px; background: var(--line); margin: 6px 10px; }
+.set-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+.set-h { font-size: 24px; font-weight: 500; }
+.set-hrow { display: flex; align-items: center; gap: 16px; }
+.set-hrow .set-h { flex: 1; }
+.scard { background: var(--white); border-radius: 14px; display: flex; flex-direction: column; overflow: hidden; }
+.scard.pad { padding: 18px 20px; }
+.scard.row { flex-direction: row; gap: 24px; padding-right: 24px; }
+.scol { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.shead { font-size: 12.5px; font-weight: 500; letter-spacing: .3px; color: var(--muted); padding: 16px 20px 4px; text-transform: uppercase; }
+.srow2 { min-height: 60px; display: flex; align-items: center; gap: 16px; padding: 6px 20px; border-top: 1px solid #F0F2F6; text-align: left; width: 100%; box-sizing: border-box; font-size: 15px; }
+.shead + .srow2 { border-top: 0; }
+.srow2 > span:first-child { flex: 1; }
+.srow2 > .ic:first-child { color: #15803D; }
+.srow2 > .ic:first-child + span { flex: 1; }
+.sval { font-size: 14px; color: var(--muted); }
+.fab-s { width: 44px; height: 44px; border-radius: 50%; background: var(--blue); color: #fff; display: grid; place-items: center; margin-top: 12px; }
+.fab-s .ic { width: 22px; height: 22px; }
+.pill-b { height: 36px; padding: 0 14px; border-radius: 18px; background: var(--blue-soft); color: #1D4ED8; font-size: 13.5px; font-weight: 500; flex: none; }
+.seg2 { display: flex; background: #F1F4F8; border-radius: 10px; padding: 3px; flex: none; }
+.seg2 button { height: 34px; min-width: 44px; padding: 0 14px; border-radius: 8px; font-size: 14px; color: #3D4654; font-variant-numeric: tabular-nums; }
+.seg2 button.on { background: var(--white); box-shadow: 0 1px 2px rgba(30,36,48,.15); font-weight: 500; color: var(--ink); }
+.astprev { width: 140px; flex: none; display: flex; align-items: center; justify-content: center; background: var(--pane); border-radius: 12px; margin: 16px 0; }
+.ast-mini { width: 56px; background: #1E2430; border-radius: 20px; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 7px 0 5px; color: #E7EBF0; }
+.ast-mini .am { width: 44px; height: 40px; display: grid; place-items: center; }
+.ast-mini .am.pen { background: #fff; border-radius: 14px; }
+.ast-mini .am.pen svg { width: 34px; height: 14px; }
+.ast-mini .am.sm { height: 30px; color: #A9B1BC; }
+.ast-mini .am .ic { width: 20px; height: 20px; }
+.ast-mini .asep { width: 30px; height: 1px; background: #39414D; margin: 3px 0; }
+.hsearch { width: 360px; height: 42px; background: var(--white); border: 1px solid var(--line); border-radius: 21px; display: flex; align-items: center; gap: 10px; padding: 0 16px; box-sizing: border-box; color: var(--muted); }
+.hsearch input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font-size: 14.5px; color: var(--ink); }
+.hsearch .ic { width: 18px; height: 18px; }
+.hgrp { height: 56px; display: flex; align-items: center; gap: 14px; padding: 0 20px; text-align: left; font-size: 16px; font-weight: 500; border-top: 1px solid #F0F2F6; width: 100%; box-sizing: border-box; }
+.hgrp:first-child { border-top: 0; }
+.hgrp .ht { flex: 1; }
+.hgrp > .ic { color: var(--muted); width: 20px; height: 20px; }
+.hic { width: 32px; height: 32px; border-radius: 9px; background: #F1F4F8; color: #3D4654; display: grid; place-items: center; }
+.hic .ic { width: 18px; height: 18px; }
+.hgrp.open .hic { background: var(--blue-soft); color: #1D4ED8; }
+.hitems { padding: 2px 20px 16px 66px; display: flex; flex-direction: column; gap: 14px; }
+.hitems.flat { padding: 18px 20px; }
+.hitem { display: flex; flex-direction: column; gap: 4px; }
+.hitem b { font-size: 14.5px; font-weight: 500; }
+.hitem span { font-size: 14px; color: #3D4654; line-height: 1.5; }
+.hnone { padding: 24px 20px; color: var(--muted); }
+.drv-row .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--fc); flex: none; margin: 0 4px; }
+.drv-list .drv-row { padding: 10px 20px; border-top: 1px solid #F0F2F6; }
+.drv-list .shead + .drv-row { border-top: 0; }
+
+/* Lavagna: il foglio occupa tutto, i comandi galleggiano sopra */
+#editor { display: block; }
+#editor .ed-bar, #editor .ed-tools { display: none; }
+#stage { position: absolute; inset: 0; }
+.cap { background: var(--white); box-shadow: 0 4px 16px rgba(30,36,48,.10), 0 1px 2px rgba(30,36,48,.12); }
+.ed-tl { position: absolute; left: 16px; top: 16px; display: flex; align-items: center; gap: 10px; z-index: 6; max-width: calc(50% - 40px); }
+.ed-tl .back { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+.ed-tl .ed-titles { height: 48px; padding: 0 18px; border-radius: 24px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; min-width: 0; max-width: 100%; line-height: 1.2; }
+#edTitle { font-size: 15px; font-weight: 500; }
+#edSub { font-size: 12px; color: var(--muted); }
+#edSub .dot { width: 8px; height: 8px; border-radius: 50%; }
+.ed-tr { position: absolute; right: 16px; top: 16px; height: 48px; border-radius: 24px; display: flex; align-items: center; gap: 2px; padding: 0 4px; z-index: 6; }
+.ed-tr .ib { width: 44px; height: 44px; color: var(--ink); }
+.ed-tr .ib:disabled { color: #A9B1BC; opacity: 1; }
+.ed-tr .plus { width: 40px; height: 40px; border-radius: 50%; background: var(--blue); color: #fff; display: grid; place-items: center; margin: 0 2px; }
+.ed-tr .plus .ic { stroke-width: 2.2; }
+.ed-tr .vsep { margin: 0 4px; }
+.zpill { left: 16px; bottom: 16px; height: 44px; border-radius: 22px; align-items: center; padding: 0 4px; box-shadow: 0 4px 16px rgba(30,36,48,.10), 0 1px 2px rgba(30,36,48,.12); overflow: visible; }
+.zpill button { height: 40px; min-width: 40px; padding: 0 10px; border-radius: 20px; color: var(--blue); font-weight: 500; font-size: 14px; }
+.zpill button + button { border-left: 0; }
+.zpill #zLock { color: #5B6472; padding: 0; width: 40px; }
+.zpill #zLock.on { background: var(--blue-soft); color: #1D4ED8; }
+.zpill .zsep { width: 1px; height: 22px; background: var(--line); }
+.findbar { top: 76px; }
+.pgpill { border-radius: 23px; box-shadow: 0 4px 16px rgba(30,36,48,.10), 0 1px 2px rgba(30,36,48,.12); }
+
+/* Astuccio */
+.ast { position: absolute; z-index: 7; background: #1E2430; color: #E7EBF0; border-radius: 26px; box-shadow: 0 12px 32px rgba(30,36,48,.30); display: flex; align-items: center; touch-action: none; scrollbar-width: none; box-sizing: border-box; }
+.ast::-webkit-scrollbar { display: none; }
+.ast.v { flex-direction: column; width: 72px; padding: 6px 0 8px; max-height: calc(100% - 168px); }
+.ast.h { flex-direction: row; height: 72px; padding: 0 8px 0 6px; max-width: calc(100% - 48px); }
+.ast.scroll.v { overflow-y: auto; overflow-x: hidden; }
+.ast.scroll.h { overflow-x: auto; overflow-y: hidden; }
+.ast.scroll .pen.on { width: 56px; height: 50px; margin: 0; }
+.ast.scroll.h .pen.on { width: 50px; height: 56px; }
+.ast.right { right: 16px; top: 50%; transform: translateY(-50%); }
+.ast.left { left: 16px; top: 50%; transform: translateY(-50%); }
+.ast.top { top: 80px; left: 50%; transform: translateX(-50%); }
+.ast.bottom { bottom: 16px; left: 50%; transform: translateX(-50%); }
+.ast.closed.v { max-height: none; }
+.ast.free, .ast.dragging { right: auto; bottom: auto; transform: none; }
+.ast.dragging { opacity: .92; box-shadow: 0 18px 40px rgba(30,36,48,.38); transition: none; }
+.ast .grip { flex: none; display: grid; grid-template-columns: repeat(3, 4px); gap: 4px; padding: 13px 18px; cursor: grab; touch-action: none; }
+.ast.h .grip { grid-template-columns: repeat(2, 4px); padding: 18px 12px; }
+.ast .grip i { width: 4px; height: 4px; border-radius: 50%; background: #7D8694; }
+.ast .ab { flex: none; width: 56px; height: 50px; border-radius: 16px; display: grid; place-items: center; color: inherit; }
+.ast.h .ab { width: 50px; height: 56px; }
+.ast .ab .ic { width: 24px; height: 24px; }
+.ast .ab.sm { height: 40px; color: #A9B1BC; }
+.ast.h .ab.sm { width: 40px; height: 56px; }
+.ast .ab.on:not(.pen) { background: #3A4454; box-shadow: inset 0 0 0 1.5px #5B6576; color: #fff; }
+.ast .pen.on { background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,.25); }
+.ast.right .pen.on { width: 68px; margin-left: -12px; }
+.ast.left .pen.on { width: 68px; margin-right: -12px; }
+.ast.top .pen.on { height: 68px; margin-bottom: -12px; }
+.ast.bottom .pen.on { height: 68px; margin-top: -12px; }
+.ast.closed .pen.on { width: 56px; margin: 0; }
+.ast.h.closed .pen.on { width: 50px; height: 56px; margin: 0; }
+.ast.left .penic { transform: scaleX(-1); }
+.ast.top .penic { transform: rotate(-90deg); }
+.ast.bottom .penic { transform: rotate(90deg); }
+.ast .addpen { height: 40px; color: #A9B1BC; }
+.ast.h .addpen { width: 40px; height: 56px; }
+.ast .addpen span { width: 26px; height: 26px; border-radius: 50%; border: 1.5px dashed #6B7480; display: grid; place-items: center; box-sizing: border-box; }
+.ast .addpen .ic { width: 14px; height: 14px; stroke-width: 2.4; }
+.ast .asep { flex: none; background: #39414D; }
+.ast.v .asep { width: 40px; height: 1px; margin: 6px 0; }
+.ast.h .asep { width: 1px; height: 40px; margin: 0 6px; }
+.ast.closed.v { padding: 8px 0 6px; width: 64px; border-radius: 22px; }
+.ast.closed.v .ab { width: 52px; }
+.ast.closed.h { height: 64px; padding: 0 6px 0 8px; border-radius: 22px; }
+.ast.closed.h .ab { height: 52px; }
+
+/* Ruota della penna */
+.wheel-l .wh-disc { position: absolute; width: 304px; height: 304px; border-radius: 50%; background: rgba(255,255,255,.98); box-shadow: 0 12px 36px rgba(30,36,48,.18), 0 1px 3px rgba(30,36,48,.12); }
+.wh-i { position: absolute; display: grid; place-items: center; }
+.wh-c { width: 32px; height: 32px; border-radius: 50%; background: var(--c); box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
+.wh-c.on { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--c); }
+.wh-c.lt.on { box-shadow: 0 0 0 3px #fff, 0 0 0 5px #9AA0A6; }
+.wh-c.more { background: conic-gradient(#DC2626, #FACC15, #16A34A, #2563EB, #7C3AED, #DC2626); }
+.wh-c.more.on { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--c, #9AA0A6); }
+.wh-s { width: 28px; height: 28px; border-radius: 50%; }
+.wh-s i { border-radius: 50%; display: block; }
+.wh-s.on { background: var(--blue-soft); box-shadow: inset 0 0 0 1.5px var(--blue); }
+.wh-pill { position: absolute; height: 36px; padding: 0 6px 0 14px; border-radius: 18px; background: #fff; box-shadow: 0 4px 16px rgba(30,36,48,.12), 0 1px 2px rgba(30,36,48,.12); display: flex; align-items: center; gap: 10px; font-size: 13px; white-space: nowrap; }
+.wh-pill b { font-weight: 500; }
+.wh-k { height: 28px; padding: 0 8px 0 10px; border-radius: 14px; background: #F1F4F8; font-size: 12.5px; display: flex; align-items: center; gap: 2px; }
+.wh-k .ic { width: 14px; height: 14px; }
+.palpop { width: 300px; box-sizing: border-box; padding: 16px; }
+.crow { display: flex; flex-wrap: wrap; gap: 8px; }
+.crow .sw { box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
+.crow .sw.add { margin-left: 0; }
+.crow-l { font-size: 13px; color: var(--muted); margin: 14px 0 8px; }
+
+/* Altri strumenti e scelta degli strumenti */
+.amore { width: 300px; box-sizing: border-box; padding: 14px 16px 16px; }
+.amore-h { display: flex; align-items: center; justify-content: space-between; font-size: 15px; font-weight: 500; margin: -4px -6px 10px 0; }
+.amore-h .ib { color: var(--muted); }
+.amore-g { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.amore-t { height: 60px; border-radius: 12px; background: var(--pane); display: flex; align-items: center; gap: 12px; padding: 0 12px; text-align: left; font-size: 14px; }
+.amore-t.on { background: var(--blue-soft); color: #1D4ED8; box-shadow: inset 0 0 0 1.5px var(--blue); }
+.astdlg { width: min(640px, 100%); padding: 24px 26px 18px; }
+.ad-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.ad-col { display: flex; flex-direction: column; gap: 8px; }
+.ad-l { font-size: 12.5px; color: var(--muted); font-weight: 500; letter-spacing: .3px; text-transform: uppercase; }
+.ad-list { display: flex; flex-direction: column; gap: 8px; }
+.ad-row { height: 52px; border-radius: 12px; box-shadow: inset 0 0 0 1px var(--line); display: flex; align-items: center; gap: 12px; padding: 0 8px 0 14px; background: #fff; }
+.ad-row.in { background: var(--pane); box-shadow: none; padding-left: 6px; }
+.ad-row.drag { box-shadow: 0 8px 20px rgba(30,36,48,.2); position: relative; z-index: 2; }
+.ad-h { color: #8A93A0; display: grid; place-items: center; width: 28px; height: 44px; cursor: grab; touch-action: none; }
+.ad-n { flex: 1; font-size: 15px; }
+.ad-b { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+.ad-b .ic { width: 16px; height: 16px; stroke-width: 2.4; }
+.ad-b.rm { background: #fff; box-shadow: inset 0 0 0 1.5px #D3D9E1; color: #B91C1C; }
+.ad-b.ad { background: var(--blue); color: #fff; }
+.ad-foot { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 14px; margin-top: 18px; }
 #updBar { position: fixed; left: 50%; top: 12px; transform: translateX(-50%); z-index: 90; background: #2F3337; color: #fff; border-radius: 8px; padding: 10px 12px 10px 18px; display: flex; align-items: center; gap: 16px; font-size: 14.5px; box-shadow: var(--shadow); max-width: calc(100% - 32px); box-sizing: border-box; }
 #updBar button { color: #82C4FF; font-weight: 500; padding: 6px 8px; }
 </style>
@@ -349,46 +616,38 @@ input { font: inherit; color: inherit; }
 
 <div id="app">
   <section id="lib">
-    <aside id="drawer">
-      <div class="dr-head">
-        <button class="ib" data-act="drawer-close" aria-label="Chiudi pannello"><i data-ic="close"></i></button>
-        <h2 id="drTitle">Lavagne</h2>
-        <button class="ib" id="drPlus" data-act="drawer-plus" aria-label="Nuova raccolta o cartella"><i data-ic="plus"></i></button>
-      </div>
-      <div class="dr-sync" id="drSync"><span>Nessuna sincronizzazione cloud</span><button class="link" data-act="sync-info">ABILITA</button></div>
-      <div class="dr-list" id="drList"></div>
-      <nav class="dr-nav" id="drNav"></nav>
-    </aside>
+    <div id="libTop" class="lt-bar"></div>
+    <div id="libFolders"></div>
     <div id="main">
       <header class="mn-head" id="mnHead"></header>
-      <div class="mn-sub" id="mnSub"></div>
       <div class="mn-body" id="mnBody"></div>
-      <button class="fab" id="fab" data-act="fab-menu" aria-label="Nuova lavagna o apri file"><i data-ic="plus"></i></button>
     </div>
+    <button class="fab" id="fab" data-act="fab-menu" aria-label="Nuova lavagna o PDF"><i data-ic="plus"></i></button>
+    <div id="selPanel" class="selpanel" hidden></div>
   </section>
 
   <section id="editor" hidden>
-    <div class="ed-bar">
-      <button class="ib" data-act="ed-back" aria-label="Torna alla libreria"><i data-ic="back"></i></button>
-      <button class="ed-titles" data-act="ed-rename" aria-label="Rinomina lavagna"><span id="edTitle"></span><span id="edSub"></span></button>
-      <span class="sp"></span>
+    <div class="ed-tl"><button class="back cap" data-act="ed-back" aria-label="Torna alla libreria"><i data-ic="back"></i></button><button class="ed-titles cap" data-act="ed-rename" aria-label="Rinomina lavagna"><span id="edTitle"></span><span id="edSub"></span></button></div>
+    <div class="ed-tr cap">
       <button class="ib" id="bUndo" data-act="undo" aria-label="Annulla"><i data-ic="undo"></i></button>
       <button class="ib" id="bRedo" data-act="redo" aria-label="Ripeti"><i data-ic="redo"></i></button>
-      <button class="ib" data-act="ed-insert" aria-label="Inserisci"><i data-ic="plus"></i></button>
-      <button class="ib" data-act="ed-more" aria-label="Altre opzioni"><i data-ic="more"></i></button>
+      <span class="vsep"></span>
+      <button class="plus" data-act="ed-insert" aria-label="Inserisci"><i data-ic="plus"></i></button>
+      <button class="ib" data-act="ed-more" aria-label="Altre opzioni della lavagna"><i data-ic="more"></i></button>
     </div>
-    <div class="ed-tools" id="edTools"></div>
+    <div id="ast" class="ast"></div>
     <div id="stage">
       <canvas id="bgCv"></canvas>
       <canvas id="inkCv"></canvas>
       <canvas id="liveCv"></canvas>
       <textarea id="txtEd" hidden spellcheck="false" autocomplete="off" aria-label="Testo"></textarea>
       <div id="selBar" class="selbar" hidden></div>
-      <div id="findBar" class="findbar" hidden><i data-ic="search"></i><input id="findIn" placeholder="Cerca nella lavagna" autocomplete="off" spellcheck="false"><span id="findN"></span><button class="ib sm" data-act="find-prev" aria-label="Risultato precedente"><i data-ic="chevU"></i></button><button class="ib sm" data-act="find-next" aria-label="Risultato successivo"><i data-ic="chevD"></i></button><button class="ib sm" data-act="find-close" aria-label="Chiudi la ricerca"><i data-ic="close"></i></button></div>
+      <div id="findBar" class="findbar" hidden><i data-ic="search"></i><input id="findIn" aria-label="Cerca nella lavagna" autocomplete="off" spellcheck="false"><span id="findN"></span><button class="ib sm" data-act="find-prev" aria-label="Risultato precedente"><i data-ic="chevU"></i></button><button class="ib sm" data-act="find-next" aria-label="Risultato successivo"><i data-ic="chevD"></i></button><button class="ib sm" data-act="find-close" aria-label="Chiudi la ricerca"><i data-ic="close"></i></button></div>
       <div class="pgpill" id="pgPill" hidden><button data-act="page-menu" id="pgLabel" aria-label="Pagine"></button></div>
-      <div class="zpill">
-        <button id="zLabel" data-act="zoom-reset" aria-label="Torna al 100%">100%</button>
+      <div class="zpill cap">
         <button id="zLock" data-act="zoom-lock" aria-label="Blocca lo zoom"></button>
+        <span class="zsep"></span>
+        <button id="zLabel" data-act="zoom-reset" aria-label="Torna al 100%">100%</button>
         <button data-act="zoom-fit" aria-label="Torna al contenuto"><i data-ic="target"></i></button>
       </div>
     </div>
@@ -446,7 +705,14 @@ const I = {
   kbd: '<rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 10h1M9.5 10h1M13 10h1M16.5 10h1M6 13.5h1M17 13.5h1M9.5 13.5h5"/>',
   pen: '<path d="M15 5.5l3.5 3.5L9 18.5H5.5V15z"/><path class="tip" d="M5.5 15v3.5H9z"/><path d="M13 7.5l3.5 3.5"/>',
   hl: '<path d="M8.5 13.5L16 6l3 3-7.5 7.5z"/><path d="M8.5 13.5L7 17h3.5l1-.5"/><path class="tipl" d="M4 20.5h9"/>',
-  eraser: '<path d="M6 15.5l8.5-8.5a1.6 1.6 0 012.2 0l2.3 2.3a1.6 1.6 0 010 2.2L12 18.5H9z"/><path d="M10 11.5l5 5M12 18.5h8"/>',
+  eraser: '<path d="M7 21l-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21M22 21H7M5 11l9 9"/>',
+  textT: '<path d="M5 8V5h14v3M12 5v14M9 19h6"/>',
+  moreH: '<circle cx="5.5" cy="12" r="1.7" class="f"/><circle cx="12" cy="12" r="1.7" class="f"/><circle cx="18.5" cy="12" r="1.7" class="f"/>',
+  dblR: '<path d="M5 6l6 6-6 6M11 6l6 6-6 6"/>',
+  dblL: '<path d="M13 6l-6 6 6 6M19 6l-6 6 6 6"/>',
+  dblU: '<path d="M6 13l6-6 6 6M6 19l6-6 6 6"/>',
+  dblD: '<path d="M6 5l6 6 6-6M6 11l6 6 6-6"/>',
+  drag: '<path d="M6 9h12M6 15h12"/>',
   erStroke: '<path d="M9 14.5l7-7a1.4 1.4 0 012 0l1.5 1.5a1.4 1.4 0 010 2L13 17.5h-2.5z"/><path d="M2.5 20c2-2.6 4-2.6 6-1.2s4 1.4 6-.4"/>',
   erPrecise: '<path d="M9 14.5l7-7a1.4 1.4 0 012 0l1.5 1.5a1.4 1.4 0 010 2L13 17.5h-2.5z"/><circle cx="5" cy="18.5" r="2" class="f"/>',
   lasso: '<path d="M6 15C3.5 12.5 5 6 12 6s9 4 7 7-6.5 3.5-9.5 2.5" stroke-dasharray="2.2 2.4"/><path d="M8.5 15.5c-1.5 1.5 0 3.5 1.5 3 1.5-.5 2 1.5.5 2.5"/>',
@@ -585,7 +851,7 @@ const PATTERNS = [['none', 'Nessuno'], ['lines', 'Righe'], ['grid', 'Quadretti']
 const PEN_SIZES = [1.2, 2, 3, 4.5, 6.5, 9.5];
 const HL_SIZES = [8, 12, 17, 24, 32, 44];
 const ER_SIZES = [6, 10, 16, 24, 36, 52];
-const APP_VERSION = '0.11.2';
+const APP_VERSION = '0.12.0';
 const ZMIN = 0.1, ZMAX = 6;
 const ER_DECAY_MS = 600; // tempo con cui la gomma ingrandita torna piccola
 const SORT_LABEL = { created: 'Data di creazione', modified: 'Data di modifica', name: 'Nome' };
@@ -628,6 +894,14 @@ function closeLayer(L) { if (!L.isConnected) return; L.remove(); if (L.onClose) 
 function closeAllLayers() { [...$('#layers').children].forEach(closeLayer); }
 function place(el, anchor, mode) {
   const r = anchor.getBoundingClientRect(), w = el.offsetWidth, hh = el.offsetHeight, W = innerWidth, H = innerHeight;
+  if (mode === 'side' || (mode === 'center' && anchor.closest && anchor.closest('#ast'))) {
+    const side = typeof astSide === 'function' && meta && meta.ast ? astSide() : (r.left > W / 2 ? 'right' : 'left');
+    let x, y;
+    if (side === 'right' || side === 'left') { x = side === 'right' ? r.left - w - 14 : r.right + 14; y = r.top + r.height / 2 - hh / 2; }
+    else { x = r.left + r.width / 2 - w / 2; y = side === 'top' ? r.bottom + 14 : r.top - hh - 14; }
+    el.style.left = clamp(x, 8, W - w - 8) + 'px'; el.style.top = clamp(y, 8, Math.max(8, H - hh - 8)) + 'px';
+    return;
+  }
   let x = mode === 'center' ? r.left + r.width / 2 - w / 2 : (r.left + r.width / 2 > W / 2 ? r.right - w : r.left);
   x = clamp(x, 8, W - w - 8);
   let y = r.bottom + 4;
@@ -657,7 +931,7 @@ function dialog(o) {
     box.append(h('div', 'dlg-t', esc(o.title)));
     if (o.text) box.append(h('p', 'dlg-p', esc(o.text)));
     let inp = null;
-    if (o.input !== undefined) { inp = h('input', 'dlg-in'); inp.id = 'dlgIn'; inp.value = o.input; inp.placeholder = o.placeholder || ''; inp.setAttribute('autocomplete', 'off'); box.append(inp); }
+    if (o.input !== undefined) { inp = h('input', 'dlg-in'); inp.id = 'dlgIn'; inp.value = o.input;  inp.setAttribute('autocomplete', 'off'); box.append(inp); }
     if (o.body) box.append(o.body);
     const btns = h('div', 'dlg-b'), cancel = h('button', 'tbtn', 'ANNULLA'), ok = h('button', 'tbtn' + (o.danger ? ' danger' : ''), esc(o.ok || 'OK'));
     if (o.noCancel) btns.append(ok); else btns.append(cancel, ok); box.append(btns); L.append(box);
@@ -700,142 +974,357 @@ function pickFolder(title, current) {
 }
 
 /* ================= Libreria ================= */
-const curFolder = () => meta.folders.find(f => f.id === meta.ui.folder) || meta.folders[0] || null;
+const curFolder = () => {
+  const f = meta.folders.find(x => x.id === meta.ui.folder); if (f) return f;
+  const c = meta.collections.find(x => x.id === meta.ui.col) || meta.collections[0];
+  return c ? meta.folders.find(x => x.col === c.id) || null : null;
+};
 const liveBoards = () => meta.boards.filter(b => !b.deleted);
 function sortBoards(arr) {
   const s = meta.settings.sort;
   return arr.slice().sort((a, b) => s === 'name' ? a.name.localeCompare(b.name, 'it', { numeric: true }) : s === 'modified' ? b.modified - a.modified : b.created - a.created);
 }
-function renderLibrary() { renderDrawer(); renderMain(); }
-
-function renderDrawer() {
-  const dr = $('#drawer');
-  dr.hidden = !meta.ui.drawer;
-  const setMode = drawerMode === 'settings';
-  $('#drTitle').textContent = setMode ? 'Impostazioni' : 'Lavagne';
-  $('#drPlus').hidden = setMode;
-  $('#drSync').hidden = setMode;
-  $('#drSync').innerHTML = drvOn() ? `<span>Google Drive${drvConf().email ? ' · ' + esc(drvConf().email) : ''}</span><button class="link" data-act="sync-info">GESTISCI</button>` : `<span>Nessuna sincronizzazione cloud</span><button class="link" data-act="sync-info">ABILITA</button>`;
-  let html = '';
-  if (setMode) {
-    for (const [k, l, i] of SETTINGS_PAGES) html += `<button class="srow ${settingsPage === k ? 'sel' : ''}" data-act="set-page" data-v="${k}">${ic(i)}<span>${l}</span></button>`;
-  } else {
-    for (const c of meta.collections) {
-      html += `<div class="coll" data-act="toggle-coll" data-id="${c.id}">${ic(c.open ? 'chevD' : 'chevR')}<span class="coll-n">${esc(c.name)}</span><button class="ib sm" data-act="coll-menu" data-id="${c.id}" aria-label="Opzioni raccolta">${ic('more')}</button></div>`;
-      if (!c.open) continue;
-      const fs = meta.folders.filter(f => f.col === c.id);
-      if (!fs.length) html += `<div class="empty-f">Nessuna cartella · <button class="link" data-act="new-folder" data-id="${c.id}">Crea</button></div>`;
-      for (const f of fs) {
-        const n = meta.boards.filter(b => b.folder === f.id && !b.deleted).length;
-        const sel = (libMode === 'folder' && !searching) && meta.ui.folder === f.id;
-        html += `<div class="fold ${sel ? 'sel' : ''}" data-act="open-folder" data-ctx="folder" data-id="${f.id}" style="--fc:${f.color}">${ic('folder', 'fi')}<span class="fold-n">${esc(f.name)}</span><span class="fold-c">${n || ''}</span></div>`;
-      }
-    }
-  }
-  $('#drList').innerHTML = html;
-  const navOn = libMode === 'trash' ? 'trash' : libMode === 'settings' ? 'settings' : libMode === 'help' ? 'help' : 'lib';
-  $('#drNav').innerHTML = [['lib', 'Lavagne', 'books'], ['trash', 'Cestino', 'trash'], ['settings', 'Impostazioni', 'gear'], ['help', 'Aiuto', 'help']]
-    .map(([k, l, i]) => `<button class="${navOn === k ? 'on' : ''}" data-act="nav" data-v="${k}" aria-label="${l}">${ic(i)}<span>${l}</span></button>`).join('');
+/* ================= Libreria: raccolte in schede, cartelle in linguette, griglia o elenco ================= */
+const curCol = () => {
+  const f = meta.folders.find(x => x.id === meta.ui.folder), id = f ? f.col : meta.ui.col;
+  return meta.collections.find(c => c.id === id) || meta.collections[0] || null;
+};
+function relDate(ts) {
+  const d = new Date(ts), now = new Date(), t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const hm = d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+  if (ts >= t0) return 'Oggi, ' + hm;
+  if (ts >= t0 - 864e5) return 'Ieri, ' + hm;
+  return d.toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: d.getFullYear() === now.getFullYear() ? undefined : 'numeric' });
 }
-
+let lsel = null; // selezione nella libreria: { kind: 'board' | 'folder', ids: Set }
+function renderLibrary() { if (!meta) return; renderTop(); renderFolderTabs(); renderMain(); renderSelPanel(); }
+function renderDrawer() { renderTop(); renderFolderTabs(); }
+function renderTop() {
+  const el = $('#libTop');
+  const side = `<button class="ib" data-act="nav" data-v="trash" aria-label="Cestino">${ic('trash')}</button><button class="ib" data-act="nav" data-v="settings" aria-label="Impostazioni">${ic('gear')}</button>`;
+  if (libMode === 'trash' || libMode === 'settings') {
+    el.className = 'lt-bar page';
+    el.innerHTML = `<button class="ib" data-act="nav" data-v="lib" aria-label="Torna alla libreria">${ic('back')}</button><span class="lt-title">${libMode === 'trash' ? 'Cestino' : 'Impostazioni'}</span><span class="sp"></span>${libMode === 'trash' && meta.boards.some(b => b.deleted) ? '<button class="tbtn" data-act="trash-empty">SVUOTA CESTINO</button>' : ''}`;
+    return;
+  }
+  el.className = 'lt-bar';
+  if (searching) {
+    el.innerHTML = `<label class="lt-search">${ic('search')}<input id="srchIn" autocomplete="off" spellcheck="false" aria-label="Cerca" value="${esc(searchQ)}"></label><button class="ib" data-act="search-close" aria-label="Chiudi la ricerca">${ic('close')}</button><span class="vsep"></span><div class="lt-icons">${side}</div>`;
+    return;
+  }
+  const col = curCol();
+  el.innerHTML = `<div class="lt-tabs">${meta.collections.map(c => `<button class="lt-tab ${col && c.id === col.id ? 'on' : ''}" data-act="open-col" data-ctx="col" data-id="${c.id}">${esc(c.name)}</button>`).join('')}<button class="lt-tab add" data-act="new-col" aria-label="Nuova raccolta"><span class="rnd">${ic('plus')}</span></button></div>
+    <div class="lt-icons"><button class="ib" data-act="search" aria-label="Cerca">${ic('search')}</button>${side}</div>`;
+}
+function renderFolderTabs() {
+  const el = $('#libFolders');
+  el.hidden = libMode !== 'folder' || searching;
+  if (el.hidden) return;
+  const col = curCol(), cf = curFolder(), fs = col ? meta.folders.filter(f => f.col === col.id) : [];
+  el.innerHTML = fs.map(f => {
+    const n = liveBoards().filter(b => b.folder === f.id).length, chk = !!(lsel && lsel.kind === 'folder' && lsel.ids.has(f.id));
+    return `<button class="ftab ${cf && f.id === cf.id ? 'on' : ''} ${chk ? 'chk' : ''}" data-act="open-folder" data-ctx="folder" data-id="${f.id}" style="--fc:${f.color}">${chk ? `<span class="fck">${ic('check')}</span>` : '<span class="dot"></span>'}<span class="fn">${esc(f.name)}</span><span class="n">${n || ''}</span></button>`;
+  }).join('') + (col ? `<button class="ftab add" data-act="new-folder" data-id="${col.id}" aria-label="Nuova cartella">${ic('plus')}</button>` : '');
+}
 function drvHeadBtn(f) {
-  if (!f.drive) return `<button class="ib drv-b off" data-act="drv-folder" aria-label="Collega a Google Drive">${ic('cloudUp')}</button>`;
+  if (!f.drive) return `<button class="drvpill off" data-act="drv-folder" aria-label="Collega a Google Drive">${ic('cloud')}<span>Drive</span></button>`;
   const n = drvPending(f).length;
-  return `<button class="ib drv-b" data-act="drv-sync" aria-label="Invia a Google Drive">${ic(n ? 'cloudUp' : 'cloudOk')}${n ? `<span class="bdg">${n > 99 ? '99+' : n}</span>` : ''}</button>`;
+  return n ? `<button class="drvpill" data-act="drv-sync" aria-label="Invia ${n} a Google Drive">${ic('cloudUp')}<span>Invia ${n}</span></button>`
+    : `<button class="drvpill ok" data-act="drv-sync" aria-label="Google Drive aggiornato">${ic('cloudOk')}</button>`;
 }
 function renderMain() {
-  const head = $('#mnHead'), sub = $('#mnSub');
-  const ham = meta.ui.drawer ? '' : `<button class="ib" data-act="drawer-open" aria-label="Apri pannello">${ic('menu')}</button>`;
-  $('#fab').hidden = !(libMode === 'folder' && !searching && curFolder());
-  if (libMode === 'folder') {
-    const f = curFolder();
-    if (searching) head.innerHTML = `${ham}<div class="srch">${ic('search')}<input id="srchIn" placeholder="Cerca nei nomi e nei testi delle lavagne" autocomplete="off" value="${esc(searchQ)}"></div><button class="ib" data-act="search-close" aria-label="Chiudi ricerca">${ic('close')}</button>`;
-    else head.innerHTML = `${ham}<h1>${f ? esc(f.name) : 'Nessuna cartella'}</h1><span class="sp"></span>${f && drvOn() ? drvHeadBtn(f) : ''}<button class="ib" data-act="search" aria-label="Cerca">${ic('search')}</button>${f ? `<button class="ib" data-act="folder-menu" aria-label="Opzioni cartella">${ic('more')}</button>` : ''}`;
-    sub.hidden = false;
-    sub.innerHTML = `<button class="ib" data-act="view-toggle" aria-label="Cambia vista">${ic(meta.settings.view === 'grid' ? 'list' : 'grid')}</button><button class="chip" data-act="sort-menu">${ic('sort')}<span>${SORT_LABEL[meta.settings.sort]}</span></button>`;
-  } else {
-    sub.hidden = true;
-    const titles = { trash: 'Cestino', help: 'Aiuto', settings: (SETTINGS_PAGES.find(p => p[0] === settingsPage) || [])[1] };
-    const right = libMode === 'trash' && meta.boards.some(b => b.deleted) ? `<button class="tbtn" data-act="trash-empty">SVUOTA CESTINO</button>` : '';
-    head.innerHTML = `${ham}<h1>${esc(titles[libMode] || '')}</h1><span class="sp"></span>${right}`;
+  const head = $('#mnHead'), main = $('#main');
+  const folderView = libMode === 'folder' && !searching;
+  main.className = folderView ? 'm-folder' : 'm-page';
+  $('#fab').hidden = !(folderView && curFolder()) || !!lsel;
+  const f = folderView ? curFolder() : null;
+  head.hidden = !f;
+  if (f) {
+    const n = liveBoards().filter(b => b.folder === f.id).length, grid = meta.settings.view === 'grid';
+    head.innerHTML = `<h1>${esc(f.name)}</h1><span class="mn-count">${n === 1 ? '1 lavagna' : n + ' lavagne'}</span><span class="sp"></span>
+      <button class="chip" data-act="sort-menu">${ic('sort')}<span>${SORT_LABEL[meta.settings.sort]}</span></button>
+      <div class="vseg"><button class="${grid ? 'on' : ''}" data-act="view-set" data-v="grid" aria-label="Vista a griglia">${ic('grid')}</button><button class="${grid ? '' : 'on'}" data-act="view-set" data-v="list" aria-label="Vista a elenco">${ic('list')}</button></div>
+      ${drvOn() ? drvHeadBtn(f) : ''}`;
   }
   renderBody();
 }
-
-function boardCard(b, showFolder) {
-  const f = meta.folders.find(x => x.id === b.folder);
-  const date = meta.settings.sort === 'modified' ? 'Modificata il ' + fmtDate(b.modified) : 'Creata il ' + fmtDate(b.created);
-  return `<div class="bcard" data-act="open-board" data-ctx="board" data-id="${b.id}">
-    <div class="thumb" style="background:${b.bg || '#FFFFFF'}">${thumbImg(b.id)}</div>
-    <div class="bt"><div class="bn">${esc(b.name)}</div><div class="bd">${showFolder && f ? esc(f.name) + ' · ' : ''}${date}</div></div>
-    <button class="ib sm" data-act="board-menu" data-id="${b.id}" aria-label="Opzioni lavagna">${ic('more')}</button></div>`;
+const boardChecked = id => !!(lsel && lsel.kind === 'board' && lsel.ids.has(id));
+function boardThumb(b) {
+  return `<div class="thumb" style="background:${b.bg || '#FFFFFF'}">${thumbImg(b.id)}${b.pages ? '<span class="pdfb">PDF</span>' : ''}${boardChecked(b.id) ? `<span class="ck">${ic('check')}</span>` : ''}</div>`;
 }
-
+function boardCard(b, showFolder) {
+  const f = meta.folders.find(x => x.id === b.folder), date = relDate(meta.settings.sort === 'created' ? b.created : b.modified);
+  return `<div class="bcard ${boardChecked(b.id) ? 'chk' : ''}" data-act="open-board" data-ctx="board" data-id="${b.id}">${boardThumb(b)}
+    <div class="bt"><div class="bn">${esc(b.name)}</div><div class="bd">${showFolder && f ? esc(f.name) + ' · ' : ''}${date}</div></div>
+    <button class="ib sm" data-act="board-menu" data-id="${b.id}" aria-label="Opzioni">${ic('more')}</button></div>`;
+}
+function boardRow(b, f) {
+  const drv = f && f.drive ? (drvNeeds(b, f) ? '<span class="dst wait"><i></i>Da inviare</span>' : '<span class="dst ok"><i></i>Aggiornata</span>') : '<span></span>';
+  return `<div class="brow ${boardChecked(b.id) ? 'chk' : ''}" data-act="open-board" data-ctx="board" data-id="${b.id}">${boardThumb(b)}
+    <span class="bn">${esc(b.name)}</span><span class="bdt">${relDate(meta.settings.sort === 'created' ? b.created : b.modified)}</span>${drv}
+    <button class="ib sm" data-act="board-menu" data-id="${b.id}" aria-label="Opzioni">${ic('more')}</button></div>`;
+}
 function renderBody() {
   const body = $('#mnBody');
-  if (libMode === 'folder' && searching) renderSearch(body);
-  else if (libMode === 'folder') {
+  if (libMode === 'folder' && searching) { renderSearch(body); return; }
+  if (libMode === 'folder') {
     const f = curFolder();
-    let boards = searching ? (searchQ ? liveBoards().filter(b => b.name.toLowerCase().includes(searchQ.toLowerCase())) : []) : (f ? liveBoards().filter(b => b.folder === f.id) : []);
-    boards = sortBoards(boards);
-    if (boards.length) body.innerHTML = `<div class="${meta.settings.view === 'grid' ? 'bgrid' : 'blist'}">${boards.map(b => boardCard(b, searching)).join('')}</div>`;
-    else if (searching) body.innerHTML = `<div class="empty">${searchQ ? `<b>Nessun risultato</b>Nessuna lavagna contiene "${esc(searchQ)}" nel nome.` : 'Scrivi una parola del nome della lavagna.'}</div>`;
-    else if (!f) body.innerHTML = `<div class="empty"><b>Nessuna cartella</b>Crea una raccolta e una cartella con il pulsante + del pannello.</div>`;
-    else body.innerHTML = `<div class="empty"><b>La cartella è vuota</b>Tocca il pulsante blu + per creare la prima lavagna.</div>`;
-  } else if (libMode === 'trash') {
+    if (!f) { body.innerHTML = `<div class="empty"><b>Nessuna cartella</b><button class="fab-s" data-act="new-folder" aria-label="Nuova cartella">${ic('plus')}</button></div>`; return; }
+    const boards = sortBoards(liveBoards().filter(b => b.folder === f.id));
+    if (!boards.length) { body.innerHTML = `<div class="empty"><b>Nessuna lavagna</b></div>`; return; }
+    body.innerHTML = meta.settings.view === 'grid'
+      ? `<div class="bgrid">${boards.map(b => boardCard(b, false)).join('')}</div>`
+      : `<div class="blist2"><div class="brow head"><span></span><span>Nome</span><span>${meta.settings.sort === 'created' ? 'Creata' : 'Modificata'}</span><span>${f.drive ? 'Drive' : ''}</span><span></span></div>${boards.map(b => boardRow(b, f)).join('')}</div>`;
+    return;
+  }
+  if (libMode === 'trash') {
     const del = meta.boards.filter(b => b.deleted).sort((a, b) => b.deleted - a.deleted);
     body.innerHTML = del.length
-      ? `<p class="note">Le lavagne restano nel cestino finché non le elimini definitivamente.</p><div class="blist">${del.map(b => `<div class="trow-b">
+      ? `<div class="tlist">${del.map(b => `<div class="trow-b">
           <div class="thumb" style="background:${b.bg || '#FFFFFF'}">${thumbImg(b.id)}</div>
           <div class="bt"><div class="bn">${esc(b.name)}</div><div class="bd">Eliminata il ${fmtDate(b.deleted)}</div></div>
           <button class="tbtn" data-act="trash-restore" data-id="${b.id}">RIPRISTINA</button>
           <button class="ib sm" data-act="trash-del" data-id="${b.id}" aria-label="Elimina definitivamente">${ic('trash')}</button></div>`).join('')}</div>`
-      : `<div class="empty"><b>Il cestino è vuoto</b>Le lavagne che elimini arrivano qui e puoi ripristinarle.</div>`;
-  } else if (libMode === 'settings') {
-    const tg = (k, t, d) => `<button class="trow" data-act="toggle-setting" data-k="${k}"><span><b>${t}</b><small>${d}</small></span><span class="tg ${meta.settings[k] ? 'on' : ''}"></span></button>`;
-    const pages = {
-      penna: `<div class="setp">${tg('dbl', 'Doppio clic sul pulsante della penna', 'Passa dalla penna o dall\'evidenziatore alla gomma, e viceversa.')}<p>Il clic singolo sul pulsante non ha nessun effetto.</p></div>`,
-      interazioni: `<div class="setp">${tg('scribble', 'Cancella con lo scarabocchio', 'Uno zig-zag veloce con la penna sopra una scritta la cancella.')}${tg('xErase', 'Cancella con una X', 'Una X disegnata con la penna sopra una scritta la cancella. Su uno spazio vuoto la X resta disegnata.')}${tg('erBoost', 'Gomma che si allarga con la velocità', 'Se strofini la gomma velocemente, la sua area si ingrandisce.')}${meta.settings.erBoost ? `<div class="trow col"><span><b>Ingrandimento massimo della gomma</b><small>Quanto può diventare grande la gomma quando la muovi velocemente.</small></span><div class="seg nums">${[2,3,4,5,6,7].map(n => `<button class="seg-b ${meta.settings.erMax === n ? 'on' : ''}" data-act="set-ermax" data-v="${n}">${n}×</button>`).join('')}</div></div>` : ''}${tg('shapeRec', 'Riconoscimento delle forme', 'Disegna con la penna e tieni ferma la punta: il tratto diventa una forma precisa, con la sua inclinazione. Se non somiglia a una forma diventa una linea.')}${meta.settings.shapeRec ? `<div class="trow col"><span><b>Durata della pausa</b><small>Quanto a lungo tenere ferma la punta prima che il tratto diventi una forma.</small></span><div class="seg nums">${[['short', 'Breve'], ['normal', 'Normale'], ['long', 'Lunga']].map(([k, l]) => `<button class="seg-b ${meta.settings.shapeHold === k ? 'on' : ''}" data-act="set-hold" data-v="${k}">${l}</button>`).join('')}</div></div>${tg('shapeGrid', 'Allinea le forme alla griglia', 'Rettangoli, quadrati, ellissi, cerchi, rombi e poligoni riconosciuti diventano dritti, con i bordi sulle righe della griglia: comodo per le mappe concettuali. Linee e frecce restano come le disegni.')}` : ''}</div>`,
-      cloud: drvSettingsHTML(),
-      info: `<div class="setp"><div class="card"><p><b>BoardLab ${APP_VERSION}</b> · prima versione completa</p></div><p>Raccolte, cartelle colorate, cestino, foglio infinito, penna, evidenziatore, gomme, scarabocchio e X, tavolozza, zoom, doppio clic della penna, testo da tastiera, lazo, forme, connettori, tabelle, modelli e modelli personali, righello e goniometro, immagini e PDF da annotare, puntatore laser, ricerca nel testo, esportazione e file .boardlab, invio a Google Drive.</p></div>`
-    };
-    body.innerHTML = pages[settingsPage] || '';
-  } else if (libMode === 'help') {
-    body.innerHTML = `<div class="setp help"><div class="card"><dl>
-      <dt>Scrivere</dt><dd>Con la penna. Il palmo appoggiato viene ignorato.</dd>
-      <dt>Spostare il foglio</dt><dd>Trascina con un dito.</dd>
-      <dt>Zoom</dt><dd>Pizzica con due dita. Tocca la percentuale in basso per tornare al 100%. Il lucchetto blocca lo zoom.</dd>
-      <dt>Torna al contenuto</dt><dd>Il mirino in basso a sinistra riporta al centro di quello che hai scritto.</dd>
-      <dt>Opzioni di uno strumento</dt><dd>Tocca una volta per sceglierlo, una seconda volta per aprire tipo e spessore.</dd>
-      <dt>Gomma veloce</dt><dd>Doppio clic sul pulsante della penna. Un altro doppio clic torna allo strumento di prima.</dd>
-      <dt>Riconoscimento delle forme</dt><dd>Disegna con la penna e, alla fine, tieni ferma la punta: il tratto diventa linea, freccia, cerchio, ellisse, rettangolo, quadrato, rombo, triangolo, poligono, arco o spezzata (anche un rettangolo a tre lati), con l'inclinazione con cui l'hai tracciato. Se non somiglia a una forma diventa una linea. Una V disegnata in fondo a una linea la trasforma in freccia. Un Annulla riporta il tratto a mano. Si attiva e si regola in Impostazioni → Interazioni, dove puoi anche far allineare le forme alla griglia (utile per le mappe concettuali; linee e frecce restano libere).</dd>
-      <dt>Secchiello</dt><dd>Scegli il secchiello e tocca con la penna dentro un'area chiusa (un cerchio fatto a mano, una forma, una cella, una regione di una cartina): si colora sotto i tratti. Piccoli buchi nel contorno vengono ignorati; su un'area aperta o sullo spazio bianco non succede niente. Toccando un riempimento ne cambi il colore. Il secondo tocco sullo strumento sceglie Pieno o Chiaro. Se l'area esce dallo schermo, rimpicciolisci.</dd>
-      <dt>Gomma precisa</dt><dd>Cancella solo il pezzo su cui passa, anche su forme, linee, frecce ed evidenziatore dritto. Una forma cancellata in parte diventa tratti; il suo riempimento resta.</dd>
-      <dt>Scarabocchio e X</dt><dd>Uno zig-zag veloce o una X sopra una scritta la cancellano.</dd>
-      <dt>Colori</dt><dd>Tocca di nuovo il colore attivo, o tienilo premuto, per modificarlo o eliminarlo. Il + aggiunge un colore.</dd>
-      <dt>Testo</dt><dd>Con lo strumento tastiera tocca un punto e scrivi. Tocca un testo esistente per modificarlo. Il secondo tocco sullo strumento apre carattere (8 tipi, inclusi nell'app), dimensione in punti come nei programmi di videoscrittura (− e +, oppure tocca il numero e scrivi un valore da 3 a 100; 12 pt è il corpo di un normale documento a zoom 100%), grassetto, corsivo, sottolineato e barrato. Mentre scrivi, le scelte valgono per il testo che stai scrivendo.</dd>
-      <dt>Lazo</dt><dd>Disegna un giro attorno a ciò che vuoi selezionare, oppure tocca un singolo elemento. Trascina dentro il riquadro per spostare, usa gli angoli per ingrandire e il pallino blu in alto per ruotare.</dd>
-      <dt>Incolla</dt><dd>Con il lazo, tocca un punto vuoto dopo aver copiato qualcosa.</dd>
-      <dt>Forme</dt><dd>Scegli lo strumento Forme (o + in alto → Forme), poi trascina con la penna. Il secondo tocco sullo strumento apre forma, spessore, riempimento e tratteggio.</dd>
-      <dt>Connettori</dt><dd>Con Forme scegli Linea, Freccia o Doppia freccia e traccia partendo o arrivando su una forma, una tabella, un'immagine o un testo: l'elemento si illumina e la linea resta agganciata, anche quando lo sposti, lo ingrandisci o lo ruoti. Tocca una linea o una freccia per selezionarla: trascina i due estremi dove vuoi (o la linea intera); se un estremo finisce su un elemento si aggancia, se lo porti fuori si sgancia. Gli estremi agganciati sono pieni.</dd>
-      <dt>Tabelle e modelli</dt><dd>Dal + in alto. Per scrivere in una cella usa lo strumento tastiera e tocca la cella. Righe, colonne e intestazione si cambiano selezionando la tabella → Tabella. Con la tabella selezionata, trascina una linea interna per allargare una colonna o alzare una riga. La gomma cancella anche le lettere nelle celle.</dd>
-      <dt>Selezionare con il dito</dt><dd>Tocca una tabella, una forma o un'immagine per selezionarla. Trascinala con il dito per spostarla; usa angoli, lati e il pallino blu per ridimensionarla o ruotarla. Trascinando altrove il foglio scorre.</dd>
-      <dt>Righello e goniometro</dt><dd>Dal + in alto. Spostali con il dito, ruotali con il pallino blu, chiudili con la ×. Con la penna, partendo vicino al bordo del righello o alla base del goniometro tracci una linea dritta; partendo dal centro del goniometro tracci un angolo, con i gradi mostrati mentre disegni. La lancetta rossa misura gli angoli.</dd>
-      <dt>PDF e immagini</dt><dd>Dal pulsante blu + della libreria scegli Apri PDF: le pagine compaiono una sotto l'altra e ci scrivi sopra. Si scrive solo sui fogli: i tratti si fermano al bordo della pagina. In basso vedi a che pagina sei: toccalo per andare a una pagina o aggiungere una pagina bianca in fondo (anche da + in alto). Le immagini si inseriscono dal + in alto e si spostano con il lazo.</dd>
-      <dt>Puntatore laser</dt><dd>Indica con la penna: la scia rossa svanisce da sola e non lascia segni.</dd>
-      <dt>I miei modelli</dt><dd>Seleziona qualcosa con il lazo e tocca Modello: gli dai un nome e lo ritrovi in + → Modelli, pronto da inserire in qualsiasi lavagna. Con ⋮ sul modello lo rinomini o lo elimini.</dd>
-      <dt>Cercare</dt><dd>Con la lente della libreria cerchi nei nomi delle lavagne, nei testi scritti con la tastiera e nelle tabelle (non nella scrittura a mano). Tocca un risultato per aprire la lavagna proprio lì. Dentro una lavagna: ⋮ → Cerca nella lavagna, con le frecce per passare da un risultato all'altro.</dd>
-      <dt>Google Drive</dt><dd>Si collega in Impostazioni → Sincronizzazione con il cloud, con lo script "BoardLab Drive" del tuo account. Poi, in una cartella, tocca la nuvola in alto: la prima volta scegli la cartella di Drive e i formati (PDF, PNG, BoardLab); dopo, ogni tocco invia solo le lavagne nuove o modificate (il numero sulla nuvola dice quante sono). Le lavagne già inviate vengono aggiornate, non duplicate; su Drive non si cancella mai niente.</dd>
-      <dt>Esporta</dt><dd>Dal menu ⋮ della lavagna: PNG, PDF o file .boardlab. Un file .boardlab si riapre con il pulsante blu + della libreria.</dd>
-      <dt>Lavagne e cartelle</dt><dd>Tieni premuto su una lavagna o su una cartella per le altre opzioni.</dd>
-    </dl></div></div>`;
+      : `<div class="empty"><b>Il cestino è vuoto</b></div>`;
+    return;
   }
+  if (libMode === 'settings') renderSettings(body);
+}
+
+/* ---- Selezione: pressione lunga su una lavagna o una cartella; poi i tocchi brevi aggiungono o tolgono ---- */
+function libSelect(kind, id) {
+  if (!lsel || lsel.kind !== kind) lsel = { kind, ids: new Set() };
+  lsel.ids.add(id); renderLibrary();
+}
+function libToggle(id) {
+  if (!lsel) return;
+  if (lsel.ids.has(id)) lsel.ids.delete(id); else lsel.ids.add(id);
+  if (!lsel.ids.size) lsel = null;
+  renderLibrary();
+}
+function libClear() { if (!lsel) return; lsel = null; renderLibrary(); }
+function renderSelPanel() {
+  const el = $('#selPanel');
+  if (!lsel || libMode !== 'folder' || searching) { el.hidden = true; return; }
+  const n = lsel.ids.size, one = n === 1;
+  const A = (act, icon, label, cls = '') => `<button class="sa ${cls}" data-act="${act}">${ic(icon)}<span>${label}</span></button>`;
+  const acts = lsel.kind === 'board'
+    ? (one ? A('ls-rename', 'rename', 'Rinomina') : '') + A('ls-dup', 'copy', 'Duplica') + A('ls-move', 'move', 'Sposta') + A('ls-export', 'export', 'Esporta') + (drvOn() ? A('ls-drive', 'cloudUp', 'Invia a Drive') : '') + A('ls-del', 'trash', 'Elimina', 'danger')
+    : (one ? A('ls-rename', 'rename', 'Rinomina') : '') + A('ls-color', 'palette', 'Colore') + (meta.collections.length > 1 ? A('ls-move', 'move', 'Sposta') : '') + (one && drvOn() ? A('ls-drive', 'cloud', 'Drive') : '') + A('ls-del', 'trash', 'Elimina', 'danger');
+  el.innerHTML = `<button class="ib sm sx" data-act="ls-clear" aria-label="Annulla la selezione">${ic('close')}</button><span class="sp-n">${lsel.kind === 'board' ? (one ? '1 lavagna' : n + ' lavagne') : (one ? '1 cartella' : n + ' cartelle')}</span><span class="sp-sep"></span>${acts}`;
+  el.hidden = false;
+}
+async function lsAction(act) {
+  if (!lsel) return;
+  const kind = lsel.kind, ids = [...lsel.ids], one = ids.length === 1;
+  const done = () => { lsel = null; renderLibrary(); };
+  if (kind === 'board') {
+    const bs = ids.map(id => meta.boards.find(b => b.id === id)).filter(Boolean);
+    if (act === 'ls-rename' && one) { done(); renameBoard(ids[0]); }
+    else if (act === 'ls-dup') { for (const b of bs) await dupBoard(b.id); done(); }
+    else if (act === 'ls-move') {
+      const to = await pickFolder('Sposta in…', bs[0].folder); if (!to) return;
+      bs.forEach(b => { b.folder = to; }); saveMeta(); done();
+      toast((one ? 'Spostata in ' : `${bs.length} lavagne spostate in `) + meta.folders.find(f => f.id === to).name);
+    }
+    else if (act === 'ls-export') { done(); exportMany(ids); }
+    else if (act === 'ls-drive') { done(); drvSendBoards(ids); }
+    else if (act === 'ls-del') {
+      const now = Date.now(); bs.forEach(b => { b.deleted = now; }); saveMeta(); done();
+      toast(one ? 'Lavagna spostata nel cestino' : `${bs.length} lavagne spostate nel cestino`, 'ANNULLA', () => { bs.forEach(b => { b.deleted = 0; }); saveMeta(); renderLibrary(); });
+    }
+    return;
+  }
+  const fs = ids.map(id => meta.folders.find(f => f.id === id)).filter(Boolean);
+  if (act === 'ls-rename' && one) { done(); renameFolder(ids[0]); }
+  else if (act === 'ls-color') {
+    const fc = folderColorBody(fs[0].color);
+    const ok = await dialog({ title: one ? 'Colore della cartella' : `Colore di ${fs.length} cartelle`, body: fc.body }); if (!ok) return;
+    fs.forEach(f => { f.color = fc.get(); }); saveMeta(); done();
+  }
+  else if (act === 'ls-move') {
+    let to = fs[0].col;
+    const body = h('div', 'pick');
+    const draw = () => { body.innerHTML = meta.collections.map(c => `<button class="pick-f ${c.id === to ? 'on' : ''}" data-id="${c.id}" style="--fc:#5B6472">${ic('books')}<span>${esc(c.name)}</span></button>`).join(''); };
+    body.addEventListener('click', e => { const b = e.target.closest('[data-id]'); if (b) { to = b.dataset.id; draw(); } });
+    draw();
+    const ok = await dialog({ title: one ? 'Sposta la cartella in…' : `Sposta ${fs.length} cartelle in…`, body, ok: 'SPOSTA' }); if (!ok) return;
+    fs.forEach(f => { f.col = to; }); saveMeta(); done();
+  }
+  else if (act === 'ls-drive' && one) { done(); drvFolderDialog(ids[0]); }
+  else if (act === 'ls-del') {
+    const bs = meta.boards.filter(b => ids.includes(b.folder) && !b.deleted);
+    const ok = await dialog({ title: one ? `Eliminare la cartella "${fs[0].name}"?` : `Eliminare ${fs.length} cartelle?`, text: bs.length ? (bs.length === 1 ? '1 lavagna finirà nel cestino.' : `${bs.length} lavagne finiranno nel cestino.`) : '', ok: 'ELIMINA', danger: true });
+    if (!ok) return;
+    const now = Date.now(); bs.forEach(b => { b.deleted = now; });
+    meta.folders = meta.folders.filter(f => !ids.includes(f.id));
+    if (!meta.folders.some(f => f.id === meta.ui.folder)) meta.ui.folder = (meta.folders.find(f => f.col === meta.ui.col) || {}).id || null;
+    saveMeta(); done();
+  }
+}
+function openCollection(id) {
+  const c = meta.collections.find(x => x.id === id); if (!c) return;
+  meta.ui.col = id;
+  const last = meta.ui.colFolder && meta.ui.colFolder[id];
+  const f = meta.folders.find(x => x.id === last && x.col === id) || meta.folders.find(x => x.col === id);
+  meta.ui.folder = f ? f.id : null;
+  if (lsel && lsel.kind === 'folder') lsel = null;
+  saveMeta(); renderLibrary();
+}
+function openFolder(id) {
+  const f = meta.folders.find(x => x.id === id); if (!f) return;
+  meta.ui.folder = id; meta.ui.col = f.col;
+  meta.ui.colFolder = Object.assign({}, meta.ui.colFolder, { [f.col]: id });
+  libMode = 'folder'; searching = false; searchQ = '';
+  if (lsel && lsel.kind === 'board') lsel = null;
+  saveMeta(); renderLibrary();
+}
+
+/* ---- Esportazione di più lavagne: tutte insieme nel menu Condividi ---- */
+async function exportMany(ids) {
+  const S = meta.settings.exp || (meta.settings.exp = { fmt: 'pdf', col: true, pat: true });
+  const st = { fmt: S.fmt || 'pdf' };
+  const body = h('div', 'expo');
+  body.innerHTML = `<div class="exp-l">Formato</div><div class="exp-sel"><select id="expFmtM">${[['png', 'PNG'], ['pdf', 'PDF'], ['boardlab', 'BoardLab']].map(([v, l]) => `<option value="${v}"${st.fmt === v ? ' selected' : ''}>${l}</option>`).join('')}</select>${ic('chevD')}</div>`;
+  $('#expFmtM', body).addEventListener('change', e => { st.fmt = e.target.value; });
+  const ok = await dialog({ title: ids.length === 1 ? 'Esporta la lavagna' : `Esporta ${ids.length} lavagne`, body, ok: 'ESPORTA' });
+  if (!ok) return;
+  S.fmt = st.fmt; saveMeta();
+  toast('Preparo i file…');
+  const files = [];
+  for (const id of ids) {
+    const b = meta.boards.find(x => x.id === id); if (!b) continue;
+    const d = (await DB.get('b:' + id)) || { items: [], bg: NEW_BG() }, items = d.items || [];
+    if (st.fmt !== 'boardlab' && !items.length) continue;
+    const prev = connScope; connScope = new Map(items.map(i => [i.id, i]));
+    try { const blob = await buildFile(items, d.bg || NEW_BG(), st.fmt, { col: S.col !== false, pat: S.pat !== false, name: b.name }); if (blob) files.push({ blob, name: fileSafe(b.name) + '.' + st.fmt }); }
+    catch (_) { toast('Non riesco a creare il PDF'); }
+    finally { connScope = prev; }
+  }
+  deliverFiles(files);
+}
+async function deliverFiles(list) {
+  if (!list.length) { toast('Non c\'è niente da esportare'); return; }
+  if (list.length === 1) { deliverFile(list[0].blob, list[0].name); return; }
+  const fs = list.map(x => shareFile(x.blob, x.name));
+  if (fs.every(Boolean) && navigator.canShare && navigator.canShare({ files: fs })) {
+    const share = async () => { try { await navigator.share({ files: fs }); return true; } catch (e) { return e && e.name === 'AbortError' ? true : e && e.name === 'NotAllowedError' ? null : false; } };
+    let r = await share();
+    if (r === null) { const ok = await dialog({ title: 'I file sono pronti', text: list.length + ' file', ok: 'CONDIVIDI' }); if (!ok) return; r = await share(); }
+    if (r === true) return;
+  }
+  for (const x of list) await downloadBlob(x.blob, x.name);
+}
+async function drvSendBoards(ids) {
+  const byF = new Map();
+  for (const id of ids) { const b = meta.boards.find(x => x.id === id); if (b) { if (!byF.has(b.folder)) byF.set(b.folder, []); byF.get(b.folder).push(b.id); } }
+  const linked = [...byF.keys()].filter(fid => { const f = meta.folders.find(x => x.id === fid); return f && f.drive; });
+  if (!linked.length) { drvFolderDialog([...byF.keys()][0]); return; }
+  for (const fid of linked) await drvSync(fid, byF.get(fid));
+}
+
+/* ================= Impostazioni (con Aiuto) ================= */
+const SET_PAGES = [['penna', 'Penna e astuccio', 'pen'], ['gesti', 'Gesti e riconoscimento', 'sparkle'], ['cloud', 'Google Drive', 'cloud'], null, ['aiuto', 'Aiuto', 'help'], ['info', 'Informazioni', 'info']];
+const HELP = [
+  ['astuccio', 'L\'astuccio e le penne', 'pen', [
+    ['Scegliere una penna', 'Tocca una penna dell\'astuccio. Toccala di nuovo per aprire la ruota: colori sul giro esterno, spessori su quello interno, tipo nella pastiglia. Il cerchio colorato apre tutta la tavolozza.'],
+    ['Aggiungere, rinominare, togliere', 'Il + sotto le penne ne aggiunge una. Tieni premuta una penna per rinominarla, cambiarne il tipo o toglierla.'],
+    ['Strumenti dell\'astuccio', 'Nell\'astuccio stanno fino a 5 strumenti; gli altri sono nei tre puntini. L\'ingranaggio in Altri strumenti sceglie quali tenere e in che ordine.'],
+    ['Opzioni di uno strumento', 'Tocca uno strumento già scelto per aprire le sue opzioni (tipo di gomma, carattere del testo, forma, riempimento).'],
+    ['Spostare e ridurre l\'astuccio', 'Trascinalo dai puntini: si aggancia al lato più vicino (sinistra, destra, sopra o sotto). Le frecce in fondo lo riducono a icona e lo riaprono. Ridotto, tienilo premuto per spostarlo dove vuoi.'],
+    ['Gomma veloce', 'Doppio clic sul tasto della penna: passa alla gomma; un altro doppio clic torna allo strumento di prima.']
+  ]],
+  ['scrivere', 'Scrivere e muoversi', 'kbd', [
+    ['Scrivere', 'Con la penna. Il palmo appoggiato viene ignorato.'],
+    ['Spostare il foglio e zoom', 'Trascina con un dito; pizzica con due dita per lo zoom. In basso a sinistra: il lucchetto blocca lo zoom, la percentuale riporta al 100%, il mirino torna al contenuto.'],
+    ['Testo', 'Con lo strumento Testo tocca un punto e scrivi; tocca un testo per modificarlo. Le opzioni hanno carattere, dimensione in punti (da 3 a 100), grassetto, corsivo, sottolineato, barrato e colore.'],
+    ['Riconoscimento delle forme', 'Disegna e tieni ferma la punta: il tratto diventa una forma precisa, con la sua inclinazione. Una V in fondo a una linea la trasforma in freccia. Annulla riporta il tratto a mano.'],
+    ['Riempire', 'Con Riempi tocca dentro un\'area chiusa: si colora sotto i tratti. Toccando un riempimento ne cambi il colore.'],
+    ['Puntatore laser', 'Indica con la penna: la scia svanisce da sola.']
+  ]],
+  ['cancellare', 'Cancellare e selezionare', 'eraser', [
+    ['Gomma', 'Per tratti cancella tratti interi; precisa cancella solo il pezzo su cui passa, anche su forme e linee.'],
+    ['Scarabocchio e X', 'Uno zig-zag veloce o una X sopra una scritta la cancellano.'],
+    ['Lazo', 'Disegna un giro attorno a ciò che vuoi selezionare o tocca un elemento. Trascina per spostare, gli angoli ingrandiscono, il pallino blu ruota. Con il lazo, un tocco su un punto vuoto incolla.'],
+    ['Selezionare con il dito', 'Tocca una tabella, una forma o un\'immagine per selezionarla e trascinarla.']
+  ]],
+  ['forme', 'Forme, tabelle e modelli', 'shapes', [
+    ['Forme e connettori', 'Con Forme trascina con la penna. Linee e frecce che partono o arrivano su un elemento restano agganciate; tocca una linea per spostarne gli estremi.'],
+    ['Tabelle', 'Dal + in alto. Per scrivere in una cella usa il Testo. Selezionata la tabella: Tabella cambia righe, colonne e intestazione; le linee interne si trascinano.'],
+    ['I miei modelli', 'Seleziona con il lazo e tocca Modello: lo ritrovi in + → Modelli.'],
+    ['Righello e goniometro', 'In Altri strumenti. Spostali con il dito, ruotali con il pallino blu, chiudili con la ×. La penna che parte dal loro bordo traccia linee dritte e angoli.']
+  ]],
+  ['pdf', 'PDF e immagini', 'pdf', [
+    ['PDF', 'Dal + della libreria scegli Apri un PDF: scrivi sulle pagine; i tratti si fermano al bordo. La pastiglia in basso porta a una pagina; + → Pagina bianca ne aggiunge una in fondo.'],
+    ['Immagini', 'Dal + in alto: dalla galleria o con la fotocamera.']
+  ]],
+  ['libreria', 'Libreria e ricerca', 'folder', [
+    ['Raccolte e cartelle', 'Le raccolte sono le schede in alto, le cartelle le linguette colorate. Tieni premuta una scheda per rinominare o eliminare la raccolta.'],
+    ['Selezionare più elementi', 'Tieni premuta una lavagna o una cartella: si seleziona e compaiono le azioni. Poi tocca le altre per aggiungerle alla selezione.'],
+    ['Cercare', 'La lente cerca nei nomi, nei testi scritti con la tastiera e nelle tabelle. Dentro una lavagna: ⋮ → Cerca nella lavagna.']
+  ]],
+  ['esporta', 'Esportare e Google Drive', 'export', [
+    ['Esportare', 'Dentro una lavagna: ⋮ → Esporta (PDF, PNG o BoardLab). Il file va al menu Condividi del tablet. Un file .boardlab si riapre dal + della libreria.'],
+    ['Google Drive', 'Si collega in Impostazioni → Google Drive con lo script "BoardLab Drive". In ogni cartella, Invia manda a Drive solo le lavagne nuove o modificate; i file già inviati vengono aggiornati.']
+  ]]
+];
+let helpQ = '', helpOpen = 'astuccio';
+const seg2 = (act, cur, opts) => `<div class="seg2">${opts.map(([v, l]) => `<button class="${String(cur) === String(v) ? 'on' : ''}" data-act="${act}" data-v="${v}">${l}</button>`).join('')}</div>`;
+const srowT = (k, label) => `<button class="srow2" data-act="toggle-setting" data-k="${k}"><span>${label}</span><span class="tg ${meta.settings[k] ? 'on' : ''}"></span></button>`;
+const srowS = (label, ctl) => `<div class="srow2"><span>${label}</span>${ctl}</div>`;
+function astPreviewHTML() {
+  const a = meta.ast, cur = curPen(), pens = cur ? [cur].concat(meta.pens.filter(p => p !== cur)).slice(0, a.cPens) : [], tools = a.tools.slice(0, a.cTools);
+  return `<div class="astprev"><div class="ast-mini">${pens.map(p => `<span class="am pen">${penIcon(p)}</span>`).join('')}${tools.map(k => `<span class="am">${ic(AST_TOOLS[k][1])}</span>`).join('')}${pens.length + tools.length ? '<span class="asep"></span>' : ''}<span class="am sm">${ic('dblL')}</span></div></div>`;
+}
+function settingsPageHTML(k) {
+  const S = meta.settings;
+  if (k === 'penna') return `<div class="set-h">Penna e astuccio</div>
+    <div class="scard"><div class="shead">Astuccio</div>
+      ${srowS('Posizione', seg2('ast-pos', meta.ast.pos, [['left', 'Sinistra'], ['right', 'Destra'], ['top', 'Sopra'], ['bottom', 'Sotto']]))}
+      <div class="srow2"><span>Strumenti</span><span class="sval">${meta.ast.tools.map(t => AST_TOOLS[t][0]).join(', ') || '—'}</span><button class="pill-b" data-act="ast-tools">Modifica</button></div></div>
+    <div class="scard row"><div class="scol"><div class="shead">Astuccio chiuso</div>
+      ${srowS('Penne ed evidenziatori', seg2('ast-cpens', meta.ast.cPens, [[0, '0'], [1, '1'], [2, '2'], [3, '3'], [4, '4']]))}
+      ${srowS('Strumenti', seg2('ast-ctools', meta.ast.cTools, [[0, '0'], [1, '1'], [2, '2'], [3, '3']]))}</div>${astPreviewHTML()}</div>
+    <div class="scard"><div class="shead">Penna</div>${srowT('dbl', 'Doppio clic sul tasto della penna: gomma')}</div>`;
+  if (k === 'gesti') return `<div class="set-h">Gesti e riconoscimento</div>
+    <div class="scard"><div class="shead">Cancellare</div>${srowT('scribble', 'Cancella con lo scarabocchio')}${srowT('xErase', 'Cancella con una X')}${srowT('erBoost', 'Gomma che si allarga con la velocità')}${S.erBoost ? srowS('Ingrandimento massimo', seg2('set-ermax', S.erMax, [2, 3, 4, 5, 6, 7].map(n => [n, n + '×']))) : ''}</div>
+    <div class="scard"><div class="shead">Forme</div>${srowT('shapeRec', 'Riconoscimento delle forme')}${S.shapeRec ? srowS('Pausa', seg2('set-hold', S.shapeHold, [['short', 'Breve'], ['normal', 'Normale'], ['long', 'Lunga']])) + srowT('shapeGrid', 'Allinea le forme alla griglia') : ''}</div>`;
+  if (k === 'cloud') return `<div class="set-h">Google Drive</div>` + drvSettingsHTML();
+  if (k === 'aiuto') return `<div class="set-hrow"><span class="set-h">Aiuto</span><label class="hsearch">${ic('search')}<input id="helpIn" autocomplete="off" spellcheck="false" aria-label="Cerca nell'aiuto" value="${esc(helpQ)}"></label></div><div class="scard" id="helpList">${helpListHTML()}</div>`;
+  return `<div class="set-h">Informazioni</div><div class="scard"><div class="srow2"><span>BoardLab</span><span class="sval">versione ${APP_VERSION}</span></div></div>`;
+}
+function helpListHTML() {
+  const q = fold(helpQ.trim());
+  if (q) {
+    const hits = [];
+    for (const [, , , items] of HELP) for (const [t, d] of items) if (fold(t + ' ' + d).includes(q)) hits.push([t, d]);
+    return hits.length ? `<div class="hitems flat">${hits.map(([t, d]) => `<div class="hitem"><b>${esc(t)}</b><span>${esc(d)}</span></div>`).join('')}</div>` : `<div class="hnone">Nessun risultato</div>`;
+  }
+  return HELP.map(([id, title, icon, items]) => `<button class="hgrp ${helpOpen === id ? 'open' : ''}" data-act="help-grp" data-v="${id}"><span class="hic">${ic(icon)}</span><span class="ht">${title}</span>${ic(helpOpen === id ? 'chevU' : 'chevD')}</button>` +
+    (helpOpen === id ? `<div class="hitems">${items.map(([t, d]) => `<div class="hitem"><b>${esc(t)}</b><span>${esc(d)}</span></div>`).join('')}</div>` : '')).join('');
+}
+function renderSettings(body) {
+  if (!SET_PAGES.some(p => p && p[0] === settingsPage)) settingsPage = 'penna';
+  body.innerHTML = `<div class="set-wrap"><nav class="set-nav">${SET_PAGES.map(p => p ? `<button class="set-i ${settingsPage === p[0] ? 'on' : ''}" data-act="set-page" data-v="${p[0]}">${ic(p[2])}<span>${p[1]}</span></button>` : '<span class="set-sep"></span>').join('')}</nav>
+    <div class="set-main">${settingsPageHTML(settingsPage)}</div></div>`;
+}
+/* Google Drive nelle impostazioni: solo i comandi, senza spiegazioni */
+function drvSettingsHTML() {
+  const c = drvConf();
+  if (!drvOn()) return `<div class="scard pad expo"><div class="exp-l">Indirizzo dello script (app web)</div><input class="dlg-in" id="drvUrl" autocomplete="off" spellcheck="false" aria-label="Indirizzo dello script" value="${esc((c && c.url) || '')}"><div class="drv-act"><button class="pbtn" data-act="drv-connect">Collega</button></div></div>`;
+  const rows = meta.folders.map(f => {
+    const n = drvPending(f).length;
+    const sub = f.drive ? `${esc(f.drive.name)} · ${drvFmts(f).map(k => DRV_FMTS.find(x => x[0] === k)[1]).join(', ')} · ${n ? (n === 1 ? '1 da inviare' : n + ' da inviare') : 'aggiornata'}` : 'Non collegata';
+    return `<div class="drv-row" style="--fc:${f.color}"><span class="dot"></span><span><b>${esc(f.name)}</b><small>${sub}</small></span><button class="tbtn" data-act="drv-folder" data-id="${f.id}">${f.drive ? 'MODIFICA' : 'COLLEGA'}</button>${f.drive && n ? `<button class="tbtn" data-act="drv-sync" data-id="${f.id}">INVIA</button>` : ''}</div>`;
+  }).join('');
+  return `<div class="scard"><div class="srow2">${ic('cloudOk')}<span>${c.email ? esc(c.email) : 'Collegato'}</span><button class="tbtn danger" data-act="drv-disconnect">SCOLLEGA</button></div></div>
+    <div class="scard drv-list"><div class="shead">Cartelle</div>${rows}</div>`;
 }
 
 /* ---- Azioni libreria ---- */
 async function newBoard() {
   const f = curFolder(); if (!f) return;
-  const name = await dialog({ title: 'Nuova lavagna', input: f.name + ' - ', placeholder: 'Nome della lavagna' });
+  const name = await dialog({ title: 'Nuova lavagna', input: f.name + ' - ' });
   if (!name) return;
   const now = Date.now();
   const b = { id: uid(), folder: f.id, name, created: now, modified: now, deleted: 0, bg: '#FFFFFF' };
@@ -879,20 +1368,21 @@ function boardMenu(anchor, id) {
   ]);
 }
 async function newCollection() {
-  const name = await dialog({ title: 'Nuova raccolta', input: '', placeholder: 'Nome della raccolta' });
+  const name = await dialog({ title: 'Nuova raccolta', input: '' });
   if (!name) return;
-  meta.collections.push({ id: uid(), name, open: true }); saveMeta(); renderLibrary();
+  const c = { id: uid(), name, open: true }; meta.collections.push(c);
+  meta.ui.col = c.id; meta.ui.folder = null; libMode = 'folder'; searching = false; saveMeta(); renderLibrary();
 }
 async function newFolder(colId) {
   if (!colId) colId = (meta.folders.find(f => f.id === meta.ui.folder) || {}).col || (meta.collections[0] || {}).id;
   if (!colId) { toast('Crea prima una raccolta'); return; }
   const fc = folderColorBody(FOLDER_COLORS[0]);
-  const name = await dialog({ title: 'Nuova cartella', input: '', placeholder: 'Nome della cartella', body: fc.body });
+  const name = await dialog({ title: 'Nuova cartella', input: '', body: fc.body });
   if (!name) return;
   const f = { id: uid(), col: colId, name, color: fc.get(), created: Date.now() };
   meta.folders.push(f);
   const c = meta.collections.find(x => x.id === colId); if (c) c.open = true;
-  meta.ui.folder = f.id; libMode = 'folder'; drawerMode = 'folders'; searching = false;
+  meta.ui.folder = f.id; meta.ui.col = colId; libMode = 'folder'; drawerMode = 'folders'; searching = false;
   saveMeta(); renderLibrary();
 }
 async function renameFolder(id) {
@@ -1671,7 +2161,8 @@ function shapePopover(anchor, styleOnly) {
   const o = sample ? { s: Math.max(0, SHAPE_SIZES.indexOf(sample.sw)), fill: sample.fill, ls: lineStyle(sample) } : T;
   if (sample && o.s < 0) o.s = 1;
   const box = h('div', 'pop ptool');
-  const render = () => { box.innerHTML = `<div class="pop-h">${styleOnly ? 'Stile delle forme' : 'Forme'}</div>${shapeStyleHTML(o, !styleOnly)}`; };
+  const colL = h('div', 'crow-l', 'Colore'), colR = styleOnly ? null : colorRow(() => T.c, c => { T.c = c; saveMeta(); });
+  const render = () => { box.innerHTML = `<div class="pop-h">${styleOnly ? 'Stile delle forme' : 'Forme'}</div>${shapeStyleHTML(o, !styleOnly)}`; if (colR) box.append(colL, colR); };
   render();
   box.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
@@ -1799,7 +2290,7 @@ async function openPdfFile(file) {
   if (!items.length) { toast('Il PDF non contiene pagine'); return; }
   await loadImage(items[0].img);
   const now = Date.now(), bg = { color: '#E9ECEF', pattern: 'none' };
-  const b = { id: uid(), folder: f.id, name: file.name.replace(/\.pdf$/i, '').slice(0, 120), created: now, modified: now, deleted: 0, bg: bg.color };
+  const b = { id: uid(), folder: f.id, name: file.name.replace(/\.pdf$/i, '').slice(0, 120), created: now, modified: now, deleted: 0, bg: bg.color, pages: items.length };
   setThumb(b.id, makeThumb({ items, bg }));
   meta.boards.push(b);
   await DB.set('b:' + b.id, { items, bg, view: null });
@@ -2295,15 +2786,15 @@ async function ensureSearchIndex() {
 function boardHits(b, fq) { const ix = SIDX.get(b.id); return ix && ix.mod === b.modified ? ix.entries.filter(e => e.f.includes(fq)) : []; }
 function renderSearch(body) {
   const q = searchQ.trim();
-  if (!q) { body.innerHTML = `<div class="empty">Scrivi una parola: la cerco nei nomi delle lavagne, nei testi scritti con la tastiera e nelle tabelle.</div>`; return; }
+  if (!q) { body.innerHTML = ''; return; }
   ensureSearchIndex();
   const fq = fold(q), res = [];
   for (const b of sortBoards(liveBoards())) {
     const hits = boardHits(b, fq);
     if (hits.length || fold(b.name).includes(fq)) res.push({ b, hits });
   }
-  const pending = sIdxBusy ? '<p class="note">Cerco anche nei testi delle lavagne…</p>' : '';
-  if (!res.length) { body.innerHTML = pending || `<div class="empty"><b>Nessun risultato</b>Nessuna lavagna contiene "${esc(q)}".</div>`; return; }
+  const pending = '';
+  if (!res.length) { body.innerHTML = pending || `<div class="empty"><b>Nessun risultato</b></div>`; return; }
   body.innerHTML = pending + `<div class="blist">${res.map(({ b, hits }) => boardCard(b, true) + (hits.length ? `<div class="snips">${hits.slice(0, 3).map((e, n) =>
     `<button class="snip" data-act="open-hit" data-id="${b.id}" data-n="${n}">${ic(e.cell ? 'table' : 'kbd')}<span>${snippet(e.txt, fq)}</span></button>`).join('')}${hits.length > 3
     ? `<button class="snip more" data-act="open-hit" data-id="${b.id}" data-n="3"><span>${hits.length === 4 ? 'Un altro risultato' : `Altri ${hits.length - 3} risultati`} in questa lavagna</span></button>` : ''}</div>` : '')).join('')}</div>`;
@@ -2918,7 +3409,8 @@ function traceRings(M, W, H) {
 }
 function fillPopover(anchor) {
   const T = meta.tool.fill, box = h('div', 'pop ptool');
-  const render = () => { box.innerHTML = `<div class="pop-h">Secchiello</div><div class="seg">${[['solid', 'Pieno'], ['light', 'Chiaro']].map(([k, l]) => `<button class="seg-b ${(T.mode || 'solid') === k ? 'on' : ''}" data-m="${k}"><span class="fillsw fs-${k}"></span><span>${l}</span></button>`).join('')}</div>`; };
+  const colL = h('div', 'crow-l', 'Colore'), colR = colorRow(() => T.c, c => { T.c = c; saveMeta(); });
+  const render = () => { box.innerHTML = `<div class="pop-h">Riempi</div><div class="seg">${[['solid', 'Pieno'], ['light', 'Chiaro']].map(([k, l]) => `<button class="seg-b ${(T.mode || 'solid') === k ? 'on' : ''}" data-m="${k}"><span class="fillsw fs-${k}"></span><span>${l}</span></button>`).join('')}</div>`; box.append(colL, colR); };
   render();
   box.addEventListener('click', e => { const b = e.target.closest('[data-m]'); if (!b) return; T.mode = b.dataset.m; saveMeta(); render(); });
   popover(anchor, box, 'center');
@@ -2937,7 +3429,7 @@ const knobR = () => Math.max(13, 13 / cam.z);
 function toggleGuide(k) {
   if (guides[k]) guides[k] = null;
   else { const c = toWorld({ x: SW / 2, y: SH / 2 }); guides[k] = k === 'ruler' ? { x: c.x, y: c.y, a: 0 } : { x: c.x, y: c.y + PROT.R / 2, a: 0, arm: 60 }; }
-  drawLive();
+  drawLive(); renderAst();
 }
 function guideParts(k) {
   if (k === 'ruler') { const L = RULER.L; return { rot: [L / 2 - 30, 0], close: [-L / 2 + 30, 0] }; }
@@ -3003,7 +3495,7 @@ function guideDragMove(d, w) {
 }
 function guideDragStart(hit, w, pid) {
   const g = guides[hit.k];
-  if (hit.part === 'close') { guides[hit.k] = null; drawLive(); return true; }
+  if (hit.part === 'close') { guides[hit.k] = null; drawLive(); renderAst(); return true; }
   drawing = { pid, kind: 'guide', k: hit.k, mode: hit.part === 'body' ? 'move' : hit.part, off: { x: w.x - g.x, y: w.y - g.y }, a0: g.a, ang0: Math.atan2(w.y - g.y, w.x - g.x) };
   drawLive(); return true;
 }
@@ -3971,7 +4463,7 @@ async function closeBoard(fromPop) {
   if (!ed) return;
   commitText(); clearSel(); hidePasteBar(); laser.pts = []; closeFind();
   const e = ed;
-  if (e.changed) { setThumb(e.b.id, makeThumb(e)); e.b.bg = e.bg.color; }
+  if (e.changed) { setThumb(e.b.id, makeThumb(e)); e.b.bg = e.bg.color; const np = e.items.filter(i => i.t === 'page').length; if (np) e.b.pages = np; else delete e.b.pages; }
   await saveBoardNow(e);
   ed = null; drawing = null; hover = null; touches.clear(); gest = null;
   closeAllLayers();
@@ -3984,6 +4476,7 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden' && ed) { commitText(); if (ed.changed) { setThumb(ed.b.id, makeThumb(ed)); ed.b.bg = ed.bg.color; } saveBoardNow(); DB.set('meta', meta); }
 });
 function renderEdHead() {
+  renderAst();
   const f = meta.folders.find(x => x.id === ed.b.folder);
   $('#edTitle').textContent = ed.b.name;
   $('#edSub').innerHTML = f ? `<span class="dot" style="background:${f.color}"></span>${esc(f.name)}` : '';
@@ -4011,35 +4504,359 @@ function fitContent() {
   updZoomLabel(); requestRender(); scheduleSave();
 }
 
+/* ================= Astuccio ================= */
+/* Penne pronte (ognuna con tipo, colore e spessore: anche l'evidenziatore è una penna) e fino a 5 strumenti.
+   Gli strumenti che non stanno nell'astuccio sono in Altri strumenti. L'astuccio si aggancia a un lato,
+   si riduce a icona e, ridotto, si può spostare dove si vuole tenendolo premuto. */
+const AST_TOOLS = {
+  er: ['Gomma', 'eraser'], lasso: ['Lazo', 'lasso'], text: ['Testo', 'textT'], shape: ['Forme', 'shapes'],
+  fill: ['Riempi', 'bucket'], laser: ['Laser', 'laser'], ruler: ['Righello', 'ruler'], prot: ['Goniometro', 'protractor']
+};
+const AST_DEFAULT = ['er', 'lasso', 'text', 'shape'];
+const AST_MAX = 5;
+const PEN_TYPES = [['pen', 'marker', 'Pennarello'], ['pen', 'fountain', 'Stilografica'], ['pen', 'brush', 'Pennello'], ['hl', 'free', 'Evidenziatore'], ['hl', 'straight', 'Evidenziatore dritto']];
+const penTypeName = p => (PEN_TYPES.find(x => x[0] === p.t && x[1] === p.k) || PEN_TYPES[0])[2];
+function seedPens() {
+  return [
+    { id: uid(), name: 'Penna nera', t: 'pen', k: 'marker', s: 2, c: '#000000' },
+    { id: uid(), name: 'Penna blu', t: 'pen', k: 'marker', s: 2, c: '#0B52E0' },
+    { id: uid(), name: 'Penna rossa', t: 'pen', k: 'marker', s: 2, c: '#F0163A' },
+    { id: uid(), name: 'Evidenziatore giallo', t: 'hl', k: 'free', s: 2, c: '#FFD83B' }
+  ];
+}
+function astInit() {
+  if (!Array.isArray(meta.pens) || !meta.pens.length) meta.pens = seedPens();
+  meta.ast = Object.assign({ tools: AST_DEFAULT.slice(), pos: 'right', closed: false, free: null, cPens: 1, cTools: 1 }, meta.ast || {});
+  meta.ast.tools = meta.ast.tools.filter((k, i, a) => AST_TOOLS[k] && a.indexOf(k) === i).slice(0, AST_MAX);
+  if (!meta.pens.some(p => p.id === meta.ui.pen)) meta.ui.pen = meta.pens[0].id;
+  applyPen(curPen());
+}
+const curPen = () => meta.pens.find(p => p.id === meta.ui.pen) || meta.pens[0];
+const penOn = () => meta.tool.tool === 'pen' || meta.tool.tool === 'hl';
+function applyPen(p) { if (!p) return; const T = meta.tool; T[p.t] = { ...(T[p.t] || {}), k: p.k, s: p.s, c: p.c }; }
+function setPen(id) { const p = meta.pens.find(x => x.id === id); if (!p) return; meta.ui.pen = id; applyPen(p); setTool(p.t); }
+const astToolOn = k => (k === 'ruler' || k === 'prot' ? !!guides[k] : meta.tool.tool === k);
+function darker(hex) { const [r, g, b] = mixRgb(hex, '#000000', 0.45); return `rgb(${r},${g},${b})`; }
+function penIcon(p) {
+  const c = esc(p.c), d = darker(p.c), o = isLight(p.c) ? 'rgba(0,0,0,.25)' : 'rgba(255,255,255,.4)';
+  return p.t === 'hl'
+    ? `<svg class="penic" width="44" height="20" viewBox="0 0 44 20" aria-hidden="true"><path d="M44 2H16l-8 5v6l8 5h28z" fill="${c}" stroke="${o}" stroke-width="1"/><path d="M8 7L2 8.5v3L8 13z" fill="${d}"/></svg>`
+    : `<svg class="penic" width="44" height="16" viewBox="0 0 44 16" aria-hidden="true"><path d="M44 3H14L2 8l12 5h30z" fill="${c}" stroke="${o}" stroke-width="1"/><path d="M2 8l6-2.5v5z" fill="${d}"/></svg>`;
+}
+/* Lato verso cui guarda l'astuccio: quello agganciato, oppure (ridotto e spostato) verso il centro dello schermo */
+function astSide() {
+  const a = meta.ast;
+  if (!(a.closed && a.free)) return a.pos;
+  const el = $('#ast'); if (!el) return a.pos;
+  const r = el.getBoundingClientRect(), s = stage.getBoundingClientRect();
+  const cx = r.left + r.width / 2 - s.left, cy = r.top + r.height / 2 - s.top;
+  const d = { left: cx, right: s.width - cx, top: cy, bottom: s.height - cy };
+  return Object.keys(d).reduce((m, k) => (d[k] < d[m] ? k : m), 'right');
+}
+const AST_ARROW = { right: 'dblR', left: 'dblL', top: 'dblU', bottom: 'dblD' };
+const AST_BACK = { right: 'dblL', left: 'dblR', top: 'dblD', bottom: 'dblU' };
+function renderAst() {
+  const el = $('#ast'); if (!el || !meta || !meta.ast) return;
+  const a = meta.ast, side = a.pos, vert = side === 'left' || side === 'right', cur = curPen();
+  const penBtn = (p, ctx) => `<button class="ab pen ${penOn() && cur && p.id === cur.id ? 'on' : ''}" data-pen="${p.id}" ${ctx ? `data-ctx="pen" data-id="${p.id}"` : ''} aria-label="${esc(p.name)}">${penIcon(p)}</button>`;
+  const toolBtn = k => `<button class="ab ${astToolOn(k) ? 'on' : ''}" data-atool="${k}" aria-label="${AST_TOOLS[k][0]}">${ic(AST_TOOLS[k][1])}</button>`;
+  el.className = `ast ${vert ? 'v' : 'h'} ${side}${a.closed ? ' closed' : ''}${a.closed && a.free ? ' free' : ''}`;
+  el.style.left = el.style.top = '';
+  if (a.closed) {
+    const pens = cur ? [cur].concat(meta.pens.filter(p => p !== cur)).slice(0, a.cPens) : [];
+    const tools = a.tools.slice(0, a.cTools);
+    el.innerHTML = pens.map(p => penBtn(p, false)).join('') + tools.map(toolBtn).join('') + (pens.length + tools.length ? '<span class="asep"></span>' : '') +
+      `<button class="ab sm" data-act="ast-open" aria-label="Riapri l'astuccio">${ic(AST_BACK[side])}</button>`;
+    if (a.free) { const s = stage.getBoundingClientRect(); el.style.left = Math.round(a.free.x * s.width) + 'px'; el.style.top = Math.round(a.free.y * s.height) + 'px'; requestAnimationFrame(astClamp); }
+    return;
+  }
+  const others = Object.keys(AST_TOOLS).filter(k => !a.tools.includes(k));
+  el.innerHTML = `<span class="grip" data-grip="1" aria-hidden="true">${'<i></i>'.repeat(6)}</span>` +
+    meta.pens.map(p => penBtn(p, true)).join('') +
+    `<button class="ab addpen" data-act="pen-add" aria-label="Aggiungi una penna"><span>${ic('plus')}</span></button>` +
+    (a.tools.length ? '<span class="asep"></span>' + a.tools.map(toolBtn).join('') : '') +
+    `<span class="asep"></span><button class="ab ${others.some(astToolOn) ? 'on' : ''}" data-act="ast-more" aria-label="Altri strumenti">${ic('moreH')}</button>` +
+    `<span class="asep"></span><button class="ab sm" data-act="ast-close" aria-label="Riduci l'astuccio a icona">${ic(AST_ARROW[side])}</button>`;
+  el.classList.remove('scroll');
+  requestAnimationFrame(() => el.classList.toggle('scroll', vert ? el.scrollHeight > el.clientHeight + 2 : el.scrollWidth > el.clientWidth + 2));
+}
+/* L'astuccio ridotto e spostato resta sempre dentro lo schermo */
+function astClamp() {
+  const el = $('#ast'), a = meta.ast; if (!el || !a.closed || !a.free) return;
+  const s = stage.getBoundingClientRect(), w = el.offsetWidth, hh = el.offsetHeight;
+  el.style.left = clamp(parseFloat(el.style.left) || 0, 8, Math.max(8, s.width - w - 8)) + 'px';
+  el.style.top = clamp(parseFloat(el.style.top) || 0, 8, Math.max(8, s.height - hh - 8)) + 'px';
+}
+function astTap(e) {
+  const b = e.target.closest('button'); if (!b || performance.now() - astDragEnd < 400) return;
+  if (b.dataset.pen) {
+    const p = meta.pens.find(x => x.id === b.dataset.pen); if (!p) return;
+    if (penOn() && meta.ui.pen === p.id) openWheel(b); else setPen(p.id);
+    return;
+  }
+  const k = b.dataset.atool; if (!k) return;
+  astUseTool(k, b);
+}
+function astUseTool(k, anchor) {
+  if (k === 'ruler' || k === 'prot') { toggleGuide(k); updToolbar(); return; }
+  if (meta.tool.tool === k) toolOptions(k, anchor); else setTool(k);
+}
+function toolOptions(k, anchor) {
+  if (k === 'er') toolPopover('er', anchor);
+  else if (k === 'text') textPopover(anchor);
+  else if (k === 'shape') shapePopover(anchor, false);
+  else if (k === 'fill') fillPopover(anchor);
+  else if (k === 'laser') laserPopover(anchor);
+}
+/* Trascinamento: dai puntini (astuccio aperto) si aggancia al lato più vicino;
+   ridotto a icona, tenendolo premuto si sposta dove si vuole */
+let astDrag = null, astDragEnd = 0, astHold = null;
+function astPointerDown(e) {
+  const el = $('#ast'), a = meta.ast;
+  if (!a.closed && e.target.closest('[data-grip]')) { e.preventDefault(); astStartDrag(e, false); return; }
+  if (a.closed) {
+    const x = e.clientX, y = e.clientY;
+    astHold = { x, y, id: e.pointerId, t: setTimeout(() => { astHold = null; if (navigator.vibrate) { try { navigator.vibrate(15); } catch (_) {} } astStartDrag({ clientX: x, clientY: y, pointerId: e.pointerId }, true); }, 450) };
+  }
+}
+function astStartDrag(e, free) {
+  const el = $('#ast'), s = stage.getBoundingClientRect(), r = el.getBoundingClientRect();
+  astDrag = { free, dx: e.clientX - r.left, dy: e.clientY - r.top, s };
+  el.classList.add('dragging');
+  el.style.left = (r.left - s.left) + 'px'; el.style.top = (r.top - s.top) + 'px';
+  swallowUntil = performance.now() + 100000;
+}
+window.addEventListener('pointermove', e => {
+  if (astHold && Math.hypot(e.clientX - astHold.x, e.clientY - astHold.y) > 8) { clearTimeout(astHold.t); astHold = null; }
+  if (!astDrag) return;
+  const el = $('#ast'), s = astDrag.s;
+  el.style.left = clamp(e.clientX - s.left - astDrag.dx, 0, s.width - el.offsetWidth) + 'px';
+  el.style.top = clamp(e.clientY - s.top - astDrag.dy, 0, s.height - el.offsetHeight) + 'px';
+});
+const astUp = () => {
+  if (astHold) { clearTimeout(astHold.t); astHold = null; }
+  if (!astDrag) return;
+  const el = $('#ast'), s = astDrag.s, a = meta.ast;
+  const x = parseFloat(el.style.left), y = parseFloat(el.style.top), w = el.offsetWidth, hh = el.offsetHeight;
+  if (astDrag.free) a.free = { x: x / s.width, y: y / s.height };
+  else {
+    const cx = x + w / 2, cy = y + hh / 2, d = { left: cx, right: s.width - cx, top: cy, bottom: s.height - cy };
+    a.pos = Object.keys(d).reduce((m, k) => (d[k] < d[m] ? k : m), 'right');
+  }
+  astDrag = null; astDragEnd = performance.now(); swallowUntil = performance.now() + 350;
+  el.classList.remove('dragging'); saveMeta(); renderAst();
+};
+window.addEventListener('pointerup', astUp);
+window.addEventListener('pointercancel', astUp);
+
+/* Ruota della penna: colori sul giro esterno, spessori su quello interno, tipo nella pastiglia */
+function openWheel(btn) {
+  const p = curPen(); if (!p) return;
+  const L = layer(false); L.classList.add('wheel-l');
+  const side = astSide(), r = btn.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  const dir = { right: Math.PI, left: 0, top: Math.PI / 2, bottom: -Math.PI / 2 }[side];
+  const ux = Math.cos(dir), uy = Math.sin(dir), R = 152, off = 30;
+  // il disco si vede solo dalla parte del foglio: la metà sotto l'astuccio è tagliata
+  const sq = [[0, 0], [2 * R, 0], [2 * R, 2 * R], [0, 2 * R]], keep = ([x, y]) => (x - R) * ux + (y - R) * uy - off;
+  const poly = [];
+  for (let i = 0; i < 4; i++) {
+    const A = sq[i], B = sq[(i + 1) % 4], ka = keep(A), kb = keep(B);
+    if (ka >= 0) poly.push(A);
+    if ((ka >= 0) !== (kb >= 0)) { const t = ka / (ka - kb); poly.push([A[0] + (B[0] - A[0]) * t, A[1] + (B[1] - A[1]) * t]); }
+  }
+  const disc = h('div', 'wh-disc');
+  disc.style.left = (cx - R) + 'px'; disc.style.top = (cy - R) + 'px';
+  disc.style.clipPath = `polygon(${poly.map(([x, y]) => `${x.toFixed(1)}px ${y.toFixed(1)}px`).join(',')})`;
+  L.append(disc);
+  const sizes = p.t === 'hl' ? HL_SIZES : PEN_SIZES;
+  const at = (deg, rad, w) => { const a = dir + deg * Math.PI / 180; return `left:${(cx + rad * Math.cos(a) - w / 2).toFixed(1)}px;top:${(cy + rad * Math.sin(a) - w / 2).toFixed(1)}px`; };
+  const cols = meta.palette.slice(0, 6);
+  const render = () => {
+    $$('.wh-i', L).forEach(x => x.remove());
+    const curC = p.c.toUpperCase(); let marked = false;
+    cols.forEach((c, i) => {
+      const on = !marked && c.toUpperCase() === curC; if (on) marked = true;
+      const b = h('button', 'wh-i wh-c' + (on ? ' on' : '') + (isLight(c) ? ' lt' : ''));
+      b.style.cssText = at(-60 + i * 20, 124, 32) + `;--c:${c}`; b.dataset.c = c; b.setAttribute('aria-label', 'Colore ' + c);
+      L.append(b);
+    });
+    const more = h('button', 'wh-i wh-c more' + (marked ? '' : ' on'));
+    more.style.cssText = at(60, 124, 32); more.dataset.more = '1'; more.setAttribute('aria-label', 'Altri colori');
+    if (!marked) more.style.setProperty('--c', p.c);
+    L.append(more);
+    sizes.forEach((v, i) => {
+      const b = h('button', 'wh-i wh-s' + (p.s === i ? ' on' : ''));
+      b.style.cssText = at(-50 + i * 20, 80, 28); b.dataset.s = i; b.setAttribute('aria-label', 'Spessore ' + (i + 1));
+      const d = p.t === 'hl' ? 4 + i * 3 : 3 + i * 2.6;
+      b.innerHTML = `<i style="width:${d}px;height:${d}px;background:${esc(p.c)}"></i>`;
+      L.append(b);
+    });
+    pill.innerHTML = `<span><b>${esc(p.name)}</b></span><button class="wh-k" data-kind="1">${penTypeName(p)}${ic('chevD')}</button>`;
+  };
+  const pill = h('div', 'wh-pill'); L.append(pill);
+  render();
+  // pastiglia: sotto il disco (astuccio a lato) o accanto (astuccio sopra o sotto)
+  requestAnimationFrame(() => {
+    const pw = pill.offsetWidth, ph = pill.offsetHeight, W = innerWidth, H = innerHeight;
+    let x, y;
+    if (side === 'left' || side === 'right') { x = cx + ux * R * 0.55 - pw / 2; y = cy + R + 8; if (y + ph > H - 8) y = cy - R - ph - 8; }
+    else { x = cx + R + 10; y = cy + uy * R * 0.55 - ph / 2; if (x + pw > W - 8) x = cx - R - pw - 10; }
+    const ar = $('#ast').getBoundingClientRect();
+    if (side === 'right') x = Math.min(x, ar.left - pw - 10);
+    else if (side === 'left') x = Math.max(x, ar.right + 10);
+    else if (side === 'top') y = Math.max(y, ar.bottom + 10);
+    else y = Math.min(y, ar.top - ph - 10);
+    pill.style.left = clamp(x, 8, W - pw - 8) + 'px'; pill.style.top = clamp(y, 8, H - ph - 8) + 'px';
+  });
+  const changed = () => { applyPen(p); saveMeta(); renderAst(); drawLive(); render(); };
+  L.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.c) { p.c = b.dataset.c; changed(); }
+    else if (b.dataset.s !== undefined) { p.s = +b.dataset.s; changed(); }
+    else if (b.dataset.more) paletteMenu(b, p.c, c => { p.c = c; changed(); });
+    else if (b.dataset.kind) penKindMenu(b, p, changed);
+  });
+}
+function penKindMenu(anchor, p, done) {
+  menu(anchor, PEN_TYPES.map(([t, k, l]) => ({ label: l, icon: p.t === t && p.k === k ? 'check' : null, fn: () => {
+    p.s = clamp(p.s, 0, (t === 'hl' ? HL_SIZES : PEN_SIZES).length - 1);
+    p.t = t; p.k = k; if (penOn() && meta.ui.pen === p.id) setTool(t); done();
+  } })));
+}
+/* Tavolozza completa: tocca per scegliere, tocca di nuovo il colore scelto per modificarlo, + per aggiungerne uno */
+function paletteMenu(anchor, cur, pick) {
+  const box = h('div', 'pop palpop');
+  const render = () => {
+    const c0 = (cur || '').toUpperCase(); let marked = false;
+    box.innerHTML = `<div class="crow">${meta.palette.map((c, i) => { const on = !marked && c.toUpperCase() === c0; if (on) marked = true; return `<button class="sw big ${on ? 'on' : ''} ${isLight(c) ? 'lt' : ''}" data-i="${i}" style="--c:${c}" aria-label="Colore ${c}">${ic('check')}</button>`; }).join('')}<button class="sw big add" data-add="1" aria-label="Nuovo colore">${ic('plus')}</button></div>`;
+  };
+  render();
+  const L = popover(anchor, box, 'auto');
+  box.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.add) {
+      meta.palette.push((cur || '#000000').toUpperCase()); const idx = meta.palette.length - 1; saveMeta();
+      colorEditor(b, meta.palette[idx], { title: 'Nuovo colore', onChange(hex) { meta.palette[idx] = hex; cur = hex; pick(hex); saveMeta(); render(); } });
+      return;
+    }
+    const i = +b.dataset.i, c = meta.palette[i];
+    if (b.classList.contains('on')) {
+      colorEditor(b, c, {
+        title: 'Colore', onChange(hex) { meta.palette[i] = hex; cur = hex; pick(hex); saveMeta(); render(); },
+        onDelete: () => { if (meta.palette.length <= 1) return false; meta.palette.splice(i, 1); saveMeta(); render(); return true; }
+      });
+      return;
+    }
+    cur = c; pick(c); render();
+  });
+  return L;
+}
+/* Riga di colori per le finestre degli strumenti (testo, forme, riempimento, laser) */
+function colorRow(get, set) {
+  const row = h('div', 'crow');
+  const render = () => {
+    const c0 = (get() || '').toUpperCase(); let marked = false;
+    row.innerHTML = meta.palette.map((c, i) => { const on = !marked && c.toUpperCase() === c0; if (on) marked = true; return `<button class="sw ${on ? 'on' : ''} ${isLight(c) ? 'lt' : ''}" data-ci="${i}" style="--c:${c}" aria-label="Colore ${c}">${ic('check')}</button>`; }).join('') +
+      `<button class="sw add" data-cmore="1" aria-label="Altri colori">${ic('plus')}</button>`;
+  };
+  render();
+  row.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    e.stopPropagation();
+    if (b.dataset.cmore) { paletteMenu(b, get(), c => { set(c); render(); }); return; }
+    set(meta.palette[+b.dataset.ci]); render();
+  });
+  return row;
+}
+function penMenu(anchor, id) {
+  const p = meta.pens.find(x => x.id === id); if (!p) return;
+  menu(anchor, [
+    { label: 'Rinomina', icon: 'rename', fn: async () => { const n = await dialog({ title: 'Nome della penna', input: p.name }); if (n) { p.name = n; saveMeta(); renderAst(); } } },
+    { label: 'Tipo: ' + penTypeName(p), icon: 'pen', fn: () => penKindMenu(anchor, p, () => { applyPen(p); saveMeta(); renderAst(); }) },
+    { sep: true },
+    { label: 'Togli dall\'astuccio', icon: 'trash', danger: true, disabled: meta.pens.length <= 1, note: meta.pens.length <= 1 ? 'Serve almeno una penna' : '', fn: () => {
+      meta.pens = meta.pens.filter(x => x !== p);
+      if (meta.ui.pen === p.id) { meta.ui.pen = meta.pens[0].id; applyPen(meta.pens[0]); if (penOn()) setTool(meta.pens[0].t); }
+      saveMeta(); renderAst();
+    } }
+  ]);
+}
+function addPen() {
+  const c = curPen() || { t: 'pen', k: 'marker', s: 2, c: '#000000' };
+  const p = { id: uid(), name: 'Penna ' + (meta.pens.length + 1), t: c.t, k: c.k, s: c.s, c: c.c };
+  meta.pens.push(p); saveMeta(); setPen(p.id);
+  requestAnimationFrame(() => { const b = $(`#ast [data-pen="${p.id}"]`); if (b) { b.scrollIntoView({ block: 'nearest', inline: 'nearest' }); openWheel(b); } });
+}
+/* Altri strumenti: quelli che non stanno nell'astuccio; l'ingranaggio sceglie cosa tenere nell'astuccio */
+function astMore(anchor) {
+  const box = h('div', 'pop amore');
+  const render = () => {
+    const others = Object.keys(AST_TOOLS).filter(k => !meta.ast.tools.includes(k));
+    box.innerHTML = `<div class="amore-h"><span>Altri strumenti</span><button class="ib sm" data-gear="1" aria-label="Scegli gli strumenti dell'astuccio">${ic('gear')}</button></div>
+      <div class="amore-g">${others.map(k => `<button class="amore-t ${astToolOn(k) ? 'on' : ''}" data-k="${k}">${ic(AST_TOOLS[k][1])}<span>${AST_TOOLS[k][0]}</span></button>`).join('') || '<span class="amore-0"></span>'}</div>`;
+  };
+  render();
+  const L = popover(anchor, box, 'side');
+  box.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.gear) { closeLayer(L); astToolsDialog(); return; }
+    const k = b.dataset.k; if (!k) return;
+    closeLayer(L);
+    if (k === 'ruler' || k === 'prot') { toggleGuide(k); updToolbar(); return; }
+    if (meta.tool.tool === k) toolOptions(k, anchor); else setTool(k);
+  });
+}
+/* Finestra: strumenti dell'astuccio (al massimo 5), con ordine trascinabile; l'astuccio si aggiorna subito */
+function astToolsDialog() {
+  const L = layer(true), box = h('div', 'dlg astdlg');
+  const set = list => { meta.ast.tools = list.slice(); saveMeta(); renderAst(); render(); };
+  const row = (k, inAst) => `<div class="ad-row ${inAst ? 'in' : ''}" data-k="${k}">${inAst ? `<span class="ad-h" data-drag="${k}" aria-hidden="true">${ic('drag')}</span>` : ''}${ic(AST_TOOLS[k][1])}<span class="ad-n">${AST_TOOLS[k][0]}</span>${inAst ? `<button class="ad-b rm" data-rm="${k}" aria-label="Togli ${AST_TOOLS[k][0]}">${ic('minus')}</button>` : `<button class="ad-b ad" data-add="${k}" aria-label="Metti ${AST_TOOLS[k][0]} nell'astuccio">${ic('plus')}</button>`}</div>`;
+  const render = () => {
+    const tools = meta.ast.tools, others = Object.keys(AST_TOOLS).filter(k => !tools.includes(k));
+    box.innerHTML = `<div class="dlg-t">Strumenti dell'astuccio</div>
+      <div class="ad-cols"><div class="ad-col"><div class="ad-l">Nell'astuccio · ${tools.length} di ${AST_MAX}</div><div class="ad-list" id="adIn">${tools.map(k => row(k, true)).join('')}</div></div>
+      <div class="ad-col"><div class="ad-l">In Altri strumenti</div><div class="ad-list">${others.map(k => row(k, false)).join('')}</div></div></div>
+      <div class="ad-foot"><button class="tbtn gray" data-reset="1">Ripristina</button><button class="pbtn" data-ok="1">Fatto</button></div>`;
+  };
+  render(); L.append(box);
+  box.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const tools = meta.ast.tools;
+    if (b.dataset.rm) set(tools.filter(k => k !== b.dataset.rm));
+    else if (b.dataset.add) { if (tools.length >= AST_MAX) { toast(`Nell'astuccio ci stanno al massimo ${AST_MAX} strumenti`); return; } set(tools.concat([b.dataset.add])); }
+    else if (b.dataset.reset) set(AST_DEFAULT);
+    else if (b.dataset.ok) closeLayer(L);
+  });
+  // riordino: si trascina la maniglia ≡
+  let drag = null;
+  box.addEventListener('pointerdown', e => {
+    const hnd = e.target.closest('[data-drag]'); if (!hnd) return;
+    e.preventDefault();
+    const rowEl = hnd.closest('.ad-row');
+    drag = { k: hnd.dataset.drag, y0: e.clientY, h: rowEl.offsetHeight + 8, el: rowEl };
+    rowEl.classList.add('drag'); hnd.setPointerCapture(e.pointerId);
+  });
+  box.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const dy = e.clientY - drag.y0, steps = Math.round(dy / drag.h);
+    drag.el.style.transform = `translateY(${dy}px)`;
+    if (steps) {
+      const t = meta.ast.tools.slice(), i = t.indexOf(drag.k), j = clamp(i + steps, 0, t.length - 1);
+      if (j !== i) { t.splice(i, 1); t.splice(j, 0, drag.k); meta.ast.tools = t; saveMeta(); renderAst(); render(); drag.el = $(`.ad-row.in[data-k="${drag.k}"]`, box); drag.el.classList.add('drag'); drag.y0 += (j - i) * drag.h; drag.el.style.transform = `translateY(${e.clientY - drag.y0}px)`; }
+    }
+  });
+  const end = () => { if (!drag) return; if (drag.el) { drag.el.classList.remove('drag'); drag.el.style.transform = ''; } drag = null; };
+  box.addEventListener('pointerup', end); box.addEventListener('pointercancel', end);
+}
+
 /* ================= Lavagna: barra strumenti, tavolozza, pannelli ================= */
 function buildToolbar() {
-  const t = $('#edTools');
-  t.innerHTML = `<button class="tb" data-tool="text" aria-label="Testo da tastiera">${ic('kbd')}</button>
-    <button class="tb" data-tool="pen" aria-label="Penna">${ic('pen')}</button>
-    <button class="tb" data-tool="hl" aria-label="Evidenziatore">${ic('hl')}</button>
-    <button class="tb" data-tool="er" aria-label="Gomma">${ic('eraser')}</button>
-    <button class="tb" data-tool="lasso" aria-label="Lazo">${ic('lasso')}</button>
-    <button class="tb" data-tool="shape" aria-label="Forme">${ic('shapes')}</button>
-    <button class="tb" data-tool="fill" aria-label="Secchiello">${ic('bucket')}</button>
-    <button class="tb" data-tool="laser" aria-label="Puntatore laser">${ic('laser')}</button>
-    <span class="tsep"></span><div class="sws" id="sws"></div>
-    <button class="sw add" id="swAdd" aria-label="Aggiungi colore">${ic('plus')}</button>`;
-  t.addEventListener('click', onToolbarClick);
+  const el = $('#ast');
+  el.addEventListener('click', astTap);
+  el.addEventListener('pointerdown', astPointerDown);
 }
 function curColor() { const T = meta.tool; return T.tool === 'fill' ? T.fill.c : T.tool === 'hl' ? T.hl.c : T.tool === 'text' ? T.text.c : T.tool === 'laser' ? T.laser.c : T.tool === 'shape' ? T.shape.c : T.pen.c; }
-function updToolbar() {
-  const T = meta.tool;
-  $$('.tb').forEach(b => b.classList.toggle('on', b.dataset.tool === T.tool));
-  $('.tb[data-tool="pen"]').style.setProperty('--tc', T.pen.c);
-  $('.tb[data-tool="hl"]').style.setProperty('--tc', T.hl.c);
-  $('.tb[data-tool="fill"]').style.setProperty('--tc', T.fill.c);
-  const cur = curColor().toUpperCase(), show = T.tool === 'pen' || T.tool === 'hl' || T.tool === 'text' || T.tool === 'laser' || T.tool === 'shape' || T.tool === 'fill';
-  let marked = false;
-  $('#sws').innerHTML = meta.palette.map((c, i) => {
-    const on = show && !marked && c.toUpperCase() === cur; if (on) marked = true;
-    return `<button class="sw ${on ? 'on' : ''} ${isLight(c) ? 'lt' : ''}" data-sw="${i}" data-ctx="sw" data-i="${i}" style="--c:${c}" aria-label="Colore ${c}">${ic('check')}</button>`;
-  }).join('');
-}
+function updToolbar() { renderAst(); }
 function setTool(t) {
   const T = meta.tool;
   commitText(); clearSel(); hidePasteBar();
@@ -4059,27 +4876,6 @@ function applyColor(c) {
   else if (T.tool === 'fill') T.fill.c = c;
   else { T.pen.c = c; if (T.tool !== 'pen') setTool('pen'); }
   updToolbar(); saveMeta();
-}
-function onToolbarClick(e) {
-  const b = e.target.closest('button'); if (!b) return;
-  const T = meta.tool;
-  if (b.dataset.tool) {
-    const t = b.dataset.tool;
-    if (T.tool === t) { if (t === 'pen' || t === 'hl' || t === 'er' || t === 'text' || t === 'laser') toolPopover(t, b); else if (t === 'shape') shapePopover(b, false); else if (t === 'fill') fillPopover(b); }
-    else setTool(t);
-    return;
-  }
-  if (b.dataset.sw !== undefined) {
-    const i = +b.dataset.sw;
-    if (b.classList.contains('on')) { editSwatch(i, b); return; }
-    applyColor(meta.palette[i]); return;
-  }
-  if (b.id === 'swAdd') {
-    meta.palette.push(curColor().toUpperCase());
-    const idx = meta.palette.length - 1;
-    updToolbar(); saveMeta();
-    editSwatch(idx, $('#swAdd'), true);
-  }
 }
 function editSwatch(i, anchor, isNew) {
   let idx = i;
@@ -4164,7 +4960,9 @@ function textPopover(anchor) {
       <div class="ptrow"><button class="ib sm" data-step="-1" aria-label="Più piccolo">${ic('minus')}</button><button class="ptv" data-ptin="1" aria-label="Scrivi la dimensione">${fmtPt(v.pt * PT)} pt</button><button class="ib sm" data-step="1" aria-label="Più grande">${ic('plus')}</button></div>
       <div class="lbl">Stile</div>
       <div class="fmt fmt4"><button class="fmt-b ${v.b ? 'on' : ''}" data-f="b" aria-label="Grassetto"><b>G</b></button><button class="fmt-b ${v.i ? 'on' : ''}" data-f="i" aria-label="Corsivo"><i>C</i></button><button class="fmt-b ${v.u ? 'on' : ''}" data-f="u" aria-label="Sottolineato"><u>S</u></button><button class="fmt-b ${v.st ? 'on' : ''}" data-f="st" aria-label="Barrato"><s>abc</s></button></div>`;
+    box.append(colL, colR);
   };
+  const colL = h('div', 'crow-l', 'Colore'), colR = colorRow(() => (textEd && !textEd.cell ? textEd.c : T.c), c => { T.c = c; if (textEd) { textEd.c = c; layoutTextEd(); } saveMeta(); });
   render();
   box.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
@@ -4205,7 +5003,9 @@ function laserPopover(anchor) {
   const render = () => {
     box.innerHTML = `<div class="pop-h">Puntatore laser</div>
       <div class="seg">${LASER_SPEEDS.map(([ms, l], i) => `<button class="seg-b ${T.f === i ? 'on' : ''}" data-f="${i}"><span>${l}</span></button>`).join('')}</div>`;
+    box.append(colL, colR);
   };
+  const colL = h('div', 'crow-l', 'Colore'), colR = colorRow(() => T.c, c => { T.c = c; saveMeta(); });
   render();
   box.addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (!b) return; T.f = +b.dataset.f; saveMeta(); render(); });
   popover(anchor, box, 'center');
@@ -4343,7 +5143,6 @@ function exportDialog() {
     const pagesPdf = st.fmt === 'pdf' && hasPages && !(sel && st.selOnly), bgOpts = st.fmt !== 'boardlab' && !pagesPdf;
     body.innerHTML = `<div class="exp-l">Formato</div>
       <div class="exp-sel"><select id="expFmt">${[['png', 'PNG'], ['pdf', 'PDF'], ['boardlab', 'BoardLab']].map(([v, l]) => `<option value="${v}"${st.fmt === v ? ' selected' : ''}>${l}</option>`).join('')}</select>${ic('chevD')}</div>
-      ${st.fmt === 'boardlab' ? '<p class="exp-note dim">Conserva tutto modificabile: si riapre in BoardLab.</p>' : pagesPdf ? '<p class="exp-note dim">Le pagine del PDF originale con le tue annotazioni.</p>' : ''}
       <div class="exp-rows">${sel ? row('selOnly', 'Solo la selezione') : ''}${bgOpts && !white ? row('col', 'Colore sfondo') : ''}${bgOpts && ed.bg.pattern !== 'none' ? row('pat', 'Motivo di sfondo') : ''}</div>
       <div class="exp-l">Nome file</div>
       <input class="dlg-in" id="expName" autocomplete="off" spellcheck="false">
@@ -4686,20 +5485,20 @@ async function drvDisconnect() {
 async function drvFolderDialog(fid) {
   const f = meta.folders.find(x => x.id === fid); if (!f) return;
   if (!drvOn()) {
-    if (await dialog({ title: 'Google Drive', text: 'Prima collega BoardLab al tuo Google Drive, in Impostazioni → Sincronizzazione con il cloud.', ok: 'VAI' })) drvGoSettings();
+    if (await dialog({ title: 'Google Drive', text: 'Prima collega BoardLab a Google Drive, in Impostazioni → Google Drive.', ok: 'VAI' })) drvGoSettings();
     return;
   }
   const st = { mode: f.drive ? 'keep' : 'auto', link: '', fmts: new Set(f.drive ? drvFmts(f) : ['pdf', 'boardlab']), unlink: false };
   const body = h('div', 'expo drvd');
-  const opt = (v, title, sub) => `<button class="drv-opt ${st.mode === v ? 'on' : ''}" data-m="${v}"><span class="rb"></span><span><b>${title}</b><small>${sub}</small></span></button>`;
+  const opt = (v, title, sub) => `<button class="drv-opt ${st.mode === v ? 'on' : ''}" data-m="${v}"><span class="rb"></span><span><b>${title}</b>${sub ? `<small>${sub}</small>` : ''}</span></button>`;
   const render = () => {
     body.innerHTML = `<div class="exp-l">Cartella su Drive</div>
-      ${f.drive ? opt('keep', esc(f.drive.name), 'La cartella collegata ora') : ''}
+      ${f.drive ? opt('keep', esc(f.drive.name), '') : ''}
       ${opt('auto', 'Crea automaticamente', 'BoardLab / ' + esc(f.name))}
-      ${opt('link', 'Usa una cartella che ho già', 'Incolla il link della cartella di Drive')}
-      ${st.mode === 'link' ? '<input class="dlg-in" id="drvLink" placeholder="https://drive.google.com/drive/folders/…" autocomplete="off" spellcheck="false">' : ''}
+      ${opt('link', 'Usa una cartella che ho già', '')}
+      ${st.mode === 'link' ? '<input class="dlg-in" id="drvLink" aria-label="Link della cartella di Drive" autocomplete="off" spellcheck="false">' : ''}
       <div class="exp-l">Formati da caricare</div>
-      <div class="exp-rows">${DRV_FMTS.map(([k, l]) => `<button class="exp-row" data-f="${k}"><span>${l}${k === 'boardlab' ? ' <small class="dim">· si riapre in BoardLab, modificabile</small>' : ''}</span><span class="tg ${st.fmts.has(k) ? 'on' : ''}"></span></button>`).join('')}</div>
+      <div class="exp-rows">${DRV_FMTS.map(([k, l]) => `<button class="exp-row" data-f="${k}"><span>${l}</span><span class="tg ${st.fmts.has(k) ? 'on' : ''}"></span></button>`).join('')}</div>
       ${f.drive ? '<button class="link drv-unl" data-u="1">Scollega questa cartella</button>' : ''}`;
     const li = $('#drvLink', body);
     if (li) { li.value = st.link; li.addEventListener('input', () => { st.link = li.value.trim(); }); setTimeout(() => li.focus(), 50); }
@@ -4753,11 +5552,11 @@ async function drvSendBoard(b, f, fmts) {
 
 /* Il pulsante: invia le lavagne nuove o modificate della cartella, mostrando l'avanzamento */
 let drvBusy = false;
-async function drvSync(fid) {
+async function drvSync(fid, onlyIds) {
   const f = meta.folders.find(x => x.id === fid); if (!f || drvBusy) return;
   if (!drvOn() || !f.drive) { drvFolderDialog(fid); return; }
-  const list = drvPending(f).sort((a, b) => a.modified - b.modified);
-  if (!list.length) { toast('Su Drive è già tutto aggiornato'); return; }
+  const list = drvPending(f).filter(b => !onlyIds || onlyIds.includes(b.id)).sort((a, b) => a.modified - b.modified);
+  if (!list.length) { toast(onlyIds ? 'Su Drive sono già aggiornate' : 'Su Drive è già tutto aggiornato'); return; }
   if (!navigator.onLine) { drvAlert(drvMsg(new DrvError('offline'))); return; }
   drvBusy = true;
   const L = h('div', 'layer dim'), box = h('div', 'dlg drv-prog');
@@ -4786,22 +5585,6 @@ async function drvSync(fid) {
   else toast(done.replace(/\.$/, ''));
 }
 
-/* Pagina delle impostazioni */
-function drvSettingsHTML() {
-  const c = drvConf();
-  const intro = `<div class="card"><p><b>Google Drive</b></p><p>Quando tocchi la nuvola in una cartella, BoardLab invia a Drive le lavagne nuove o modificate, nei formati che scegli per quella cartella. Una lavagna già inviata viene aggiornata (stesso file, stesso link), mai duplicata. Su Drive non viene cancellato niente. Non c'è nessuna attività in background.</p></div>`;
-  if (!drvOn()) return `<div class="setp">${intro}
-    <div class="card expo"><div class="exp-l">Indirizzo dello script (app web)</div><input class="dlg-in" id="drvUrl" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" spellcheck="false" value="${esc((c && c.url) || '')}"><div class="drv-act"><button class="tbtn" data-act="drv-connect">COLLEGA</button></div></div>
-    <p>Lo script "BoardLab Drive" si prepara una volta sola su script.google.com, con l'account Google che vuoi usare: si incolla il codice, si aggiunge il servizio Drive API, si pubblica come app web (Esegui come: io · Chi ha accesso: chiunque) e se ne copia qui l'indirizzo.</p></div>`;
-  const rows = meta.folders.map(f => {
-    const n = drvPending(f).length;
-    const sub = f.drive ? `${esc(f.drive.name)} · ${drvFmts(f).map(k => DRV_FMTS.find(x => x[0] === k)[1]).join(', ')} · ${n ? (n === 1 ? '1 da inviare' : n + ' da inviare') : 'aggiornata'}` : 'Non collegata';
-    return `<div class="drv-row" style="--fc:${f.color}">${ic('folder', 'fi')}<span><b>${esc(f.name)}</b><small>${sub}</small></span><button class="tbtn" data-act="drv-folder" data-id="${f.id}">${f.drive ? 'MODIFICA' : 'COLLEGA'}</button>${f.drive && n ? `<button class="tbtn" data-act="drv-sync" data-id="${f.id}">INVIA</button>` : ''}</div>`;
-  }).join('');
-  return `<div class="setp">${intro}
-    <div class="card drv-con">${ic('cloudOk')}<p><b>Collegato</b>${c.email ? ' · ' + esc(c.email) : ''}</p><button class="tbtn danger" data-act="drv-disconnect">SCOLLEGA</button></div>
-    <div class="card drv-list"><p><b>Cartelle</b></p>${rows || '<p>Non ci sono cartelle.</p>'}</div></div>`;
-}
 
 /* ================= Eventi globali ================= */
 const ACT = {
@@ -4815,11 +5598,26 @@ const ACT = {
   'drv-sync': t => drvSync(t.dataset.id || (curFolder() || {}).id),
   'toggle-coll': t => { const c = meta.collections.find(x => x.id === t.dataset.id); if (c) { c.open = !c.open; saveMeta(); renderDrawer(); } },
   'coll-menu': t => collMenu(t, t.dataset.id),
-  'new-folder': t => newFolder(t.dataset.id),
-  'open-folder': t => { meta.ui.folder = t.dataset.id; libMode = 'folder'; searching = false; searchQ = ''; if (innerWidth <= 720) meta.ui.drawer = false; saveMeta(); renderLibrary(); },
+  'new-folder': t => newFolder(t.dataset.id || (curCol() || {}).id),
+  'open-folder': t => { if (lsel && lsel.kind === 'folder') { libToggle(t.dataset.id); return; } if (lsel) return; openFolder(t.dataset.id); },
+  'open-col': t => openCollection(t.dataset.id),
+  'new-col': () => newCollection(),
+  'view-set': t => { meta.settings.view = t.dataset.v; saveMeta(); renderMain(); },
+  'ls-clear': () => libClear(),
+  'ls-rename': t => lsAction('ls-rename'), 'ls-dup': () => lsAction('ls-dup'), 'ls-move': () => lsAction('ls-move'), 'ls-export': () => lsAction('ls-export'),
+  'ls-drive': () => lsAction('ls-drive'), 'ls-del': () => lsAction('ls-del'), 'ls-color': () => lsAction('ls-color'),
+  'help-grp': t => { helpOpen = helpOpen === t.dataset.v ? '' : t.dataset.v; const l = $('#helpList'); if (l) l.innerHTML = helpListHTML(); },
+  'ast-open': () => { meta.ast.closed = false; saveMeta(); renderAst(); },
+  'ast-close': () => { meta.ast.closed = true; saveMeta(); renderAst(); },
+  'ast-more': t => astMore(t),
+  'ast-tools': () => astToolsDialog(),
+  'pen-add': () => addPen(),
+  'ast-pos': t => { meta.ast.pos = t.dataset.v; meta.ast.free = null; saveMeta(); renderBody(); },
+  'ast-cpens': t => { meta.ast.cPens = +t.dataset.v; saveMeta(); renderBody(); },
+  'ast-ctools': t => { meta.ast.cTools = +t.dataset.v; saveMeta(); renderBody(); },
   'folder-menu': t => { const f = curFolder(); if (f) folderMenu(t, f.id); },
   'nav': t => {
-    const v = t.dataset.v; searching = false;
+    const v = t.dataset.v; searching = false; lsel = null;
     if (v === 'lib') { libMode = 'folder'; drawerMode = 'folders'; }
     else if (v === 'trash') { libMode = 'trash'; drawerMode = 'folders'; }
     else if (v === 'settings') { libMode = 'settings'; drawerMode = 'settings'; }
@@ -4830,15 +5628,15 @@ const ACT = {
   'set-ermax': t => { meta.settings.erMax = +t.dataset.v; saveMeta(); renderBody(); },
   'set-hold': t => { meta.settings.shapeHold = t.dataset.v; saveMeta(); renderBody(); },
   'toggle-setting': t => { const k = t.dataset.k; meta.settings[k] = !meta.settings[k]; saveMeta(); renderBody(); },
-  'open-board': t => searching && searchQ.trim() ? openHit(t.dataset.id, 0) : openBoard(t.dataset.id),
+  'open-board': t => { if (lsel) { if (lsel.kind === 'board') libToggle(t.dataset.id); return; } if (searching && searchQ.trim()) openHit(t.dataset.id, 0); else openBoard(t.dataset.id); },
   'open-hit': t => openHit(t.dataset.id, +t.dataset.n || 0),
   'find-prev': () => stepFind(-1),
   'find-next': () => stepFind(1),
   'find-close': () => closeFind(),
-  'board-menu': t => boardMenu(t, t.dataset.id),
+  'board-menu': t => { if (lsel && lsel.kind === 'board') libToggle(t.dataset.id); else libSelect('board', t.dataset.id); },
   'new-board': () => newBoard(),
   'fab-menu': t => menu(t, [{ label: 'Nuova lavagna', icon: 'plus', fn: newBoard }, { label: 'Apri PDF', icon: 'pdf', fn: () => $('#pdfIn').click() }, { label: 'Apri file .boardlab', icon: 'import', fn: () => $('#fileIn').click() }]),
-  'search': () => { searching = true; searchQ = ''; renderLibrary(); setTimeout(() => { const i = $('#srchIn'); if (i) i.focus(); }, 30); },
+  'search': () => { searching = true; searchQ = ''; lsel = null; renderLibrary(); setTimeout(() => { const i = $('#srchIn'); if (i) i.focus(); }, 30); },
   'search-close': () => { searching = false; searchQ = ''; renderLibrary(); },
   'view-toggle': () => { meta.settings.view = meta.settings.view === 'grid' ? 'list' : 'grid'; saveMeta(); renderMain(); },
   'sort-menu': t => menu(t, Object.entries(SORT_LABEL).map(([k, l]) => ({ label: l, icon: meta.settings.sort === k ? 'check' : null, fn: () => { meta.settings.sort = k; saveMeta(); renderMain(); } }))),
@@ -4850,24 +5648,19 @@ const ACT = {
   'undo': () => undo(),
   'redo': () => redo(),
   'ed-insert': t => menu(t, [
-    { label: 'Forme', icon: 'shapes', fn: () => { setTool('shape'); shapePopover($('.tb[data-tool="shape"]'), false); } },
-    { label: 'Tabella', icon: 'table', fn: () => tablePicker(t) },
-    ...(ed && ed.items.some(i => i.t === 'page') ? [{ label: 'Pagina bianca in fondo', icon: 'pageAdd', fn: addBlankPage }] : []),
-    { label: 'Modelli', icon: 'template', fn: () => templatesMenu(t) },
-    { sep: true },
-    { label: guides.ruler ? 'Nascondi il righello' : 'Righello', icon: 'ruler', fn: () => toggleGuide('ruler') },
-    { label: guides.prot ? 'Nascondi il goniometro' : 'Goniometro', icon: 'protractor', fn: () => toggleGuide('prot') },
-    { sep: true },
     { label: 'Immagine', icon: 'image', fn: () => $('#imgIn').click() },
-    { label: 'Scatta una foto', icon: 'camera', fn: () => $('#camIn').click() }
+    { label: 'Scatta una foto', icon: 'camera', fn: () => $('#camIn').click() },
+    { label: 'Tabella', icon: 'table', fn: () => tablePicker(t) },
+    { label: 'Modelli', icon: 'template', fn: () => templatesMenu(t) },
+    ...(ed && ed.items.some(i => i.t === 'page') ? [{ sep: true }, { label: 'Pagina bianca in fondo', icon: 'pageAdd', fn: addBlankPage }] : [])
   ]),
   'ed-more': t => menu(t, [
+    { label: 'Cerca nella lavagna', icon: 'search', fn: () => openFind(find ? find.q : '', true) },
     { label: 'Sfondo', icon: 'bg', fn: () => bgPopover(t) },
     { label: 'Rinomina', icon: 'rename', fn: () => renameBoard(ed.b.id) },
-    { label: 'Cerca nella lavagna', icon: 'search', fn: () => openFind(find ? find.q : '', true) },
-    { label: 'Cancella tutto', icon: 'trash', fn: clearAll },
+    { label: 'Esporta', icon: 'export', fn: exportDialog },
     { sep: true },
-    { label: 'Esporta…', icon: 'export', fn: exportDialog }
+    { label: 'Cancella tutto', icon: 'trash', danger: true, fn: clearAll }
   ]),
   'zoom-reset': () => animateZoom(1),
   'zoom-lock': () => { meta.ui.zoomLock = !meta.ui.zoomLock; saveMeta(); updZoomLabel(); toast(meta.ui.zoomLock ? 'Zoom bloccato' : 'Zoom sbloccato'); },
@@ -4880,6 +5673,7 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('input', e => {
   if (e.target.id === 'srchIn') { searchQ = e.target.value; renderBody(); }
+  else if (e.target.id === 'helpIn') { helpQ = e.target.value; const l = $('#helpList'); if (l) l.innerHTML = helpListHTML(); }
   else if (e.target.id === 'findIn' && find && ed) { find.q = e.target.value; find.i = 0; refreshFind(); if (find.hits.length) focusHit(); updFindBar(); drawLive(); }
 });
 document.addEventListener('keydown', e => {
@@ -4888,8 +5682,10 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'Escape') { e.preventDefault(); closeFind(); }
 });
 function ctxOpen(t) {
-  if (t.dataset.ctx === 'board') boardMenu(t, t.dataset.id);
-  else if (t.dataset.ctx === 'folder') folderMenu(t, t.dataset.id);
+  if (t.dataset.ctx === 'board') libSelect('board', t.dataset.id);
+  else if (t.dataset.ctx === 'folder') libSelect('folder', t.dataset.id);
+  else if (t.dataset.ctx === 'col') collMenu(t, t.dataset.id);
+  else if (t.dataset.ctx === 'pen') penMenu(t, t.dataset.id);
   else if (t.dataset.ctx === 'sw') editSwatch(+t.dataset.i, t);
 }
 /* Pressione prolungata (500 ms) gestita dall'app, così funziona anche sopra le anteprime */
@@ -4930,7 +5726,7 @@ window.addEventListener('keydown', e => {
     const now = performance.now(); if (now - lastToggle < 250) return; lastToggle = now;
     toggleEraser(); return;
   }
-  if (!ed) return;
+  if (!ed) { if (e.key === 'Escape' && lsel) libClear(); return; }
   if ((e.key === 'Delete' || e.key === 'Backspace') && sel) { e.preventDefault(); deleteSel(); return; }
   if (e.key === 'Escape') { clearSel(); hidePasteBar(); return; }
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') { e.preventDefault(); openFind(find ? find.q : '', true); return; }
@@ -4959,6 +5755,9 @@ window.addEventListener('keydown', e => {
   for (const x of (m.boards || []).concat(m.tpls || [])) if ('thumb' in x) { if (x.thumb) { await DB.set('th:' + x.id, x.thumb); THUMBS.set(x.id, x.thumb); } delete x.thumb; moved = true; }
   if (moved) await DB.set('meta', m);
   meta = m;
+  astInit();
+  if (!meta.ui.col) { const f0 = meta.folders.find(f => f.id === meta.ui.folder); meta.ui.col = f0 ? f0.col : (meta.collections[0] || {}).id; }
+  if (meta.ui.view === undefined && meta.settings.view === 'list') meta.settings.view = 'list';
   buildToolbar();
   renderLibrary();
   if (!meta.ui.lastGc || Date.now() - meta.ui.lastGc > 7 * 864e5) setTimeout(() => gcImages(), 8000);
