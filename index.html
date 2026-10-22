@@ -705,8 +705,11 @@ input { font: inherit; color: inherit; }
 .ch::after { content: ''; width: 14px; height: 14px; background: #fff; border-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,.35); }
 .ch-n::after, .ch-s::after { width: 22px; height: 6px; border-radius: 3px; }
 .ch-e::after, .ch-w::after { width: 6px; height: 22px; border-radius: 3px; }
-.ch-nw { left: 0; top: 0; } .ch-n { left: 50%; top: 0; } .ch-ne { left: 100%; top: 0; } .ch-e { left: 100%; top: 50%; }
-.ch-se { left: 100%; top: 100%; } .ch-s { left: 50%; top: 100%; } .ch-sw { left: 0; top: 100%; } .ch-w { left: 0; top: 50%; }
+.ch-nw { left: 0; top: 0; } .ch-ne { left: 100%; top: 0; } .ch-se { left: 100%; top: 100%; } .ch-sw { left: 0; top: 100%; }
+.ch-n, .ch-s { left: 14px; right: 14px; width: auto; height: 22px; margin: -11px 0 0 0; }
+.ch-n { top: 0; } .ch-s { top: 100%; }
+.ch-e, .ch-w { top: 14px; bottom: 14px; height: auto; width: 22px; margin: 0 0 0 -11px; }
+.ch-e { left: 100%; } .ch-w { left: 0; }
 .crop-bar { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); display: flex; gap: 6px; align-items: center; background: #1E2430; border-radius: 18px; padding: 6px; box-shadow: 0 12px 34px rgba(30,36,48,.32); }
 .crop-bar button { height: 44px; padding: 0 18px; border-radius: 12px; color: #E7EBF0; font-size: 15px; }
 .crop-bar button:active { background: #2C3440; }
@@ -974,7 +977,7 @@ const mmPx = mm => mm * 96 / 25.4;
 const penSizes = (t, k) => penMm(sizeKey(t, k)).map(mmPx);
 const fmtMmV = mm => String(Math.round(mm * 10) / 10).replace('.', ',');
 const ER_SIZES = [6, 10, 16, 24, 36, 52];
-const APP_VERSION = '0.15.0';
+const APP_VERSION = '0.15.1';
 const ZMIN = 0.1, ZMAX = 6;
 const ER_DECAY_MS = 600; // tempo con cui la gomma ingrandita torna piccola
 const SORT_LABEL = { created: 'Data di creazione', modified: 'Data di modifica', name: 'Nome' };
@@ -4219,6 +4222,10 @@ async function cropImage(it0) {
   bar.innerHTML = `<button data-c="cancel">Annulla</button><button data-c="reset">Ripristina</button><button data-c="ok" class="pri">Fatto</button>`;
   L.append(box, bar);
   const rect = $('.crop-r', box), hole = $('.crop-hole', box);
+  // puntatore: quattro frecce dentro (si sposta), freccia doppia su lati e angoli, girata come l'immagine
+  const BASE = { e: 0, se: 45, s: 90, sw: 135, w: 0, nw: 45, n: 90, ne: 135 }, CUR = ['ew-resize', 'nwse-resize', 'ns-resize', 'nesw-resize'];
+  const curFor = k => { const a = (((BASE[k] + r * 180 / Math.PI) % 180) + 180) % 180; return CUR[Math.round(a / 45) % 4]; };
+  for (const el of $$('.ch', box)) el.style.cursor = curFor(el.dataset.h);
   const draw = () => { for (const el of [rect, hole]) { el.style.left = cr.x0 * 100 + '%'; el.style.top = cr.y0 * 100 + '%'; el.style.width = (cr.x1 - cr.x0) * 100 + '%'; el.style.height = (cr.y1 - cr.y0) * 100 + '%'; } };
   draw();
   const toFrac = e => { const dx = e.clientX - cx, dy = e.clientY - cy, cs = Math.cos(-r), sn = Math.sin(-r); return { x: (dx * cs - dy * sn) / Wz + 0.5, y: (dx * sn + dy * cs) / Hz + 0.5 }; };
@@ -4228,6 +4235,7 @@ async function cropImage(it0) {
     if (!hnd && !e.target.closest('.crop-r')) return;
     e.preventDefault(); e.stopPropagation(); box.setPointerCapture(e.pointerId);
     drag = { h: hnd || 'move', p0: toFrac(e), o: { ...cr } };
+    document.body.style.cursor = hnd ? curFor(hnd) : 'move';
   });
   box.addEventListener('pointermove', e => {
     if (!drag) return;
@@ -4241,9 +4249,9 @@ async function cropImage(it0) {
     }
     draw();
   });
-  const end = () => { drag = null; };
+  const end = () => { drag = null; document.body.style.cursor = ''; };
   box.addEventListener('pointerup', end); box.addEventListener('pointercancel', end);
-  L.onClose = () => { URL.revokeObjectURL(url); ed.hide = null; renderInk(); drawLive(); };
+  L.onClose = () => { document.body.style.cursor = ''; URL.revokeObjectURL(url); ed.hide = null; renderInk(); drawLive(); };
   bar.addEventListener('click', e => {
     const b = e.target.closest('[data-c]'); if (!b) return;
     if (b.dataset.c === 'reset') { Object.assign(cr, { x0: 0, y0: 0, x1: 1, y1: 1 }); draw(); return; }
