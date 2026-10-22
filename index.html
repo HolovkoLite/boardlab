@@ -977,7 +977,7 @@ const mmPx = mm => mm * 96 / 25.4;
 const penSizes = (t, k) => penMm(sizeKey(t, k)).map(mmPx);
 const fmtMmV = mm => String(Math.round(mm * 10) / 10).replace('.', ',');
 const ER_SIZES = [6, 10, 16, 24, 36, 52];
-const APP_VERSION = '0.15.1';
+const APP_VERSION = '0.15.2';
 const ZMIN = 0.1, ZMAX = 6;
 const ER_DECAY_MS = 600; // tempo con cui la gomma ingrandita torna piccola
 const SORT_LABEL = { created: 'Data di creazione', modified: 'Data di modifica', name: 'Nome' };
@@ -1395,7 +1395,7 @@ const HELP = [
   ['pdf', 'PDF e immagini', 'pdf', [
     ['PDF', 'Dal + della libreria scegli Apri un PDF: scrivi sulle pagine; i tratti si fermano al bordo. La pastiglia in basso porta a una pagina; + → Pagina bianca ne aggiunge una in fondo.'],
     ['Immagini', 'Dal + in alto: dalla galleria o con la fotocamera.'],
-    ['Ritagliare un\'immagine', 'Selezionala con il lazo e tocca Ritaglia. Trascina angoli e lati del riquadro o spostalo; Fatto conferma, Ripristina torna all\'immagine intera. Puoi ritagliarla di nuovo quando vuoi.']
+    ['Ritagliare un\'immagine', 'Selezionala con il lazo e tocca Ritaglia. Gli angoli ridimensionano il riquadro mantenendo le proporzioni, i lati lo allungano o lo accorciano; dall\'interno lo sposti. Fatto conferma, Ripristina torna all\'immagine intera. Puoi ritagliarla di nuovo quando vuoi.']
   ]],
   ['libreria', 'Libreria e ricerca', 'folder', [
     ['Raccolte e cartelle', 'Le raccolte sono le schede in alto, le cartelle le linguette colorate. Tieni premuta una scheda per rinominare o eliminare la raccolta.'],
@@ -4241,6 +4241,16 @@ async function cropImage(it0) {
     if (!drag) return;
     const p = toFrac(e), dx = p.x - drag.p0.x, dy = p.y - drag.p0.y, o = drag.o, mw = Math.min(0.5, 28 / Wz), mh = Math.min(0.5, 28 / Hz), H = drag.h;
     if (H === 'move') { const w = o.x1 - o.x0, hh = o.y1 - o.y0; cr.x0 = clamp(o.x0 + dx, 0, 1 - w); cr.x1 = cr.x0 + w; cr.y0 = clamp(o.y0 + dy, 0, 1 - hh); cr.y1 = cr.y0 + hh; }
+    else if (H.length === 2) {
+      // angolo: il ritaglio cresce o cala mantenendo le proporzioni, con l'angolo opposto fermo
+      const E = H.includes('e'), S = H.includes('s'), ow = o.x1 - o.x0, oh = o.y1 - o.y0;
+      const ax = E ? o.x0 : o.x1, ay = S ? o.y0 : o.y1;
+      const rw = E ? o.x1 + dx - ax : ax - (o.x0 + dx), rh = S ? o.y1 + dy - ay : ay - (o.y0 + dy);
+      const lo = Math.max(mw / ow, mh / oh), hi = Math.min(E ? (1 - ax) / ow : ax / ow, S ? (1 - ay) / oh : ay / oh);
+      const vx = ow * Wz, vy = oh * Hz, k = clamp((rw * Wz * vx + rh * Hz * vy) / (vx * vx + vy * vy), Math.min(lo, hi), hi), w = ow * k, hh = oh * k; // l'angolo segue il dito lungo la diagonale
+      if (E) { cr.x0 = ax; cr.x1 = ax + w; } else { cr.x1 = ax; cr.x0 = ax - w; }
+      if (S) { cr.y0 = ay; cr.y1 = ay + hh; } else { cr.y1 = ay; cr.y0 = ay - hh; }
+    }
     else {
       if (H.includes('w')) cr.x0 = clamp(o.x0 + dx, 0, o.x1 - mw);
       if (H.includes('e')) cr.x1 = clamp(o.x1 + dx, o.x0 + mw, 1);
