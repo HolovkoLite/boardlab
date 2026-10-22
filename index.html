@@ -694,6 +694,23 @@ input { font: inherit; color: inherit; }
 .fmtseg { width: 100%; }
 .fmtseg button { flex: 1; }
 .pop.drw.dk-pop { width: 380px; padding: 16px 20px 18px; }
+
+/* Ritaglio */
+.crop-box { position: fixed; transform-origin: 50% 50%; touch-action: none; }
+.crop-box img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; user-select: none; -webkit-user-drag: none; pointer-events: none; }
+.crop-shade { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.crop-hole { position: absolute; box-shadow: 0 0 0 9999px rgba(30,36,48,.62); }
+.crop-r { position: absolute; box-sizing: border-box; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.25); cursor: move; }
+.ch { position: absolute; width: 28px; height: 28px; margin: -14px 0 0 -14px; display: grid; place-items: center; }
+.ch::after { content: ''; width: 14px; height: 14px; background: #fff; border-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,.35); }
+.ch-n::after, .ch-s::after { width: 22px; height: 6px; border-radius: 3px; }
+.ch-e::after, .ch-w::after { width: 6px; height: 22px; border-radius: 3px; }
+.ch-nw { left: 0; top: 0; } .ch-n { left: 50%; top: 0; } .ch-ne { left: 100%; top: 0; } .ch-e { left: 100%; top: 50%; }
+.ch-se { left: 100%; top: 100%; } .ch-s { left: 50%; top: 100%; } .ch-sw { left: 0; top: 100%; } .ch-w { left: 0; top: 50%; }
+.crop-bar { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); display: flex; gap: 6px; align-items: center; background: #1E2430; border-radius: 18px; padding: 6px; box-shadow: 0 12px 34px rgba(30,36,48,.32); }
+.crop-bar button { height: 44px; padding: 0 18px; border-radius: 12px; color: #E7EBF0; font-size: 15px; }
+.crop-bar button:active { background: #2C3440; }
+.crop-bar button.pri { background: var(--blue); color: #fff; border-radius: 22px; }
 #updBar { position: fixed; left: 50%; top: 12px; transform: translateX(-50%); z-index: 90; background: #2F3337; color: #fff; border-radius: 8px; padding: 10px 12px 10px 18px; display: flex; align-items: center; gap: 16px; font-size: 14.5px; box-shadow: var(--shadow); max-width: calc(100% - 32px); box-sizing: border-box; }
 #updBar button { color: #82C4FF; font-weight: 500; padding: 6px 8px; }
 </style>
@@ -763,6 +780,7 @@ const I = {
   menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
   close: '<path d="M6 6l12 12M18 6L6 18"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
+  crop: '<path d="M6.5 2.5v15h15M2.5 6.5h15v15"/>',
   cut: '<circle cx="6" cy="17" r="2.5"/><circle cx="6" cy="7" r="2.5"/><path d="M8.2 8.4L20 18M8.2 15.6L20 6"/>',
   paste: '<rect x="5.5" y="5" width="13" height="15.5" rx="2"/><path d="M9 5V3.5h6V5"/>',
   dup: '<rect x="8.5" y="8.5" width="12" height="12" rx="2"/><path d="M15.5 8.5V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7.5a2 2 0 002 2h2.5M14.5 11.5v6M11.5 14.5h6"/>',
@@ -956,7 +974,7 @@ const mmPx = mm => mm * 96 / 25.4;
 const penSizes = (t, k) => penMm(sizeKey(t, k)).map(mmPx);
 const fmtMmV = mm => String(Math.round(mm * 10) / 10).replace('.', ',');
 const ER_SIZES = [6, 10, 16, 24, 36, 52];
-const APP_VERSION = '0.14.2';
+const APP_VERSION = '0.15.0';
 const ZMIN = 0.1, ZMAX = 6;
 const ER_DECAY_MS = 600; // tempo con cui la gomma ingrandita torna piccola
 const SORT_LABEL = { created: 'Data di creazione', modified: 'Data di modifica', name: 'Nome' };
@@ -1373,7 +1391,8 @@ const HELP = [
   ]],
   ['pdf', 'PDF e immagini', 'pdf', [
     ['PDF', 'Dal + della libreria scegli Apri un PDF: scrivi sulle pagine; i tratti si fermano al bordo. La pastiglia in basso porta a una pagina; + → Pagina bianca ne aggiunge una in fondo.'],
-    ['Immagini', 'Dal + in alto: dalla galleria o con la fotocamera.']
+    ['Immagini', 'Dal + in alto: dalla galleria o con la fotocamera.'],
+    ['Ritagliare un\'immagine', 'Selezionala con il lazo e tocca Ritaglia. Trascina angoli e lati del riquadro o spostalo; Fatto conferma, Ripristina torna all\'immagine intera. Puoi ritagliarla di nuovo quando vuoi.']
   ]],
   ['libreria', 'Libreria e ricerca', 'folder', [
     ['Raccolte e cartelle', 'Le raccolte sono le schede in alto, le cartelle le linguette colorate. Tieni premuta una scheda per rinominare o eliminare la raccolta.'],
@@ -2401,11 +2420,18 @@ function imageGeom(it) {
   for (const [a, b] of [[-it.w / 2, -it.h / 2], [it.w / 2, -it.h / 2], [it.w / 2, it.h / 2], [-it.w / 2, it.h / 2]]) { const [x, y] = tf(a, b); xs.push(x); ys.push(y); }
   return { type: 'image', hw: it.w / 2, hh: it.h / 2, x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) };
 }
+/* Ritaglio di un'immagine: crop = { x0, y0, x1, y1 } in frazioni dell'immagine originale */
+function drawCropped(c, el, it) {
+  const cr = it.crop;
+  if (!cr) { c.drawImage(el, -it.w / 2, -it.h / 2, it.w, it.h); return; }
+  const W = el.width || el.naturalWidth, H = el.height || el.naturalHeight;
+  c.drawImage(el, cr.x0 * W, cr.y0 * H, (cr.x1 - cr.x0) * W, (cr.y1 - cr.y0) * H, -it.w / 2, -it.h / 2, it.w, it.h);
+}
 function drawImageItem(c, it) {
   const e = IMG.get(it.img);
   c.save(); c.translate(it.x, it.y); if (it.r) c.rotate(it.r);
   if (it.t === 'page') { c.fillStyle = 'rgba(0,0,0,0.10)'; c.fillRect(-it.w / 2 + 2, -it.h / 2 + 3, it.w, it.h); c.fillStyle = '#FFFFFF'; c.fillRect(-it.w / 2, -it.h / 2, it.w, it.h); }
-  if (e && e.el) c.drawImage(e.el, -it.w / 2, -it.h / 2, it.w, it.h);
+  if (e && e.el) drawCropped(c, e.el, it);
   else if (it.t === 'image') { c.fillStyle = '#E4E8EC'; c.fillRect(-it.w / 2, -it.h / 2, it.w, it.h); }
   c.restore();
 }
@@ -2597,13 +2623,15 @@ async function prepPdfImages(items) {
   for (const it of items) {
     if (it.t !== 'image' || out[it.id]) continue;
     const blob = await DB.get('img:' + it.img); if (!blob) continue;
-    if (!it.r) { out[it.id] = { url: await blobToDataURL(blob), fmt: blob.type === 'image/png' ? 'PNG' : 'JPEG' }; continue; }
-    const el = await decodeBlob(blob), g = geom(it), s = 2, c = h('canvas');
+    if (!it.r && !it.crop) { out[it.id] = { url: await blobToDataURL(blob), fmt: blob.type === 'image/png' ? 'PNG' : 'JPEG' }; continue; }
+    const el = await decodeBlob(blob), g = geom(it), c = h('canvas');
+    const cw = it.crop ? it.crop.x1 - it.crop.x0 : 1, s = clamp((el.width || 1) * cw / (it.w || 1), 2, 4);
     c.width = Math.max(1, Math.round((g.x1 - g.x0) * s)); c.height = Math.max(1, Math.round((g.y1 - g.y0) * s));
     const x = c.getContext('2d'); x.setTransform(s, 0, 0, s, -g.x0 * s, -g.y0 * s);
-    x.translate(it.x, it.y); x.rotate(it.r); x.drawImage(el, -it.w / 2, -it.h / 2, it.w, it.h);
+    x.translate(it.x, it.y); if (it.r) x.rotate(it.r); drawCropped(x, el, it);
     try { el.close && el.close(); } catch (_) {}
-    out[it.id] = { url: c.toDataURL('image/png'), fmt: 'PNG', box: g };
+    const jpg = !it.r && blob.type === 'image/jpeg';
+    out[it.id] = { url: jpg ? c.toDataURL('image/jpeg', 0.92) : c.toDataURL('image/png'), fmt: jpg ? 'JPEG' : 'PNG', box: g };
   }
   return out;
 }
@@ -4098,7 +4126,7 @@ function showSelBar() {
   const B = (a, icn, l, cls = '') => `<button data-sa="${a}" class="${cls}">${ic(icn)}<span>${l}</span></button>`;
   selBar.innerHTML = B('cut', 'cut', 'Taglia') + B('copy', 'copy', 'Copia') + (clip && clip.length ? B('paste', 'paste', 'Incolla') : '') + B('dup', 'dup', 'Duplica') + B('color', 'palette', 'Colore') +
     (selItemsList().some(x => (x.t === 'shape' && x.k !== 'blob') || x.t === 'conn') ? B('style', 'shapes', 'Stile') : '') + (selItemsList().filter(x => x.t === 'table').length === 1 ? B('table', 'table', 'Tabella') : '') +
-    B('tpl', 'template', 'Modello') + '<span class="sb-sep"></span>' + B('del', 'trash', 'Elimina', 'danger');
+    (selItemsList().length === 1 && selItemsList()[0].t === 'image' ? B('crop', 'crop', 'Ritaglia') : '') + B('tpl', 'template', 'Modello') + '<span class="sb-sep"></span>' + B('del', 'trash', 'Elimina', 'danger');
   selBar.hidden = false; positionSelBar();
 }
 function showPasteBar(w) { pasteAt = w; selBar.innerHTML = `<button data-sa="paste">${ic('paste')}<span>Incolla</span></button>`; selBar.hidden = false; positionSelBar(); }
@@ -4166,7 +4194,71 @@ selBar.addEventListener('click', e => {
   else if (a === 'style') shapePopover(b, true);
   else if (a === 'table') tableMenu(b);
   else if (a === 'tpl') saveSelAsTemplate();
+  else if (a === 'crop') { const it = selItemsList()[0]; if (it && it.t === 'image') cropImage(it); }
 });
+
+/* ================= Ritaglio delle immagini ================= */
+/* Si vede tutta l'immagine originale; il riquadro chiaro è la parte che resta. Angoli e lati lo ridimensionano,
+   dentro si sposta. Fatto: l'immagine diventa la parte scelta, nello stesso punto della lavagna. */
+async function cropImage(it0) {
+  const it = ed.items.find(x => x.id === it0.id); if (!it) return;
+  const blob = await DB.get('img:' + it.img); if (!blob) { toast('Immagine non trovata'); return; }
+  const url = URL.createObjectURL(blob);
+  const c0 = it.crop || { x0: 0, y0: 0, x1: 1, y1: 1 }, cr = { ...c0 };
+  const W0 = it.w / (c0.x1 - c0.x0), H0 = it.h / (c0.y1 - c0.y0);
+  const left = -it.w / 2 - c0.x0 * W0, top = -it.h / 2 - c0.y0 * H0; // angolo dell'immagine intera, nelle coordinate dell'immagine
+  const tf = localToWorld(it), r = it.r || 0, z = cam.z;
+  const [fx, fy] = tf(left + W0 / 2, top + H0 / 2), sc = toScreen(fx, fy), sr = stage.getBoundingClientRect();
+  const cx = sr.left + sc.x, cy = sr.top + sc.y, Wz = W0 * z, Hz = H0 * z;
+  clearSel(); ed.hide = new Set([it.id]); renderInk(); drawLive(); $('#toast').hidden = true;
+  const L = layer(true); L.classList.add('crop-l');
+  const box = h('div', 'crop-box');
+  box.style.cssText = `left:${cx - Wz / 2}px;top:${cy - Hz / 2}px;width:${Wz}px;height:${Hz}px;transform:rotate(${r}rad)`;
+  box.innerHTML = `<img src="${url}" alt="" draggable="false"><div class="crop-shade"><div class="crop-hole"></div></div><div class="crop-r">${['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'].map(k => `<i class="ch ch-${k}" data-h="${k}"></i>`).join('')}</div>`;
+  const bar = h('div', 'crop-bar');
+  bar.innerHTML = `<button data-c="cancel">Annulla</button><button data-c="reset">Ripristina</button><button data-c="ok" class="pri">Fatto</button>`;
+  L.append(box, bar);
+  const rect = $('.crop-r', box), hole = $('.crop-hole', box);
+  const draw = () => { for (const el of [rect, hole]) { el.style.left = cr.x0 * 100 + '%'; el.style.top = cr.y0 * 100 + '%'; el.style.width = (cr.x1 - cr.x0) * 100 + '%'; el.style.height = (cr.y1 - cr.y0) * 100 + '%'; } };
+  draw();
+  const toFrac = e => { const dx = e.clientX - cx, dy = e.clientY - cy, cs = Math.cos(-r), sn = Math.sin(-r); return { x: (dx * cs - dy * sn) / Wz + 0.5, y: (dx * sn + dy * cs) / Hz + 0.5 }; };
+  let drag = null;
+  box.addEventListener('pointerdown', e => {
+    const hnd = e.target.dataset && e.target.dataset.h;
+    if (!hnd && !e.target.closest('.crop-r')) return;
+    e.preventDefault(); e.stopPropagation(); box.setPointerCapture(e.pointerId);
+    drag = { h: hnd || 'move', p0: toFrac(e), o: { ...cr } };
+  });
+  box.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const p = toFrac(e), dx = p.x - drag.p0.x, dy = p.y - drag.p0.y, o = drag.o, mw = Math.min(0.5, 28 / Wz), mh = Math.min(0.5, 28 / Hz), H = drag.h;
+    if (H === 'move') { const w = o.x1 - o.x0, hh = o.y1 - o.y0; cr.x0 = clamp(o.x0 + dx, 0, 1 - w); cr.x1 = cr.x0 + w; cr.y0 = clamp(o.y0 + dy, 0, 1 - hh); cr.y1 = cr.y0 + hh; }
+    else {
+      if (H.includes('w')) cr.x0 = clamp(o.x0 + dx, 0, o.x1 - mw);
+      if (H.includes('e')) cr.x1 = clamp(o.x1 + dx, o.x0 + mw, 1);
+      if (H.includes('n')) cr.y0 = clamp(o.y0 + dy, 0, o.y1 - mh);
+      if (H.includes('s')) cr.y1 = clamp(o.y1 + dy, o.y0 + mh, 1);
+    }
+    draw();
+  });
+  const end = () => { drag = null; };
+  box.addEventListener('pointerup', end); box.addEventListener('pointercancel', end);
+  L.onClose = () => { URL.revokeObjectURL(url); ed.hide = null; renderInk(); drawLive(); };
+  bar.addEventListener('click', e => {
+    const b = e.target.closest('[data-c]'); if (!b) return;
+    if (b.dataset.c === 'reset') { Object.assign(cr, { x0: 0, y0: 0, x1: 1, y1: 1 }); draw(); return; }
+    if (b.dataset.c === 'ok' && ['x0', 'y0', 'x1', 'y1'].some(k => Math.abs(cr[k] - c0[k]) > 1e-4)) {
+      const w = (cr.x1 - cr.x0) * W0, hh = (cr.y1 - cr.y0) * H0;
+      const [x, y] = tf(left + (cr.x0 + cr.x1) / 2 * W0, top + (cr.y0 + cr.y1) / 2 * H0);
+      const full = cr.x0 < 1e-4 && cr.y0 < 1e-4 && cr.x1 > 1 - 1e-4 && cr.y1 > 1 - 1e-4;
+      const nit = { ...it, x, y, w, h: hh }; if (full) delete nit.crop; else nit.crop = { ...cr };
+      const before = ed.items.slice(); ed.items = ed.items.map(q => q.id === it.id ? nit : q); pushHist(before);
+      closeLayer(L); setTool('lasso'); setSelection([nit]); markDirty && markDirty();
+      return;
+    }
+    closeLayer(L);
+  });
+}
 
 /* ================= Lavagna: input ================= */
 const touches = new Map();
