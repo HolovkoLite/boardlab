@@ -689,7 +689,7 @@ input { font: inherit; color: inherit; }
     </div>
   </section>
 
-  <input type="file" id="fileIn" accept=".boardlab,.json,application/json" hidden>
+  <input type="file" id="fileIn" accept=".boardlab,.json,application/json" multiple hidden>
   <input type="file" id="pdfIn" accept="application/pdf,.pdf" hidden>
   <input type="file" id="imgIn" accept="image/*" hidden>
   <input type="file" id="camIn" accept="image/*" capture="environment" hidden>
@@ -919,7 +919,7 @@ const mmPx = mm => mm * 96 / 25.4;
 const penSizes = (t, k) => penMm(sizeKey(t, k)).map(mmPx);
 const fmtMmV = mm => String(Math.round(mm * 10) / 10).replace('.', ',');
 const ER_SIZES = [6, 10, 16, 24, 36, 52];
-const APP_VERSION = '0.17.0';
+const APP_VERSION = '0.17.1';
 const ZMIN = 0.1, ZMAX = 6;
 const ER_DECAY_MS = 600; // tempo con cui la gomma ingrandita torna piccola
 const SORT_LABEL = { created: 'Data di creazione', modified: 'Data di modifica', name: 'Nome' };
@@ -1330,6 +1330,7 @@ const HELP = [
     ['Riempire', 'Con Riempi tocca dentro un\'area chiusa: si colora sotto i tratti. Toccando un riempimento ne cambi il colore.'],
     ['Puntatore laser', 'Indica con la penna: la scia svanisce da sola.'],
     ['Misure dello sfondo', 'Nelle Impostazioni, in Foglio, scegli le misure di quadretti, righe e puntini per i fogli nuovi. In ogni foglio puoi cambiarle da Sfondo, sotto il motivo.'],
+    ['Tasto Indietro', 'Chiude prima il menu o la finestra aperta, poi toglie la selezione, poi chiude la lavagna. Nella libreria torna alla cartella da Cestino e Impostazioni.'],
     ['Risparmio energetico', 'Nelle Impostazioni, in Batteria. Attivo: mentre sposti o zoomi con le dita la lavagna si ridisegna solo quando ti fermi, e i bordi restano vuoti per un attimo. Spento: si ridisegna di continuo, sempre completa, ma consuma più batteria.']
   ]],
   ['cancellare', 'Cancellare e selezionare', 'eraser', [
@@ -1358,7 +1359,7 @@ const HELP = [
     ['Cercare', 'La lente cerca nei nomi, nei testi scritti con la tastiera e nelle tabelle. Dentro una lavagna: ⋮ → Cerca nella lavagna.']
   ]],
   ['esporta', 'Esportare e Google Drive', 'export', [
-    ['Esportare', 'Dentro una lavagna: ⋮ → Esporta (PDF, PNG o BoardLab). Il file va al menu Condividi del tablet. Un file .boardlab si riapre dal + della libreria.'],
+    ['Esportare', 'Dentro una lavagna: ⋮ → Esporta (PDF, PNG o BoardLab). Il file va al menu Condividi del tablet. Un file .boardlab si riapre dal + della libreria; puoi sceglierne anche più di uno insieme e finiscono tutti nella cartella aperta.'],
     ['Google Drive', 'Si collega in Impostazioni → Google Drive con lo script "BoardLab Drive". In ogni cartella, Invia manda a Drive solo le lavagne nuove o modificate; i file già inviati vengono aggiornati.']
   ]]
 ];
@@ -4764,9 +4765,32 @@ async function closeBoard(fromPop) {
   closeAllLayers();
   $('#editor').hidden = true; $('#lib').hidden = false;
   renderLibrary();
-  if (!fromPop) { try { if (history.state && history.state.bl === 'board') history.back(); } catch (_) {} }
+  if (!fromPop) { try { if (history.state && history.state.bl === 'board') { popSkip = true; history.back(); } } catch (_) {} }
 }
-window.addEventListener('popstate', () => { if (ed) closeBoard(true); });
+/* Tasto Indietro di Android: chiude prima il menu o la finestra aperta, poi la scrittura del testo, la ricerca e la selezione,
+   poi la lavagna; nella libreria torna alla cartella dalle altre viste, e solo alla fine esce dall'app. */
+let popSkip = false;
+function backStep() {
+  const Ls = $('#layers').children;
+  if (Ls.length) { closeLayer(Ls[Ls.length - 1]); return true; }
+  if (ed) {
+    if (textEd) { commitText(); return true; }
+    if (find) { closeFind(); return true; }
+    if (sel) { clearSel(); return true; }
+    if (pasteAt) { hidePasteBar(); return true; }
+    return false;
+  }
+  if (lsel) { libClear(); return true; }
+  if (searching) { searching = false; searchQ = ''; renderLibrary(); return true; }
+  if (libMode !== 'folder') { libMode = 'folder'; renderLibrary(); return true; }
+  return false;
+}
+window.addEventListener('popstate', () => {
+  if (popSkip) { popSkip = false; return; }
+  if (backStep()) { try { history.pushState({ bl: ed ? 'board' : 'lib' }, ''); } catch (_) {} return; }
+  if (ed) { closeBoard(true); return; }
+  if (window.top === window) { try { history.back(); } catch (_) {} } // esce dall'app (nell'anteprima resta qui)
+});
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden' && ed) { commitText(); if (ed.changed) { setThumb(ed.b.id, makeThumb(ed)); ed.b.bg = ed.bg.color; } saveBoardNow(); DB.set('meta', meta); }
 });
@@ -5668,12 +5692,28 @@ async function deliverFile(blob, name) {
   }
   if (r !== true) downloadBlob(blob, name);
 }
-async function importFile(file) {
-  let data;
-  try { data = JSON.parse(await file.text()); } catch (_) { toast('Il file non è un file BoardLab valido'); return; }
-  if (!data || data.format !== 'boardlab' || !Array.isArray(data.items)) { toast('Il file non è un file BoardLab valido'); return; }
+/* Uno o più file BoardLab: tutti nella cartella aperta. Con un solo file la lavagna si apre subito. */
+async function importFiles(files) {
   const f = curFolder();
   if (!f) { toast('Crea prima una cartella in cui aprire il file'); return; }
+  if (files.length === 1) {
+    const r = await importBoard(files[0], f);
+    if (!r) { toast('Il file non è un file BoardLab valido'); return; }
+    saveMeta(); renderLibrary(); toast('Lavagna aperta in ' + f.name);
+    openBoard(r.b.id).then(() => { if (r.items.some(i => i.t === 'page')) fitWidth(); else if (r.items.length) fitContent(); });
+    return;
+  }
+  toast('Importo ' + files.length + ' file…');
+  let ok = 0;
+  for (const file of files) if (await importBoard(file, f)) ok++;
+  saveMeta(); renderLibrary();
+  const bad = files.length - ok;
+  toast((ok === 1 ? '1 lavagna importata' : ok + ' lavagne importate') + ' in ' + f.name + (bad ? ` · ${bad} file non ${bad === 1 ? 'valido' : 'validi'}` : ''));
+}
+async function importBoard(file, f) {
+  let data;
+  try { data = JSON.parse(await file.text()); } catch (_) { return null; }
+  if (!data || data.format !== 'boardlab' || !Array.isArray(data.items)) return null;
   const now = Date.now();
   const name = (data.name || file.name.replace(/(\.boardlab)?(\.json)?$/i, '')).slice(0, 120);
   const imgMap = {};
@@ -5685,13 +5725,12 @@ async function importFile(file) {
   setThumb(b.id, makeThumb({ items, bg }));
   meta.boards.push(b);
   await DB.set('b:' + b.id, { items, bg, view: null });
-  saveMeta(); renderLibrary();
-  toast('Lavagna aperta in ' + f.name);
-  openBoard(b.id).then(() => { if (items.some(i => i.t === 'page')) fitWidth(); else if (items.length) fitContent(); });
+  return { b, items };
 }
 /* Il campo si svuota solo dopo aver letto il file (su Android il file scelto potrebbe non essere più leggibile dopo) */
 const onPick = (id, fn) => $('#' + id).addEventListener('change', async e => { const f = e.target.files && e.target.files[0]; try { if (f) await fn(f); } finally { e.target.value = ''; } });
-onPick('fileIn', importFile); onPick('pdfIn', openPdfFile); onPick('imgIn', insertImageFile); onPick('camIn', insertImageFile);
+$('#fileIn').addEventListener('change', async e => { const fs = [...(e.target.files || [])]; try { if (fs.length) await importFiles(fs); } finally { e.target.value = ''; } });
+onPick('pdfIn', openPdfFile); onPick('imgIn', insertImageFile); onPick('camIn', insertImageFile);
 
 /* ================= Google Drive ================= */
 /* BoardLab parla con lo script "BoardLab Drive" del tuo account (Google Apps Script, app web).
@@ -6070,6 +6109,7 @@ window.addEventListener('keydown', e => {
   if (meta.ui.view === undefined && meta.settings.view === 'list') meta.settings.view = 'list';
   buildToolbar();
   renderLibrary();
+  try { history.replaceState({ bl: 'root' }, ''); history.pushState({ bl: 'lib' }, ''); } catch (_) {}
   if (!meta.ui.lastGc || Date.now() - meta.ui.lastGc > 7 * 864e5) setTimeout(() => gcImages(), 8000);
 })();
 </script>
