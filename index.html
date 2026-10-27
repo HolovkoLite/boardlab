@@ -919,7 +919,7 @@ const mmPx = mm => mm * 96 / 25.4;
 const penSizes = (t, k) => penMm(sizeKey(t, k)).map(mmPx);
 const fmtMmV = mm => String(Math.round(mm * 10) / 10).replace('.', ',');
 const ER_SIZES = [6, 10, 16, 24, 36, 52];
-const APP_VERSION = '0.17.1';
+const APP_VERSION = '0.18.0';
 const ZMIN = 0.1, ZMAX = 6;
 const ER_DECAY_MS = 600; // tempo con cui la gomma ingrandita torna piccola
 const SORT_LABEL = { created: 'Data di creazione', modified: 'Data di modifica', name: 'Nome' };
@@ -1290,6 +1290,7 @@ async function exportMany(ids) {
 }
 async function deliverFiles(list) {
   if (!list.length) { toast('Non c\'è niente da esportare'); return; }
+  if (window.blNative) { await window.blNative.share(list); return; }
   if (list.length === 1) { deliverFile(list[0].blob, list[0].name); return; }
   const fs = list.map(x => shareFile(x.blob, x.name));
   if (fs.every(Boolean) && navigator.canShare && navigator.canShare({ files: fs })) {
@@ -4789,7 +4790,8 @@ window.addEventListener('popstate', () => {
   if (popSkip) { popSkip = false; return; }
   if (backStep()) { try { history.pushState({ bl: ed ? 'board' : 'lib' }, ''); } catch (_) {} return; }
   if (ed) { closeBoard(true); return; }
-  if (window.top === window) { try { history.back(); } catch (_) {} } // esce dall'app (nell'anteprima resta qui)
+  if (window.blNative) window.blNative.exit(); // app Android
+  else if (window.top === window) { try { history.back(); } catch (_) {} } // esce dall'app (nell'anteprima resta qui)
 });
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden' && ed) { commitText(); if (ed.changed) { setThumb(ed.b.id, makeThumb(ed)); ed.b.bg = ed.bg.color; } saveBoardNow(); DB.set('meta', meta); }
@@ -5681,6 +5683,7 @@ function shareFile(blob, name) {
 }
 /* Consegna del file esportato: menu Condividi di Android (come Nebo), altrimenti salvataggio nella cartella Download */
 async function deliverFile(blob, name) {
+  if (window.blNative) { await window.blNative.share([{ blob, name }]); return; }
   const f = shareFile(blob, name);
   if (!f) { downloadBlob(blob, name); return; }
   const share = async () => { try { await navigator.share({ files: [f], title: name }); return true; } catch (e) { return e && e.name === 'AbortError' ? true : e && e.name === 'NotAllowedError' ? null : false; } };
