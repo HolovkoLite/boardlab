@@ -1,5 +1,5 @@
 # Costruisce l'APK di BoardLab (Capacitor) a partire dalla PWA del ramo main.
-# L'APK non viene pubblicata: finisce per pochi minuti nel ramo apk-tmp, da cui viene scaricata e poi cancellata.
+# L'APK non viene pubblicata: resta 10 minuti nel ramo apk-tmp, il tempo di scaricarla, poi il ramo viene cancellato.
 name: APK Android
 
 on:
@@ -64,3 +64,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release list --json tagName -q '.[].tagName' | xargs -r -n1 gh release delete --yes --cleanup-tag
+
+      - name: Cancellazione del ramo apk-tmp dopo 10 minuti
+        run: |
+          sleep 600
+          git push -q "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" --delete apk-tmp || true
