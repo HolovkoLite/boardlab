@@ -644,6 +644,9 @@ input { font: inherit; color: inherit; }
 .crop-bar button { height: 44px; padding: 0 18px; border-radius: 12px; color: #E7EBF0; font-size: 15px; }
 .crop-bar button:active { background: #2C3440; }
 .crop-bar button.pri { background: var(--blue); color: #fff; border-radius: 22px; }
+.tab-ghost { position: fixed; z-index: 80; margin: 0; pointer-events: none; box-shadow: 0 10px 28px rgba(30,36,48,.28); opacity: .96; }
+.lt-tab.tab-ghost { background: var(--white); border-radius: 10px; padding: 0 12px; }
+.tab-src { opacity: .3; }
 #updBar { position: fixed; left: 50%; top: 12px; transform: translateX(-50%); z-index: 90; background: #2F3337; color: #fff; border-radius: 8px; padding: 10px 12px 10px 18px; display: flex; align-items: center; gap: 16px; font-size: 14.5px; box-shadow: var(--shadow); max-width: calc(100% - 32px); box-sizing: border-box; }
 #updBar button { color: #82C4FF; font-weight: 500; padding: 6px 8px; }
 </style>
@@ -919,7 +922,7 @@ const mmPx = mm => mm * 96 / 25.4;
 const penSizes = (t, k) => penMm(sizeKey(t, k)).map(mmPx);
 const fmtMmV = mm => String(Math.round(mm * 10) / 10).replace('.', ',');
 const ER_SIZES = [6, 10, 16, 24, 36, 52];
-const APP_VERSION = '0.18.0';
+const APP_VERSION = '0.19.0';
 const ZMIN = 0.1, ZMAX = 6;
 const ER_DECAY_MS = 600; // tempo con cui la gomma ingrandita torna piccola
 const SORT_LABEL = { created: 'Data di creazione', modified: 'Data di modifica', name: 'Nome' };
@@ -1355,13 +1358,27 @@ const HELP = [
     ['Ritagliare un\'immagine', 'Selezionala con il lazo e tocca Ritaglia. Gli angoli ridimensionano il riquadro mantenendo le proporzioni, i lati lo allungano o lo accorciano; dall\'interno lo sposti. Fatto conferma, Ripristina torna all\'immagine intera. Puoi ritagliarla di nuovo quando vuoi.']
   ]],
   ['libreria', 'Libreria e ricerca', 'folder', [
-    ['Raccolte e cartelle', 'Le raccolte sono le schede in alto, le cartelle le linguette colorate. Tieni premuta una scheda per rinominare o eliminare la raccolta.'],
+    ['Raccolte e cartelle', 'Le raccolte sono le schede in alto, le cartelle le linguette colorate. Tieni premuta una scheda per rinominare o eliminare la raccolta. Per cambiare l\'ordine di raccolte e cartelle tienine premuta una e trascinala nel nuovo posto.'],
     ['Selezionare più elementi', 'Tieni premuta una lavagna o una cartella: si seleziona e compaiono le azioni. Poi tocca le altre per aggiungerle alla selezione.'],
     ['Cercare', 'La lente cerca nei nomi, nei testi scritti con la tastiera e nelle tabelle. Dentro una lavagna: ⋮ → Cerca nella lavagna.']
   ]],
-  ['esporta', 'Esportare e Google Drive', 'export', [
-    ['Esportare', 'Dentro una lavagna: ⋮ → Esporta (PDF, PNG o BoardLab). Il file va al menu Condividi del tablet. Un file .boardlab si riapre dal + della libreria; puoi sceglierne anche più di uno insieme e finiscono tutti nella cartella aperta.'],
-    ['Google Drive', 'Si collega in Impostazioni → Google Drive con lo script "BoardLab Drive". In ogni cartella, Invia manda a Drive solo le lavagne nuove o modificate; i file già inviati vengono aggiornati.']
+  ['esporta', 'Esportare', 'export', [
+    ['Esportare', 'Dentro una lavagna: ⋮ → Esporta (PDF, PNG o BoardLab). Il file va al menu Condividi del tablet. Un file .boardlab si riapre dal + della libreria; puoi sceglierne anche più di uno insieme e finiscono tutti nella cartella aperta.']
+  ]],
+  ['drive', 'Google Drive', 'cloud', [
+    ['Cosa fa', 'BoardLab invia le lavagne di una cartella a una cartella del tuo Google Drive, in PDF, PNG o BoardLab. Lo fa solo quando tocchi il pulsante Drive della cartella, mai da solo. Le lavagne già inviate vengono aggiornate (stesso file, stesso link) e su Drive non viene mai cancellato niente. Serve uno script di Google, da creare una volta sola: passi da 1 a 7.'],
+    ['1. Creare lo script', 'Meglio dal computer. Apri script.google.com con il tuo account Google, tocca Nuovo progetto e, in alto a sinistra, dagli un nome, per esempio BoardLab Drive.'],
+    ['2. Incollare il codice', 'Il codice è nel repository di BoardLab su GitHub, nella cartella drive, file Codice.gs. Indirizzo diretto: raw.githubusercontent.com/HolovkoLite/boardlab/main/drive/Codice.gs. Copialo tutto, nello script cancella quello che c\'è nel file Codice.gs, incolla e salva con l\'icona del dischetto.'],
+    ['3. Aggiungere Drive API', 'Nella colonna a sinistra, accanto a Servizi, tocca +. Scegli Drive API e tocca Aggiungi.'],
+    ['4. Pubblicare come app web', 'In alto a destra: Esegui il deployment → Nuovo deployment. Accanto a Seleziona tipo tocca l\'ingranaggio e scegli App web. Esegui come: il tuo account. Chi ha accesso: Chiunque. Poi tocca Esegui il deployment.'],
+    ['5. Autorizzare', 'Google chiede l\'autorizzazione: tocca Autorizza accesso e scegli il tuo account. Se compare "Google non ha verificato questa app", tocca Avanzate e poi Vai a BoardLab Drive, infine Consenti. È il tuo script e lavora solo nel tuo Drive.'],
+    ['6. Copiare l\'indirizzo', 'Alla fine compare l\'URL dell\'app web, che finisce con /exec: copialo (puoi mandartelo per email o su Keep per averlo sul tablet). Se ti serve di nuovo: Esegui il deployment → Gestisci deployment.'],
+    ['7. Collegare BoardLab', 'In BoardLab: Impostazioni → Google Drive, incolla l\'indirizzo e tocca Collega. Quando compare il tuo indirizzo email il collegamento è fatto, e in ogni cartella appare il pulsante Drive.'],
+    ['Collegare una cartella', 'In una cartella tocca Drive. Scegli Crea automaticamente (nel tuo Drive: BoardLab / nome della cartella) oppure Usa una cartella che ho già e incolla il link della cartella di Drive. Scegli i formati e tocca Salva. Da Impostazioni → Google Drive vedi e modifichi tutte le cartelle insieme.'],
+    ['Inviare', 'Il pulsante della cartella mostra Invia con il numero di lavagne nuove o modificate: toccalo per inviarle. Con la spunta è tutto aggiornato. Nella vista a elenco la colonna Drive dice per ogni lavagna Da inviare o Aggiornata.'],
+    ['Cambiare dispositivo', 'Lo script accetta un solo BoardLab alla volta. Per collegarne un altro (per esempio l\'APK al posto della versione da Chrome): su script.google.com, nella barra sopra il codice scegli la funzione scollegaBoardLab e tocca Esegui; poi collega il nuovo BoardLab. Su quello vecchio tocca Scollega in Impostazioni → Google Drive.'],
+    ['Aggiornare lo script', 'Se cambi il codice: salva, poi Esegui il deployment → Gestisci deployment → matita → Versione: Nuova versione → Esegui il deployment. L\'indirizzo resta lo stesso e non serve ricollegare BoardLab.'],
+    ['Se non funziona', 'Controlla che l\'indirizzo finisca con /exec e che in Chi ha accesso ci sia Chiunque. Se manca Drive API aggiungila (passo 3) e pubblica una nuova versione (Aggiornare lo script). Un file più grande di circa 35 MB non si può inviare.']
   ]]
 ];
 let helpQ = '', helpOpen = 'astuccio';
@@ -6046,11 +6063,13 @@ document.addEventListener('pointerdown', e => {
   const t = e.target.closest('[data-ctx]'); if (!t || e.target.closest('.ib')) return;
   const x = e.clientX, y = e.clientY;
   t.classList.add('pressing');
+  const pid = e.pointerId;
   lp = { t, x, y, timer: setTimeout(() => {
     t.classList.remove('pressing'); lp = null;
     swallowUntil = performance.now() + 700; lpFired = performance.now();
     if (navigator.vibrate) { try { navigator.vibrate(15); } catch (_) {} }
     ctxOpen(t);
+    if (t.dataset.ctx === 'folder' || t.dataset.ctx === 'col') tabDrag = { kind: t.dataset.ctx, id: t.dataset.id, x0: x, y0: y, pid };
   }, 500) };
 });
 let lpFired = 0;
@@ -6059,6 +6078,45 @@ document.addEventListener('pointermove', e => { if (lp && Math.hypot(e.clientX -
 document.addEventListener('pointerup', lpCancel);
 document.addEventListener('pointercancel', lpCancel);
 document.addEventListener('scroll', lpCancel, true);
+/* Riordino di raccolte e cartelle: dopo la pressione prolungata, se il dito si sposta, la scheda o la linguetta segue il dito */
+let tabDrag = null;
+document.addEventListener('pointermove', e => {
+  const d = tabDrag; if (!d || e.pointerId !== d.pid) return;
+  if (!d.on) {
+    if (Math.hypot(e.clientX - d.x0, e.clientY - d.y0) < 8) return;
+    lsel = null; renderLibrary();
+    const box = d.kind === 'col' ? $('#libTop .lt-tabs') : $('#libFolders');
+    const src = box && box.querySelector(`[data-ctx="${d.kind}"][data-id="${d.id}"]`);
+    if (!src) { tabDrag = null; return; }
+    const r = src.getBoundingClientRect(), g = src.cloneNode(true);
+    g.classList.add('tab-ghost'); g.removeAttribute('data-ctx'); g.removeAttribute('data-act');
+    g.style.cssText = `left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px`;
+    document.body.append(g); src.classList.add('tab-src');
+    Object.assign(d, { on: true, box, src, g, gx: r.left - d.x0 });
+  }
+  d.g.style.left = (e.clientX + d.gx) + 'px';
+  const br = d.box.getBoundingClientRect();
+  if (e.clientX < br.left + 40) d.box.scrollLeft -= 12; else if (e.clientX > br.right - 40) d.box.scrollLeft += 12;
+  const sibs = [...d.box.querySelectorAll(`[data-ctx="${d.kind}"]`)].filter(x => x !== d.src);
+  const before = sibs.find(x => { const rr = x.getBoundingClientRect(); return e.clientX < rr.left + rr.width / 2; });
+  if (before) { if (d.src.nextElementSibling !== before) d.box.insertBefore(d.src, before); }
+  else if (sibs.length && sibs[sibs.length - 1].nextElementSibling !== d.src) sibs[sibs.length - 1].after(d.src);
+});
+const tabDrop = e => {
+  const d = tabDrag; if (!d || e.pointerId !== d.pid) return;
+  tabDrag = null; if (!d.on) return;
+  d.g.remove(); d.src.classList.remove('tab-src');
+  const ids = [...d.box.querySelectorAll(`[data-ctx="${d.kind}"]`)].map(x => x.dataset.id);
+  if (d.kind === 'col') meta.collections.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+  else {
+    const slots = [], byId = new Map(meta.folders.map(f => [f.id, f]));
+    meta.folders.forEach((f, i) => { if (ids.includes(f.id)) slots.push(i); });
+    ids.forEach((id, k) => { meta.folders[slots[k]] = byId.get(id); });
+  }
+  saveMeta(); swallowUntil = performance.now() + 400; renderLibrary();
+};
+document.addEventListener('pointerup', tabDrop);
+document.addEventListener('pointercancel', tabDrop);
 document.addEventListener('contextmenu', e => {
   if (e.target.closest('input, textarea')) return;
   e.preventDefault();
