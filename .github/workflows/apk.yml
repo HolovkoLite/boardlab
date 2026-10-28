@@ -1,0 +1,66 @@
+# Costruisce l'APK di BoardLab (Capacitor) a partire dalla PWA del ramo main.
+# L'APK non viene pubblicata: finisce per pochi minuti nel ramo apk-tmp, da cui viene scaricata e poi cancellata.
+name: APK Android
+
+on:
+  push:
+    branches: [android]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apk
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: PWA aggiornata dal ramo main
+        run: git checkout origin/main -- index.html lib fonts icons
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Strumenti Android
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0" > /dev/null
+
+      - name: App dentro l'APK
+        working-directory: apk
+        run: |
+          npm ci --no-audit --no-fund
+          python3 build_www.py
+          npx cap sync android
+
+      - name: Costruzione
+        working-directory: apk/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon --stacktrace
+
+      - name: Consegna temporanea nel ramo apk-tmp
+        run: |
+          VER=$(python3 -c "import json;print(json.load(open('apk/version.json'))['versionName'])")
+          mkdir out && cp apk/android/app/build/outputs/apk/release/app-release.apk "out/BoardLab-$VER.apk"
+          cd out
+          git init -q -b apk-tmp
+          git add .
+          git -c user.name="BoardLab build" -c user.email="build@users.noreply.github.com" commit -qm "APK $VER"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" apk-tmp
+
+      - name: Nessuna Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release list --json tagName -q '.[].tagName' | xargs -r -n1 gh release delete --yes --cleanup-tag
